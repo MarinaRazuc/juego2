@@ -1,0 +1,12 @@
+body{
+
+}
+
+#game{
+	
+}	
+
+canvas { 
+	background-image:url("/assets/cuadricula.png");
+	border: 5px solid black;
+}

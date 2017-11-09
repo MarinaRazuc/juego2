@@ -1,0 +1,31 @@
+http://gojasonyang.com/post/phaserMultiplayerGamePart4.html
+https://github.com/dci05049/Phaser-Multiplayer-Game-Tutorial/tree/master/Part3
+http://www.dynetisgames.com/2017/03/06/how-to-make-a-multiplayer-online-game-with-phaser-socket-io-and-node-js/
+https://www.google.com.ar/search?q=arcade+change+player+position&oq=arcade+change+player+position&aqs=chrome..69i57.8091j0j7&sourceid=chrome&ie=UTF-8
+http://www.html5gamedevs.com/topic/7411-set-xy-coordinate-on-arcade-body/
+
+
+
+
+
+/**    * @property {Phaser.Point} position - The position of the physics body.    * @readonly    */   
+ this.position = new Phaser.Point(sprite.x, sprite.y);
+
+/*** @name Phaser.Physics.Arcade.Body#x* @property {number} x - The x position.*/
+Object.defineProperty(Phaser.Physics.Arcade.Body.prototype, "x", {   
+		get: function () 
+			{        return this.position.x;    },    
+		set: function (value) {        
+			this.position.x = value;    
+		}
+	});
+
+/*** @name Phaser.Physics.Arcade.Body#y* @property {number} y - The y position.*/
+Object.defineProperty(Phaser.Physics.Arcade.Body.prototype, "y", {    
+		get: function () {        
+			return this.position.y;    
+		},    
+		set: function (value) {        	
+			this.position.y = value;    
+		}
+	});
