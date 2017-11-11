@@ -16,9 +16,10 @@ colores[3]="0xFF0000";
 colores[4]="0x64FE2E";
 colores[5]="0x08088A";
 colores[6]="0xFF00BF";
-
-
-
+//needed for physics update 
+var startTime = (new Date).getTime();
+var lastTime;
+var timeStep= 1/70; 
 
 app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
@@ -41,27 +42,39 @@ http.listen(4000, function(){
 //mantiene el último ID asignado
 http.lastPlayderID=0;
 
+//We call physics handler 60fps. The physics is calculated here. 
+setInterval(physics_hanlder, 1000/60);
+
+//Steps the physics world. 
+function physics_hanlder() {
+  var currentTime = (new Date).getTime();
+  timeElapsed = currentTime - startTime;
+  var dt = lastTime ? (timeElapsed - lastTime) / 1000 : 0;
+    dt = Math.min(1 / 10, dt);
+    world.step(timeStep);
+}
 //Then I listen on the connection event for incoming sockets, and I log it to the console.
 //Each socket also fires a special disconnect event:
 io.on('connection', function(socket){
   console.log('a user connected, ID: ', http.lastPlayderID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
-   socket.on('new_player', function(data) {
+  socket.on('new_player', function(data) {
       //new player instance
       var newPlayer = new Player(data.x, data.y);
-      newPlayer.id = this.id;  
+      newPlayer.id = this.id;  console.log(newPlayer.id);
       var c = http.lastPlayderID%7;
       newPlayer.color=colores[c];
       http.lastPlayderID++;
       //debo controlar si se paso de 7-- ver q hacer cuando esto pasa
       playerBody = new p2.Body ({
         mass: 0,
-        position: [data.x,data.y],
+        position: [data.x,data.y], //ver, estaba en 0,0
         fixedRotation: true
       });
       
       //add the playerbody into the player object 
       newPlayer.playerBody = playerBody;
+      //console.log(newPlayer.playerBody);
       //Don’t forget to add the playerbody to the world with world.addBody(playerbody) !! or else your player's physics will not be calculated
       world.addBody(newPlayer.playerBody); 
      
@@ -85,9 +98,10 @@ io.on('connection', function(socket){
          //send message to the sender-client only
         socket.emit("new_enemyPlayer", player_info);
       }
-      player_lst.push(newPlayer); 
+      player_lst.push(newPlayer); //console.log(player_lst.length);
       //send message to every connected client except the sender
       socket.broadcast.emit('new_enemyPlayer', current_info);
+      socket.emit('new_enemyPlayer', current_info);
   });
 //     //le enviamos al jugador la lista de los jugadores conectados
 //     socket.emit('allplayers', getAllPlayers());
@@ -104,8 +118,8 @@ io.on('connection', function(socket){
 
       //listen for new player inputs. 
       socket.on("input_fired", function(data) {
-          var movePlayer = find_playerid(this.id, this.room); 
-          if (!movePlayer){ return;}
+          var movePlayer = find_playerid(this.id/*, this.room*/); 
+          if (!movePlayer){  return;}
           setTimeout(function() {movePlayer.sendData = true}, 50);
           //we set sendData to false when we send the data. 
           movePlayer.sendData = false;
@@ -117,15 +131,26 @@ io.on('connection', function(socket){
             worldX: data.pointer_worldx,    
             worldY: data.pointer_worldy
           }
+          //moving the player to the new inputs from the player
+          // console.log(movePlayer.playerBody);
+          if (physicsPlayer.distanceToPointer(movePlayer, serverPointer) <= 30) {
+            movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, 0, serverPointer, 1000);
+          } else {
+            movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, movePlayer.speed, serverPointer); 
+          }
          //new player position to be sent back to client. 
          var info = {
-            x: movePlayer.playerBody.position[0], //ESTO VA A FALLAR
+             
+            id:movePlayer.id,
+            x: movePlayer.playerBody.position[0], 
             y: movePlayer.playerBody.position[1],
-            angle: movePlayer.playerBody.angle
-          } //VER SI ESTO ES NECESARIO O NO
+           // angle: movePlayer.playerBody.angle
+          } 
+
           //send to sender (not to every clients). 
-          socket.emit('input_recieved', info);
+          socket.emit("input_rec", info);
          
+          
 /*          socket.player.x=data.x;
           socket.player.y=data.y;
           socket.emit('input_recieved', socket.player); //para el mismo jugador
@@ -133,7 +158,7 @@ io.on('connection', function(socket){
           //data to be sent back to everyone except sender 
           var moveplayerData = {
             id: movePlayer.id, 
-            x: movePlayer.playerBody.position[0],//ESTO VA A FALLAR
+            x: movePlayer.playerBody.position[0],
             y: movePlayer.playerBody.position[1],
           }
           //send to everyone except sender 
@@ -188,7 +213,6 @@ function find_playerid(id) {
       return player_lst[i]; 
     }
   }
-  
   return false; 
 }
 
