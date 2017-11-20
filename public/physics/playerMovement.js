@@ -1,14 +1,14 @@
-this.movetoPointer=function (displayObject, speed, pointer, maxTime) {
+function  movetoPointer(displayObject, speed, pointer, maxTime) {
 	if(displayObject==null){
 		//console.log(displayObject);
 	}else{
 		//console.log("movetoPointer: ", displayObject);
 		pointer = pointer;
 		if (maxTime === undefined) { maxTime = 0; }
-		var angle = this.angleToPointer(displayObject, pointer);
+		var angle = angleToPointer(displayObject, pointer);
 		if (maxTime > 0){
 			//  We know how many pixels we need to move, but how fast?
-			speed = this.distanceToPointer(displayObject, pointer) / (maxTime / 1000);
+			speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
 		}
 		displayObject.playerBody.velocity[0] = Math.cos(angle) * speed;
 		displayObject.playerBody.velocity[1] = Math.sin(angle) * speed;
@@ -16,13 +16,12 @@ this.movetoPointer=function (displayObject, speed, pointer, maxTime) {
 	}
 }
 
-this.distanceToPointer =function (displayObject, pointer, world) {  ///esto no sirve
-	// console.log(displayObject);
-	// console.log(world);
+function distanceToPointer(displayObject, pointer, world) {  
+	
 	if(displayObject==null){
 		//console.log(displayObject);
     }else{
-	//	console.log("distanceToPointer: ", displayObject);
+		//console.log("distanceToPointer: ", displayObject);
         if (world === undefined) { world = false; }
         // var dx = (world) ? displayObject.world.x - pointer.worldX : displayObject.position[0] - pointer.worldX; //cannot read property 0 of undefined
         // var dy = (world) ? displayObject.world.y - pointer.worldY : displayObject.position[1] - pointer.worldY;
@@ -33,7 +32,7 @@ this.distanceToPointer =function (displayObject, pointer, world) {  ///esto no s
 	}
 }
 
-this.angleToPointer=function (displayObject, pointer, world) {
+function angleToPointer(displayObject, pointer, world) {
     if(displayObject==null){
 		//console.log(displayObject);
     }else{
@@ -51,8 +50,8 @@ this.angleToPointer=function (displayObject, pointer, world) {
 }
 
 //we export these three functions 
-this.exports = {
-	movetoPointer: this.movetoPointer,
-	distanceToPointer: this.distanceToPointer,
-	angleToPointer: this.angleToPointer
+module.exports = {
+	movetoPointer: movetoPointer,
+	distanceToPointer: distanceToPointer,
+	angleToPointer: angleToPointer
 }

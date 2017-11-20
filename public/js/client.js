@@ -9,7 +9,7 @@ Client.socket = io.connect();
 /*Usa nuestro objeto socket y envía a través del mismo un mensaje al servidor
   Este msj tendrá la etiqueta 'new_player'*/
 Client.askNewPlayer=function(){
-   Client.socket.emit('new_player',{x: randomInt(20, 200), y: randomInt(20, 200)}  ); //{x: randomInt(20, 600), y: randomInt(20, 800)} 
+   Client.socket.emit('new_player',{x: randomInt(20, 200), y: randomInt(20, 200), angle:0}  ); //{x: randomInt(20, 600), y: randomInt(20, 800)} 
 };
 
 Client.moverJugador = function(pointer){  
@@ -22,16 +22,7 @@ Client.moverJugador = function(pointer){
  // Client.socket.emit('moverJugador',{x:pointer.x, y:pointer.y});
 };
 
-// Client.emitMovement=function(moveplayerData){//{id, XX, YY}
-//   Client.socket.emit('player_move', moveplayerData);
-// };
-// Client.socket.on('movePlayer', function(data){
-//   Game.actualizarPos(data.id, data.x, data.y);
-// });
-
-// Client.socket.on('newplayer',function(data){
-//     Game.addNewPlayer(data.id,data.x,data.y, true);
-// });    
+    
 
 Client.socket.on('move',function(data){//data es socket.player
     Game.movePlayer(data.id, data.x, data.y);
@@ -48,9 +39,8 @@ Client.socket.on("enemy_move", function(data){
     Game.onEnemyMove(data); 
 });
 Client.socket.on("input_rec", function(data){ 
- 
   Game.onInputRecieved(data);
-   // Game.movePlayer(data.id, data.x, data.y);
+//Game.movePlayer(data.id, data.x, data.y);
 });
 
 //listen to new enemy connections
@@ -58,6 +48,9 @@ Client.socket.on("new_enemyPlayer", function(data){
     Game.onNewPlayer(data);
 });
 
+Client.socket.on("create_player", function(data){
+  Game.create_player(data);
+});
 
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
