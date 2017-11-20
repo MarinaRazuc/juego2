@@ -97,34 +97,39 @@ io.on('connection', function(socket){
       
       //send to the new player about everyone who is already connected.   
       for (i = 0; i < player_lst.length; i++) {
+        console.log("Entro al for");
         existingPlayer = player_lst[i];
         var player_info = {
-          id: existingPlayer.id,
-          x: existingPlayer.x,
-          y: existingPlayer.y  ,
-          color:existingPlayer.color, 
-          angle: existingPlayer.angle,
-          size: existingPlayer.size
+            id: existingPlayer.id,
+            x: existingPlayer.x,
+            y: existingPlayer.y  ,
+            color:existingPlayer.color, 
+            angle: existingPlayer.angle,
+            size: existingPlayer.size
         };
          //send message to the sender-client only
+         //me llega la info de cada jugador existente antes que "yo"
         socket.emit("new_enemyPlayer", player_info);
-      }
+      }//END DEL FOR
 
 
-      //send message to every connected client except the sender
-      socket.broadcast.emit('new_enemyPlayer', current_info);
-      socket.emit('new_enemyPlayer', current_info);
       player_lst.push(newPlayer); //console.log(player_lst.length);
+      //send message to every connected client except the sender
+      //a todos los jugadores existentes excepto a mí, les mando mi info
+      socket.broadcast.emit('new_enemyPlayer', current_info);
+      //socket.emit('new_enemyPlayer', current_info);
   });
  
 
       //listen for new player inputs. 
       socket.on("input_fired", function(data) {
-          var movePlayer = find_playerid(this.id, this.room); 
+          var movePlayer = find_playerid(this.id/*, this.room*/); 
           // if (impresora==0){
           //   console.log("id del update" + this.id);
           //   impresora++;
           // }
+
+
           if (!movePlayer|| movePlayer.dead){/*console.log("entra aca");*/ return;}
           //when sendData is true, we send the data back to client. 
           if (!movePlayer.sendData) {

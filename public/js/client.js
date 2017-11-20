@@ -9,7 +9,7 @@ Client.socket = io.connect();
 /*Usa nuestro objeto socket y envía a través del mismo un mensaje al servidor
   Este msj tendrá la etiqueta 'new_player'*/
 Client.askNewPlayer=function(){
-   Client.socket.emit('new_player',{x: randomInt(20, 200), y: randomInt(20, 200), angle:0}  ); //{x: randomInt(20, 600), y: randomInt(20, 800)} 
+   Client.socket.emit('new_player',{x: 0, y: 0, angle:0}  ); //{x: randomInt(20, 600), y: randomInt(20, 800)} 
 };
 
 Client.moverJugador = function(pointer){  

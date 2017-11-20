@@ -43,41 +43,6 @@ Game.create=function() {
 Game.update=function(){
 	Client.moverJugador(game.input.mousePointer);	
 };
-/*
-//el jugador se mueve en el mapa
-Game.movePlayer=function(id,x,y){
-	var player=Game.playerMap[id]; //línea que no permite que los jugadores se pisen
-	this.game.camera.follow(player);
-	if(player!=null){
-		if(game.physics.arcade.distanceToPointer(game.input.activePointer)>5){
-			//  The maxTime parameter lets you control how fast it will arrive at the Pointer coords
-			game.physics.arcade.moveToPointer(player.playerBody, 200);
-		}else{
-			player.body.velocity.set(0);
-		}
-		var XX = player.x;
-		var YY = player.y;
-	
-		//Client.emitMovement({id, XX, YY});   	
-	}else{
-		
-	}
-};*/
-
-/*Game.actualizarPos=function(id, x, y){
-	var moveplayer=Game.playerMap[id]; //problemas --> cannot read property 'id' of undefined
-	//pos llegan perfecto, no se como asignarlas ni a que
-/*	if(moveplayer!=null){
-		moveplayer.x=x;
-		moveplayer.y=y;
-	}*/
-/*	if(moveplayer!=null){
-		moveplayer.position.x=x;
-		moveplayer.position.y=y;
-	}
-};*/
-
-
 
 //eatFood function
 function eatFood(id, food) {
@@ -167,19 +132,21 @@ function findplayerbyid (id) {
 
 //Server will tell us when a new enemy player connects to the server.
 //We create a new enemy in our game.
+//onNewPlayer sólo se llama cuando hay enemigos
 Game.onNewPlayer= function(data) {
 	//enemy object 
 	
 	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle); 
 	enemies.push(new_enemy);
+	 
 };
 
 
 
 
-
+//clase enemiga
 var remote_player = function(id, startx, starty, color, startSize, startAngle){
-///	console.log("remote_player: ", id);
+	console.log("remote_player: ", id);
 	this.x = startx; 
 	this.y = starty; 
 	//this is the unique socket id. We use it as a unique name for enemy
@@ -192,9 +159,13 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle){
 	this.player.beginFill(color);
 //	console.log("id: ",id," x: ",startx, " y: ",starty);
 	this.player.lineStyle(2, color, 1);
-	this.player.drawCircle(startx, starty, this.player.radius * 2);
+//	this.player.drawCircle(startx, starty, this.player.radius * 2);
+	this.player.drawCircle(0,0, this.player.radius * 2);
 	this.player.endFill();
 	this.player.anchor.setTo(0.5,0.5);
+
+	this.initial_size = startSize;
+
 	this.player.body_size = this.player.radius; 
 	
 	this.player.type = "player_body";
@@ -213,11 +184,14 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle){
 
 Game.create_player=function(data){
 
-	player = game.add.graphics(data.x , data.y);
+	player = game.add.graphics(0,0);
+	//player = game.add.graphics(data.x , data.y);
 	player.radius = 60;
+
 	player.beginFill(data.color); //especifico el color con el cual se va a dibujar mi circulo
 	player.lineStyle(2, data.color, 1);
-	player.drawCircle(data.x, data.y, player.radius*2);
+	//player.drawCircle(data.x, data.y, player.radius*2);
+	player.drawCircle(0, 0, player.radius*2);
 	player.endFill();
 	player.anchor.setTo(0.5,0.5);
 	player.body_size = player.radius; 
@@ -227,10 +201,11 @@ Game.create_player=function(data){
 	game.physics.p2.enableBody(player, true);
 	player.body.clearShapes();
 	
-	player.body.addCircle(player.body_size, data.x , data.y);
-	
+//	player.body.addCircle(player.body_size, data.x , data.y);
+	player.body.addCircle(player.body_size, 0 , 0);
+	/*
 	player.x = data.x;  
-	player.y = data.y;  
+	player.y = data.y;  */
 	//player is the unique socket id. We use it as a unique name for enemy
 	player.id = data.id; 
 	player.body.data.shapes[0].sensor = true;
