@@ -28,7 +28,9 @@ Client.crearComida=function(color){
   Client.socket.emit("crear_comida", color);
 };
 
-    
+Client.levantarBanderin=function(data){
+  Client.socket.emit('item_picked', data); 
+};    
 
 Client.socket.on('move',function(data){//data es socket.player
     Game.movePlayer(data.id, data.x, data.y);
@@ -38,9 +40,6 @@ Client.socket.on('remove',function(id){
     Game.removePlayer(id);
 });
 
-/*Client.socket.on("enemy_move", function(data){
-  Client.socket.emit("enemy_move_info", data);
-});*/
 Client.socket.on("enemy_move", function(data){
     Game.onEnemyMove(data); 
 });
@@ -61,6 +60,15 @@ Client.socket.on("create_player", function(data){
 Client.socket.on("item_update", function(data){
   Game.onItemUpdate(data);
 });
+
+Client.socket.on("itemremove", function(data){
+  Game.onItemRemove(data);
+});
+
+Client.socket.on("remove_player", function(data){
+  Game.onRemovePlayer(data);
+});
+
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
 };

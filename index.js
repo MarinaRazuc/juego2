@@ -27,18 +27,19 @@ var unique=require('node-uuid');
 
 var game_setup = function() {
   //The constant number of foods in the game
-  this.food_num = 100; 
+//  this.food_num = 100; 
   //food object list
   this.food_pickup = [];
   //game size height
-  this.canvas_height =500;
+  this.canvas_height =2000;
   //game size width
-  this.canvas_width =500; 
+  this.canvas_width =2000; 
 }
 
 // createa a new game instance
 var game_instance = new game_setup();
 
+const max_banderas=15;
 
 
 app.use(express.static('public'));
@@ -125,15 +126,35 @@ io.on('connection', function(socket){
          //me llega la info de cada jugador existente antes que "yo"
         socket.emit("new_enemyPlayer", player_info);
       }//END DEL FOR
-      //socket.emit('allplayers', getAllPlayers());
-
-
+      
       player_lst.push(newPlayer); //console.log(player_lst.length);
+
+      //banderas del resto
+      for (j = 0; j < game_instance.food_pickup.length; j++) {
+          var food_pick = game_instance.food_pickup[j];
+          socket.emit('item_update', food_pick); 
+      }
+
       //send message to every connected client except the sender
       //a todos los jugadores existentes excepto a mí, les mando mi info
       socket.broadcast.emit('new_enemyPlayer', current_info);
-      //socket.emit('new_enemyPlayer', current_info);
-  }); //FIN 'new_player'
+     
+
+      //se crean banderitas propias
+      for (var i = 0; i < max_banderas; i++) { //por ahora 15
+          //create the unique id using node-uuid
+          var unique_id = unique.v4(); 
+          var str_clr=newPlayer.color+"_food";
+                   
+          var foodentity = new foodpickup(game_instance.canvas_width-100, game_instance.canvas_height-100, str_clr/*'food'*/, unique_id);
+          game_instance.food_pickup.push(foodentity); 
+          //set the food data back to client
+          socket.emit("item_update", foodentity); 
+          socket.broadcast.emit("item_update", foodentity);
+      }
+ 
+
+  }); //FIN 'new_player'------------------------------------------------------------
  
 
       //listen for new player inputs. 
@@ -143,8 +164,6 @@ io.on('connection', function(socket){
           //   console.log("id del update" + this.id);
           //   impresora++;
           // }
-
-
           if (!movePlayer|| movePlayer.dead){/*console.log("entra aca");*/ return;}
           //when sendData is true, we send the data back to client. 
           if (!movePlayer.sendData) {
@@ -186,11 +205,6 @@ io.on('connection', function(socket){
           //send to sender (not to every clients). 
           socket.emit("input_rec", info);
          
-          
-/*          socket.player.x=data.x;
-          socket.player.y=data.y;
-          socket.emit('input_recieved', socket.player); //para el mismo jugador
-*/
           //data to be sent back to everyone except sender 
           var moveplayerData = {
             id: movePlayer.id, 
@@ -203,20 +217,89 @@ io.on('connection', function(socket){
           socket.broadcast.emit('enemy_move', moveplayerData);
   }); //fin input fired
 
-      socket.on("crear_comida", function(color){
-        for (var i = 0; i < 30; i++) {
-            //create the unique id using node-uuid
-            var unique_id = unique.v4(); 
-            var str_clr="food_"+color;
-         //   console.log(str_clr);
-            
-            var foodentity = new foodpickup(game_instance.canvas_width-100, game_instance.canvas_height-100, str_clr/*'food'*/, unique_id);
-            game_instance.food_pickup.push(foodentity); 
-            //set the food data back to client
-            socket.emit("item_update", foodentity); 
+
+  socket.on('item_picked', function(data){
+     // console.log("item_picked");
+      var movePlayer = find_playerid(this.id); 
+      var object = find_food(data.id);  
+      if (!object) {
+        console.log(data);
+        console.log("could not find object");
+        return;
+      }
+      game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
+      //comunicar a todos los jugadores, incluyéndome
+      socket.emit('itemremove', object);
+      socket.broadcast.emit('itemremove', object); 
+      //socket.emit('item_picked');//?????
+  }); //fin item picked
+
+
+  //Modificar esto en el caso de chocar con un policia
+  socket.on("player_collision", function(data){
+    var movePlayer = find_playerid(this.id); 
+    var enemyPlayer = find_playerid(data.id); 
+    
+    
+    if (movePlayer.dead || enemyPlayer.dead)
+      return
+    
+    if (!movePlayer || !enemyPlayer)
+      return
+
+    
+    // if (movePlayer.size == enemyPlayer)
+    //   return
+    // //the main player size is less than the enemy size
+    // else if (movePlayer.size < enemyPlayer.size) {
+    //   var gained_size = movePlayer.size / 2;
+    //   enemyPlayer.size += gained_size; 
+    //   this.emit("killed");
+    //   //provide the new size the enemy will become
+    //   this.broadcast.emit('remove_player', {id: this.id});
+    //   this.broadcast.to(data.id).emit("gained", {new_size: enemyPlayer.size}); 
+    //   playerKilled(movePlayer);
+    // } else {
+    //   var gained_size = enemyPlayer.size / 2;
+    //   movePlayer.size += gained_size;
+    //   this.emit('remove_player', {id: enemyPlayer.id}); 
+    //   this.emit("gained", {new_size: movePlayer.size}); 
+    //   this.broadcast.to(data.id).emit("killed"); 
+    //   //send to everyone except sender.
+    //   this.broadcast.emit('remove_player', {id: enemyPlayer.id});
+    //   playerKilled(enemyPlayer);
+    // }
+    
+    console.log("someone ate someone!!!");
+
+  }); //fin player collision
+
+
+
+    //call when a client disconnects and tell the clients except sender to remove the disconnected player
+    socket.on("disconnect", function(){
+      console.log('disconnect'); 
+      var removePlayer = find_playerid(this.id);
+      var clave=removePlayer.color;
+      var str=clave+"_food";
+      if (removePlayer) {
+        player_lst.splice(player_lst.indexOf(removePlayer), 1);
+      }
+      console.log("removing player " + this.id);
+      //send message to every connected client except the sender
+      socket.broadcast.emit('remove_player', {id: this.id});
+      var arr=game_instance.food_pickup;
+      for (var i = 0; i < arr.length; i++) {
+        var b=arr[i];
+        if (b.type == str) {
+          socket.broadcast.emit("itemremove", b);
         }
-      });
-});//FIN DE CONNECTION 
+      }
+
+
+    }); //fin disconnect
+
+});//FIN DE CONNECTION  
 
 //find player by the the unique socket id 
 function find_playerid(id) {
@@ -251,10 +334,11 @@ var Player = function (startX, startY, angle) {
 var foodpickup = function (max_x, max_y, type, id) {
   this.x =getRandomArbitrary(1, max_x)  ;
   this.y =getRandomArbitrary(1, max_y) ;
-  console.log("x e y ", this.x, ", ", this.y);
+ // console.log("x e y ", this.x, ", ", this.y);
   this.type = type; 
+  //console.log("this ", this);
   this.id = id; 
-  this.powerup; 
+ 
 }
 
 
@@ -263,13 +347,18 @@ function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-// function getAllPlayers(){
-//   var players=[];
-//   Object.keys(io.sockets.connected).forEach(function(socketID){
-//     var player=io.sockets.connected[socketID].player;
-//     if(player){
-//       players.push(player);
-//     }
-//   });
-//   return players;
-// };
+
+function find_food (id) {
+  //el id que me llega no tiene nada que ver con el id que tienen las comidas
+  var arr=game_instance.food_pickup;
+ // console.log("arr ",arr);
+  //console.log("arr.length ", arr.length);
+
+  for (var i = 0; i < arr.length; i++) {
+    if (game_instance.food_pickup[i].id == id) {
+      return game_instance.food_pickup[i]; 
+    }
+  }
+  
+  return false;
+}

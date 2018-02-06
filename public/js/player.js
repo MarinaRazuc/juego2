@@ -3,19 +3,19 @@
 function movetoPointer (displayObject, speed, pointer, maxTime) {
 
         var angle = angleToPointer(displayObject, pointer);
+   //     if(displayObject!=null){
 
-        if (maxTime > 0)
-        {
-            //  We know how many pixels we need to move, but how fast?
-            speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
-        }
-		
-	 
-		displayObject.body.velocity.x = Math.cos(angle) * speed;
-		displayObject.body.velocity.y = Math.sin(angle) * speed;
+            if (maxTime > 0){
+                //  We know how many pixels we need to move, but how fast?
+                speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
+            }
+    		
+    	   //console.log("displayObject.body ",displayObject.body);
+    		displayObject.body.velocity.x = Math.cos(angle) * speed;
+    		displayObject.body.velocity.y = Math.sin(angle) * speed;
 
+  //      }
         return angle;
-
 }
 
 function distanceToPointer (displayObject, pointer, world) {

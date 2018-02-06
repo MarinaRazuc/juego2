@@ -10,6 +10,7 @@ function  movetoPointer(displayObject, speed, pointer, maxTime) {
 			//  We know how many pixels we need to move, but how fast?
 			speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
 		}
+		
 		displayObject.playerBody.velocity[0] = Math.cos(angle) * speed;
 		displayObject.playerBody.velocity[1] = Math.sin(angle) * speed;
 		return angle;
