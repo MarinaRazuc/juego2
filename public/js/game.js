@@ -2,11 +2,13 @@
 var ship;
 var cursors;
 var customBounds;
+var map;
+var layer,layer2;
 //********************F
 
 var players;//yo
 
-
+var bounds;
 var speed = 80;
 var score = 0;
 var scoreText;
@@ -39,7 +41,16 @@ Game.init=function(){
 		//game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight, false, false, false, false);
 		//game.physics.p2.setBoundsToWorld(false, false, false, false, false)
 		//game.physics.startSystem(Phaser.Physics.ARCADE);
-		game.load.image("background", "assets/fondo_9.jpg");            
+		//game.load.image("background", "assets/fondo_9.jpg");            
+
+		game.load.tilemap('mapa', '/assets/mapa_3.json', null, Phaser.Tilemap.TILED_JSON);
+//		game.load.tilemap('mario', '/assets/super_mario.json', null, Phaser.Tilemap.TILED_JSON);
+//		game.load.image('tiles', '/assets/super_mario.png');
+		game.load.image('tiles', '/assets/PathAndObjects.png');
+		game.load.image('tiles', '/assets/castle_tileset_part3.png');
+		// game.load.image('tiles', '/assets/dungeon_tiles.png');
+		// game.load.image('tiles', '/assets/preview.png');
+
 		game.load.image('violet_player', '/assets/circulo_violeta.png');
 		game.load.image('orange_player', '/assets/circulo_naranja.png');
 		game.load.image('red_player', '/assets/circulo_rojo.png');
@@ -58,25 +69,35 @@ Game.init=function(){
 
 		game.load.image('ship', '/assets/blue-square.png', 32, 32);
     	game.load.image('ball', '/assets/comida_rosa.png');
-		
-		//game.load.tilemap('map', '/assets/collision.json', null, Phaser.Tilemap.TILED_JSON);
-};
 
-  
+}
 
 Game.create=function() {
 
 	game.world.setBounds(0, 0, 2000, 2000);
 //*******************************************************I
 	//  The bounds of our physics simulation
-    var bounds = new Phaser.Rectangle(300, 300, 600, 600);
+//     bounds = new Phaser.Rectangle(300, 300, 600, 600);
+
+	map = game.add.tilemap('mapa');
+//	map = game.add.tilemap('mario');
+	map.addTilesetImage('PathAndObjects', 'tiles');
+	//map.addTilesetImage('dungeon_tiles', 'tiles');
+	//map.addTilesetImage('preview', 'tiles');
+	map.addTilesetImage('castle_tileset_part3', 'tiles');
+//	map.addTilesetImage('SuperMarioBros-World1-1', 'tiles');
+//	layer = map.createLayer('World1');
+	layer = map.createLayer('Capa_1');
+	layer2 = map.createLayer('Capa_2');
+    layer.resizeWorld();
+   //	map.setCollisionBetween(0, 35);
 //*******************************************************F
 
 	game.physics.startSystem(Phaser.Physics.P2JS);
 
 //******************************************************I	
 	// Make things a bit more bouncey
-	game.physics.p2.restitution = 0.9;
+	game.physics.p2.restitution = 0.5;
 //******************************************************F	
 	game.physics.p2.gravity.y = 0;
 	game.physics.p2.applyGravity = false; 
@@ -90,38 +111,39 @@ Game.create=function() {
     Game.scores={};
 //****************************************************I
 //  Some balls to collide with
-    balls = game.add.physicsGroup(Phaser.Physics.P2JS);
+    // balls = game.add.physicsGroup(Phaser.Physics.P2JS);
 
-    players=game.add.physicsGroup(Phaser.Physics.P2JS);//YO
+    // players=game.add.physicsGroup(Phaser.Physics.P2JS);//YO
 
-    for (var i = 0; i < 20; i++)
-    {
-        var ball = balls.create(bounds.randomX, bounds.randomY, 'ball');
-        ball.body.setCircle(16);
-    }
+    // for (var i = 0; i < 20; i++)
+    // {
+    //     var ball = balls.create(bounds.randomX, bounds.randomY, 'ball');
+    //     ball.body.setCircle(16);
+    // }
 
-    ship = game.add.sprite(bounds.centerX, bounds.centerY, 'ship');
-    ship.scale.set(2);
-    ship.smoothed = false;
-    ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
-    ship.play('fly');
+    // ship = game.add.sprite(bounds.centerX, bounds.centerY, 'ship');
+    // ship.scale.set(2);
+    // ship.smoothed = false;
+    // ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
+    // ship.play('fly');
 
     //  Create our physics body. A circle assigned the playerCollisionGroup
-    game.physics.p2.enable(ship);
+    // game.physics.p2.enable(ship);
 
-    ship.body.setCircle(28);
+    // ship.body.setCircle(28);
 
     //  Create a new custom sized bounds, within the world bounds
-    customBounds = { left: null, right: null, top: null, bottom: null };
+//customBounds = { left: null, right: null, top: null, bottom: null };
 
-    createPreviewBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+ //   createPreviewBounds(bounds.x, bounds.y, bounds.width, bounds.height);
 
     //  Just to display the bounds
-    var graphics = game.add.graphics(bounds.x, bounds.y);
+  /*  var graphics = game.add.graphics(300, 300);
     graphics.lineStyle(4, 0xffd900, 1);
-    graphics.drawRect(0, 0, bounds.width, bounds.height);
-
-    cursors = game.input.keyboard.createCursorKeys();
+    graphics.drawRect(300, 300, bounds.width, bounds.height);
+*/
+	//bounds.body.kinematic = true;
+   // cursors = game.input.keyboard.createCursorKeys();
 
 //****************************************************F
 
@@ -129,19 +151,19 @@ Game.create=function() {
 };
 
 Game.update=function(){
-	ship.body.setZeroVelocity();
+	// ship.body.setZeroVelocity();
 
-    if (cursors.left.isDown){
-        ship.body.moveLeft(200);
-    }else if (cursors.right.isDown){
-        ship.body.moveRight(200);
-    }
+ //    if (cursors.left.isDown){
+ //        ship.body.moveLeft(200);
+ //    }else if (cursors.right.isDown){
+ //        ship.body.moveRight(200);
+ //    }
 
-    if(cursors.up.isDown){
-        ship.body.moveUp(200);
-    }else if (cursors.down.isDown){
-        ship.body.moveDown(200);
-    }
+ //    if(cursors.up.isDown){
+ //        ship.body.moveUp(200);
+ //    }else if (cursors.down.isDown){
+ //        ship.body.moveDown(200);
+ //    }
 	Client.moverJugador(game.input.mousePointer);
 };
 
@@ -256,12 +278,28 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle){
 
 
 Game.create_player=function(data){
+    // players=game.add.physicsGroup(Phaser.Physics.P2JS);//YO
+
+
+    // var player= game.add.sprite(bounds.centerX, bounds.centerY, 'color_jugador');
+    // ship.smoothed = false;
+  
+
+    //  Create our physics body. A circle assigned the playerCollisionGroup
+    // game.physics.p2.enable(ship);
+
+    // ship.body.setCircle(28);
+
+
 	id_jugador=data.id;
 	color_jugador=data.color;
-	player = game.add.sprite(0, 0, color_jugador); 
+    // var player = players.create(bounds.randomX, bounds.randomY, color_jugador);
+	player = game.add.sprite(1200, 300, color_jugador); 
+	
 	game.physics.p2.enable(player, Phaser.Physics.p2);
-	player.body.collideWorldBounds = true;
-	player.body.data.shapes[0].sensor = true;
+    player.body.setCircle(16);
+	//player.body.collideWorldBounds = true;
+	// player.body.data.shapes[0].sensor = true;
 
 	player.type = "player_body"; //necesario para las colisiones
 	//camera follow
