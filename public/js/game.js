@@ -80,16 +80,24 @@ Game.create=function() {
 //     bounds = new Phaser.Rectangle(300, 300, 600, 600);
 
 	map = game.add.tilemap('mapa');
-//	map = game.add.tilemap('mario');
-	map.addTilesetImage('PathAndObjects', 'tiles');
-	//map.addTilesetImage('dungeon_tiles', 'tiles');
-	//map.addTilesetImage('preview', 'tiles');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
-//	map.addTilesetImage('SuperMarioBros-World1-1', 'tiles');
-//	layer = map.createLayer('World1');
+	map.addTilesetImage('PathAndObjects', 'tiles');
+
+
+	map.setCollisionBetween(83,83, true, 'Capa_2', false); //,84,85,99,101,115,116,117
+	map.setCollisionBetween(84,84, true, 'Capa_2', false);
+ 	map.setCollisionBetween(85,85, true, 'Capa_2', false);
+	map.setCollisionBetween(99,99, true, 'Capa_2', false);
+	map.setCollisionBetween( 101,101, true, 'Capa_2', false);
+	map.setCollisionBetween(115,115, true, 'Capa_2', false);
+	map.setCollisionBetween(116,116, true, 'Capa_2', false);
+	map.setCollisionBetween(117,117, true, 'Capa_2', false);
+
 	layer = map.createLayer('Capa_1');
 	layer2 = map.createLayer('Capa_2');
     layer.resizeWorld();
+    layer2.resizeWorld();
+
    //	map.setCollisionBetween(0, 35);
 //*******************************************************F
 
@@ -110,40 +118,8 @@ Game.create=function() {
 
     Game.scores={};
 //****************************************************I
-//  Some balls to collide with
-    // balls = game.add.physicsGroup(Phaser.Physics.P2JS);
 
-    // players=game.add.physicsGroup(Phaser.Physics.P2JS);//YO
-
-    // for (var i = 0; i < 20; i++)
-    // {
-    //     var ball = balls.create(bounds.randomX, bounds.randomY, 'ball');
-    //     ball.body.setCircle(16);
-    // }
-
-    // ship = game.add.sprite(bounds.centerX, bounds.centerY, 'ship');
-    // ship.scale.set(2);
-    // ship.smoothed = false;
-    // ship.animations.add('fly', [0,1,2,3,4,5], 10, true);
-    // ship.play('fly');
-
-    //  Create our physics body. A circle assigned the playerCollisionGroup
-    // game.physics.p2.enable(ship);
-
-    // ship.body.setCircle(28);
-
-    //  Create a new custom sized bounds, within the world bounds
-//customBounds = { left: null, right: null, top: null, bottom: null };
-
- //   createPreviewBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-
-    //  Just to display the bounds
-  /*  var graphics = game.add.graphics(300, 300);
-    graphics.lineStyle(4, 0xffd900, 1);
-    graphics.drawRect(300, 300, bounds.width, bounds.height);
-*/
-	//bounds.body.kinematic = true;
-   // cursors = game.input.keyboard.createCursorKeys();
+   cursors = game.input.keyboard.createCursorKeys();
 
 //****************************************************F
 
@@ -151,19 +127,7 @@ Game.create=function() {
 };
 
 Game.update=function(){
-	// ship.body.setZeroVelocity();
-
- //    if (cursors.left.isDown){
- //        ship.body.moveLeft(200);
- //    }else if (cursors.right.isDown){
- //        ship.body.moveRight(200);
- //    }
-
- //    if(cursors.up.isDown){
- //        ship.body.moveUp(200);
- //    }else if (cursors.down.isDown){
- //        ship.body.moveDown(200);
- //    }
+	 
 	Client.moverJugador(game.input.mousePointer);
 };
 
