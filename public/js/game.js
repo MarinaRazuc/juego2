@@ -21,6 +21,8 @@ colores[0xFF0000]='red_player';
 colores[0x64FE2E]='green_player';
 colores[0x08088A]='blue_player';
 colores[0xFF00BF]='pink_player';
+colores[0x151515]='black_player';
+colores[0x6E6E6E]='grey_player';
 
 var violet_food, orange_food, green_food, blue_food, red_food, pink_food, yellow_food;
 // var game = new Phaser.Game(1200,1000,window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio,/*24*48, 17*48,/*canvas_width, canvas_height 
@@ -37,19 +39,12 @@ Game.init=function(){
 };
 
  Game.preload=function(){
-		//game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-		//game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight, false, false, false, false);
-		//game.physics.p2.setBoundsToWorld(false, false, false, false, false)
-		//game.physics.startSystem(Phaser.Physics.ARCADE);
-		//game.load.image("background", "assets/fondo_9.jpg");            
+		 
+		game.load.tilemap('mapa', '/assets/mapa_4.json', null, Phaser.Tilemap.TILED_JSON);
+		//game.load.tilemap('mapa', '/assets/mapa_4.json', null, Phaser.Tilemap.TILED_JSON);
 
-		game.load.tilemap('mapa', '/assets/mapa_3.json', null, Phaser.Tilemap.TILED_JSON);
-//		game.load.tilemap('mario', '/assets/super_mario.json', null, Phaser.Tilemap.TILED_JSON);
-//		game.load.image('tiles', '/assets/super_mario.png');
 		game.load.image('tiles', '/assets/PathAndObjects.png');
 		game.load.image('tiles', '/assets/castle_tileset_part3.png');
-		// game.load.image('tiles', '/assets/dungeon_tiles.png');
-		// game.load.image('tiles', '/assets/preview.png');
 
 		game.load.image('violet_player', '/assets/circulo_violeta.png');
 		game.load.image('orange_player', '/assets/circulo_naranja.png');
@@ -58,6 +53,8 @@ Game.init=function(){
 		game.load.image('green_player', '/assets/circulo_verde.png');
 		game.load.image('pink_player', '/assets/circulo_rosa.png');
 		game.load.image('yellow_player', '/assets/circulo_amarillo.png');
+		game.load.image('black_player', '/assets/circulo_negro.png');
+		game.load.image('grey_player', '/assets/circulo_gris.png');
 
 		game.load.image('violet_player_food', '/assets/banderinVioleta2.png');
 		game.load.image('orange_player_food', '/assets/banderinNaranja2.png');
@@ -67,46 +64,34 @@ Game.init=function(){
 		game.load.image('pink_player_food', '/assets/banderinRosa2.png');
 		game.load.image('red_player_food', '/assets/banderinRojo2.png');
 
-		game.load.image('ship', '/assets/blue-square.png', 32, 32);
-    	game.load.image('ball', '/assets/comida_rosa.png');
+		// game.load.image('ship', '/assets/blue-square.png', 32, 32);
+  //   	game.load.image('ball', '/assets/comida_rosa.png');
 
 }
 
 Game.create=function() {
 
-	game.world.setBounds(0, 0, 2000, 2000);
-//*******************************************************I
-	//  The bounds of our physics simulation
-//     bounds = new Phaser.Rectangle(300, 300, 600, 600);
+	//game.world.setBounds(0, 0, 2000, 2000);
 
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
-
-
-	map.setCollisionBetween(83,83, true, 'Capa_2', false); //,84,85,99,101,115,116,117
-	map.setCollisionBetween(84,84, true, 'Capa_2', false);
- 	map.setCollisionBetween(85,85, true, 'Capa_2', false);
-	map.setCollisionBetween(99,99, true, 'Capa_2', false);
-	map.setCollisionBetween( 101,101, true, 'Capa_2', false);
-	map.setCollisionBetween(115,115, true, 'Capa_2', false);
-	map.setCollisionBetween(116,116, true, 'Capa_2', false);
-	map.setCollisionBetween(117,117, true, 'Capa_2', false);
-
-	layer = map.createLayer('Capa_1');
-	layer2 = map.createLayer('Capa_2');
-    layer.resizeWorld();
-    layer2.resizeWorld();
-
-   //	map.setCollisionBetween(0, 35);
-//*******************************************************F
-
+	 
+	Capa_3 = map.createLayer('Capa_3');
+	Capa_1 = map.createLayer('Capa_1');
+	Capa_2 = map.createLayer('Capa_2');
+	
+	Capa_1.resizeWorld();
+  	//Capa_2.resizeWorld();
+  
 	game.physics.startSystem(Phaser.Physics.P2JS);
+	// map.setCollision(252,true, 'Capa_3');
+	//map.setCollision([84,85,86, 87, 88, 89,100, 102, 103, 105, 116, 117, 118, 119, 120, 121, 197],true, 'Capa_2');
+	map.setCollisionBetween(252, 252, true, 'Capa_3');
+	game.physics.p2.convertTilemap(map, 'Capa_3');
 
-//******************************************************I	
 	// Make things a bit more bouncey
-	game.physics.p2.restitution = 0.5;
-//******************************************************F	
+	game.physics.p2.restitution = 0.3;	
 	game.physics.p2.gravity.y = 0;
 	game.physics.p2.applyGravity = false; 
 	game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
@@ -117,29 +102,24 @@ Game.create=function() {
 //    Game.add.sprite(0, 0, 'background');
 
     Game.scores={};
-//****************************************************I
+    // game.policias=[];
+    // var poli1=new Poli();
+    // var poli2=new Poli();
+    // game.policias[1]=poli1;
+    // game.policias[2]=poli2;
 
-   cursors = game.input.keyboard.createCursorKeys();
+	Client.askNewPlayer(); 
 
-//****************************************************F
-
- 	Client.askNewPlayer(); 
 };
 
 Game.update=function(){
 	 
+
 	Client.moverJugador(game.input.mousePointer);
+	// game.policias[1].update();
+	// game.policias[2].update();
 };
 
-//eatFood function
-// function eatFood(id, food) {
-// 	//remove the piece of food
-// 	food.kill();
-// 	//update the score
-// 	score++;
-// 	scoreText.text = score;
-// 	Game.scores[id]=scoreText;
-// }
  
 Game.removePlayer=function(id){
     // var player=Game.playerMap[id].destroy();
@@ -214,10 +194,8 @@ function findplayerbyid (id) {
 //onNewPlayer sólo se llama cuando hay enemigos
 Game.onNewPlayer= function(data) {
 	//enemy object 
-
 	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle); 
 	enemies.push(new_enemy);
-	 
 };
 
 
@@ -236,39 +214,23 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle){
 	game.physics.p2.enableBody(this.player, true);
 	this.player.body.clearShapes();
 	
-	var jugador = players.create(this.x, this.y, color);//yo
-    jugador.body.setCircle(16);//yo
+	// var jugador = players.create(this.x, this.y, color);//yo
+ //    jugador.body.setCircle(16);//yo
 }	
 
 
 Game.create_player=function(data){
-    // players=game.add.physicsGroup(Phaser.Physics.P2JS);//YO
-
-
-    // var player= game.add.sprite(bounds.centerX, bounds.centerY, 'color_jugador');
-    // ship.smoothed = false;
-  
-
-    //  Create our physics body. A circle assigned the playerCollisionGroup
-    // game.physics.p2.enable(ship);
-
-    // ship.body.setCircle(28);
-
-
 	id_jugador=data.id;
 	color_jugador=data.color;
     // var player = players.create(bounds.randomX, bounds.randomY, color_jugador);
 	player = game.add.sprite(1200, 300, color_jugador); 
-	
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
 	//player.body.collideWorldBounds = true;
 	// player.body.data.shapes[0].sensor = true;
-
 	player.type = "player_body"; //necesario para las colisiones
 	//camera follow
-	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);					
-	
+	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
 };
 
@@ -287,7 +249,7 @@ var food_object = function (id, type, startx, starty) {
 	//generated in the server with node-uuid
 	this.id = id; 
 //	console.log(this.id);
-	//positinon of the food
+	//pos of the food
 	this.posx = startx;  
 	this.posy = starty; 
 	
@@ -317,39 +279,33 @@ Game.onItemRemove=function(data) {
 
 
 function player_coll (body, bodyB, shapeA, shapeB, equation) {
-
 	var key_player=player.key; 
-	
 	if(body!=null){
-		
-		//the id of the collided body that player made contact with 
-		var key=body.data.parent.sprite.body.sprite.body.sprite.id;
+		if(body.data.parent.sprite!=null){
+			 
+			//the id of the collided body that player made contact with 
+			var key=body.data.parent.sprite.body.sprite.body.sprite.id;
+			//the type of the body the player made contact with 
+			var type = body.type; 
+			// console.log("body ", body);
+			// console.log("key de body ", key);
+			// console.log("bodyB ", bodyB);
+			var tipobody=body.sprite.key; //comida
+			var tipobodyB=bodyB.parent.sprite.key; //jugador
+			// console.log("tipobodyB ", tipobodyB);
+			// console.log("tipobody ", tipobody);
+			if((key_player=="orange_player" && tipobody=="orange_player_food")||
+				(key_player=="red_player" && tipobody=="red_player_food")||
+				(key_player=="yellow_player" && tipobody=="yellow_player_food")||
+				(key_player=="green_player" && tipobody=="green_player_food")||
+				(key_player=="pink_player" && tipobody=="pink_player_food")||
+				(key_player=="blue_player" && tipobody=="blue_player_food")||
+				(key_player=="violet_player" && tipobody=="violet_player_food")){
 
-		//the type of the body the player made contact with 
-		var type = body.type; 
-		
-		// console.log("body ", body);
-		// console.log("key de body ", key);
-		// console.log("bodyB ", bodyB);
-
-		var tipobody=body.sprite.key; //comida
-		var tipobodyB=bodyB.parent.sprite.key; //jugador
-
-		// console.log("tipobodyB ", tipobodyB);
-		// console.log("tipobody ", tipobody);
-
-		if((key_player=="orange_player" && tipobody=="orange_player_food")||
-			(key_player=="red_player" && tipobody=="red_player_food")||
-			(key_player=="yellow_player" && tipobody=="yellow_player_food")||
-			(key_player=="green_player" && tipobody=="green_player_food")||
-			(key_player=="pink_player" && tipobody=="pink_player_food")||
-			(key_player=="blue_player" && tipobody=="blue_player_food")||
-			(key_player=="violet_player" && tipobody=="violet_player_food")){
-		
-			score=score+1;
-			Client.levantarBanderin({id:key}); 
-			document.getElementById("score").innerHTML="Banderines: "+score;
-		}
+				score=score+1;
+				Client.levantarBanderin({id:key}); 
+				document.getElementById("score").innerHTML="Banderines: "+score;
+			}
 
 
 		// if (type == "player_body") { //CAPAZ Q EL TIPO ES DISTINTO, VER MAS ADELANTE
@@ -362,6 +318,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation) {
 		// 	Client.levantarBanderin({id:key});
 		// 	//socket.emit('item_picked', {id: key}); 
 		// }
+		}
 	}
 };
 
@@ -384,7 +341,6 @@ Game.onRemovePlayer=function(data) {
 // search through food list to find the food object
 function finditembyid (id) {
 	for (var i = 0; i < food_pickup.length; i++) {
-
 		if (food_pickup[i].id == id) {
 			return food_pickup[i]; 
 		}
@@ -394,27 +350,5 @@ function finditembyid (id) {
 
 function render(){};
 
-//******************************************************I
-function createPreviewBounds(x, y, w, h) {
-    var sim = game.physics.p2;
-    //  If you want to use your own collision group then set it here and un-comment the lines below
-    var mask = sim.boundsCollisionGroup.mask;
-    customBounds.left = new p2.Body({ mass: 0, position: [ sim.pxmi(x), sim.pxmi(y) ], angle: 1.5707963267948966 });
-    customBounds.left.addShape(new p2.Plane());
-    // customBounds.left.shapes[0].collisionGroup = mask;
-    customBounds.right = new p2.Body({ mass: 0, position: [ sim.pxmi(x + w), sim.pxmi(y) ], angle: -1.5707963267948966 });
-    customBounds.right.addShape(new p2.Plane());
-    // customBounds.right.shapes[0].collisionGroup = mask;
-    customBounds.top = new p2.Body({ mass: 0, position: [ sim.pxmi(x), sim.pxmi(y) ], angle: -3.141592653589793 });
-    customBounds.top.addShape(new p2.Plane());
-    // customBounds.top.shapes[0].collisionGroup = mask;
-    customBounds.bottom = new p2.Body({ mass: 0, position: [ sim.pxmi(x), sim.pxmi(y + h) ] });
-    customBounds.bottom.addShape(new p2.Plane());
-    // customBounds.bottom.shapes[0].collisionGroup = mask;
-    sim.world.addBody(customBounds.left);
-    sim.world.addBody(customBounds.right);
-    sim.world.addBody(customBounds.top);
-    sim.world.addBody(customBounds.bottom);
-}
 
-//*******************************************************F
+

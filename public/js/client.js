@@ -13,8 +13,6 @@ Client.askNewPlayer=function(){
 };
 
 Client.moverJugador = function(pointer){  
-
-
   Client.socket.emit('input_fired', {
     pointer_x: pointer.x, 
     pointer_y: pointer.y, 

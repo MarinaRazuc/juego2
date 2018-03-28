@@ -18,6 +18,8 @@ colores[3]='red_player'//"0xFF0000";
 colores[4]='green_player'//"0x64FE2E";
 colores[5]='blue_player'//"0x08088A";
 colores[6]='pink_player'//"0xFF00BF";
+colores[7]='black_player'
+colores[8]='grey_player'
 //needed for physics update 
 var startTime = (new Date).getTime();
 var lastTime;
@@ -79,6 +81,8 @@ function physics_handler() {
 io.on('connection', function(socket){
   console.log('a user connected, ID: ', http.lastPlayerID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
+  var crear_polis=false;
+  var poli1, poli2;
   socket.on('new_player', function(data) {
       //new player instance
       var newPlayer = new Player(data.x, data.y, data.angle);
@@ -86,6 +90,11 @@ io.on('connection', function(socket){
       var c = http.lastPlayerID%7;
       newPlayer.color=colores[c];
       http.lastPlayerID++;
+      if(c==0){ //el primero
+        poli1=new Player(200, 200, 0);//--------------------------------------------------------------
+        poli2=new Player(400, 400, 0);
+        crear_polis=true;
+      }
       //debo controlar si se paso de 7-- ver q hacer cuando esto pasa
       playerBody = new p2.Body ({
         mass: 0,
@@ -93,14 +102,44 @@ io.on('connection', function(socket){
         //position: [data.x,data.y], //ver, estaba en 0,0
         fixedRotation: true
       });
-      
+
       //add the playerbody into the player object 
       newPlayer.playerBody = playerBody;
-      
       //Don’t forget to add the playerbody to the world with world.addBody(playerbody) !! or else your player's physics will not be calculated
       world.addBody(newPlayer.playerBody); 
+
+      if(crear_polis){
+        pol1body = new p2.Body ({
+          mass: 0,
+          position: [0,0],
+          //position: [data.x,data.y], //ver, estaba en 0,0
+          fixedRotation: true
+        });
+        poli1.playerBody=pol1body;
+        
+        pol2body = new p2.Body ({
+          mass: 0,
+          position: [0,0],
+          //position: [data.x,data.y], //ver, estaba en 0,0
+          fixedRotation: true
+        });
+        poli2.playerBody=pol2body;
+        
+        poli1.color=colores[7];
+        poli2.color=colores[8];
+
+        world.addBody(poli1.playerBody);
+        world.addBody(poli2.playerBody);
+      }
+
       
+
+      if(crear_polis){
+        socket.emit('create_player', {x: poli1.x, y:poli1.y, id:"P1", color: poli1.color, size:15});
+        socket.emit('create_player', {x: poli2.x, y:poli2.y, id:"P2", color: poli2.color, size:15});
+      }
       socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size});
+
       //information to be sent to all clients except sender
       var current_info = {
         id: newPlayer.id, 
@@ -110,6 +149,29 @@ io.on('connection', function(socket){
         angle:newPlayer.angle, 
         size: newPlayer.size
       };
+
+      var current_info_1;
+      var current_info_2;
+      if(crear_polis){
+        current_info_1 = {
+          id: poli1.id, 
+          x: poli1.x,
+          y: poli1.y,
+          color:poli1.color,
+          angle:poli1.angle, 
+          size: poli1.size
+        };
+        current_info_2 = {
+          id: poli2.id, 
+          x: poli2.x,
+          y: poli2.y,
+          color:poli2.color,
+          angle:poli2.angle, 
+          size: poli2.size
+        };
+
+      }
+
       //send to the new player about everyone who is already connected.   
       for (i = 0; i < player_lst.length; i++) {
         console.log("Entro al for");
@@ -128,6 +190,10 @@ io.on('connection', function(socket){
       }//END DEL FOR
       
       player_lst.push(newPlayer); //console.log(player_lst.length);
+      if(crear_polis){
+        player_lst.push(poli1);
+        player_lst.push(poli2);
+      }
 
       //banderas del resto
       for (j = 0; j < game_instance.food_pickup.length; j++) {
@@ -135,10 +201,15 @@ io.on('connection', function(socket){
           socket.emit('item_update', food_pick); 
       }
 
+
+      if(crear_polis){
+        socket.broadcast.emit('new_enemyPlayer', current_info_1);
+        socket.broadcast.emit('new_enemyPlayer', current_info_2);
+      }
+      
       //send message to every connected client except the sender
       //a todos los jugadores existentes excepto a mí, les mando mi info
       socket.broadcast.emit('new_enemyPlayer', current_info);
-     
 
       //se crean banderitas propias
       for (var i = 0; i < max_banderas; i++) { //por ahora 15
