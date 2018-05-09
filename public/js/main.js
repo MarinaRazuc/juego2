@@ -8,20 +8,19 @@ new Phaser.Game(window.innerWidth * window.devicePixelRatio, window.innerHeight 
 // 	Phaser.CANVAS, document.getElementById('game'),null, true);
 //  game.state.add('Game',Game);
 //  game.state.start('Game');
+	
 
- canvas_width = window.innerWidth * window.devicePixelRatio;
-canvas_height = window.innerHeight * window.devicePixelRatio;
+	canvas_width = window.innerWidth * window.devicePixelRatio;
+	canvas_height = window.innerHeight * window.devicePixelRatio;
 
-game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, document.getElementById('game'),null, true );
- game.state.add('Game',Game);
- game.state.start('Game');
+	game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, document.getElementById('game'),null, true );
+	//game.state.start('Game');
+	game.state.add('login', login);
+	game.state.add('Game',Game);
+//	game.state.add('main', main);
+	 game.state.start('login'); 
+	// game.state.start('main');
+	// var main = function(game){
+	// };
+	
 
-/*
-var gameProperties = { 
-	//this is the actual game size to determine the boundary of 
-	//the world
-	gameWidth: 4000, 
-	gameHeight: 4000,
-};
-
-*/

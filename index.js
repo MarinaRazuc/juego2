@@ -78,23 +78,66 @@ function physics_handler() {
 }
 //Then I listen on the connection event for incoming sockets, and I log it to the console.
 //Each socket also fires a special disconnect event:
+
+
+
 io.on('connection', function(socket){
+
+
+  // //when the player enters their name
+    // socket.on('enter_name', onEntername); 
+    
+    // //when the player logs in
+    // socket.on('logged_in', function(data){
+    //   this.emit('enter_game', {username: data.username}); 
+    // }); 
+
+  
+  socket.on('enter_name', function(data){
+    socket.emit('join_game', {username: data.username, id: this.id});
+    //login
+  }); 
+
+
+  //when the player logs in
+  socket.on('logged_in', function(data){
+    console.log("socket.on logged_in");
+    socket.emit('enter_game', {username: data.username}); 
+  }); 
+    
+   //when the player enters the game 
+  socket.on('enter_game', function(data){
+    console.log("connected to server"); 
+    gameProperties.in_game = true;
+    var username = data.username;
+    //when the socket connects, call the onsocketconnected and send its information to the server 
+    socket.emit('logged_in', {username: username}); 
+    // send the server our initial position and tell it we are connected
+  });
+  //socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
+  //Client.askNewPlayer({username:data.username, x:0, y:0, angle:0})
+
+
+
   console.log('a user connected, ID: ', http.lastPlayerID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
   var crear_polis=false;
   var poli1, poli2;
   socket.on('new_player', function(data) {
+    console.log("index.js new_player. Player name= "+data.username);
+
       //new player instance
       var newPlayer = new Player(data.x, data.y, data.angle);
       newPlayer.id = this.id;  /*console.log(newPlayer.id);*/
       var c = http.lastPlayerID%7;
       newPlayer.color=colores[c];
+      newPlayer.username = data.username;
       http.lastPlayerID++;
-      if(c==0){ //el primero
-        poli1=new Player(200, 200, 0);//--------------------------------------------------------------
-        poli2=new Player(400, 400, 0);
-        crear_polis=true;
-      }
+      // if(c==0){ //el primero
+      //   poli1=new Player(200, 200, 0);//--------------------------------------------------------------
+      //   poli2=new Player(400, 400, 0);
+      //   crear_polis=true;
+      // }
       //debo controlar si se paso de 7-- ver q hacer cuando esto pasa
       playerBody = new p2.Body ({
         mass: 0,
@@ -108,38 +151,38 @@ io.on('connection', function(socket){
       //Don’t forget to add the playerbody to the world with world.addBody(playerbody) !! or else your player's physics will not be calculated
       world.addBody(newPlayer.playerBody); 
 
-      if(crear_polis){
-        pol1body = new p2.Body ({
-          mass: 0,
-          position: [0,0],
-          //position: [data.x,data.y], //ver, estaba en 0,0
-          fixedRotation: true
-        });
-        poli1.playerBody=pol1body;
+      // if(crear_polis){
+      //   pol1body = new p2.Body ({
+      //     mass: 0,
+      //     position: [0,0],
+      //     //position: [data.x,data.y], //ver, estaba en 0,0
+      //     fixedRotation: true
+      //   });
+      //   poli1.playerBody=pol1body;
         
-        pol2body = new p2.Body ({
-          mass: 0,
-          position: [0,0],
-          //position: [data.x,data.y], //ver, estaba en 0,0
-          fixedRotation: true
-        });
-        poli2.playerBody=pol2body;
+      //   pol2body = new p2.Body ({
+      //     mass: 0,
+      //     position: [0,0],
+      //     //position: [data.x,data.y], //ver, estaba en 0,0
+      //     fixedRotation: true
+      //   });
+      //   poli2.playerBody=pol2body;
         
-        poli1.color=colores[7];
-        poli2.color=colores[8];
+      //   poli1.color=colores[7];
+      //   poli2.color=colores[8];
 
-        world.addBody(poli1.playerBody);
-        world.addBody(poli2.playerBody);
-      }
+      //   world.addBody(poli1.playerBody);
+      //   world.addBody(poli2.playerBody);
+      // }
 
       
 
-      if(crear_polis){
-        socket.emit('create_player', {x: poli1.x, y:poli1.y, id:"P1", color: poli1.color, size:15});
-        socket.emit('create_player', {x: poli2.x, y:poli2.y, id:"P2", color: poli2.color, size:15});
-      }
-      socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size});
-
+      // if(crear_polis){
+      //   socket.emit('create_player', {x: poli1.x, y:poli1.y, id:"P1", color: poli1.color, size:15});
+      //   socket.emit('create_player', {x: poli2.x, y:poli2.y, id:"P2", color: poli2.color, size:15});
+      // }
+      socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username});
+     
       //information to be sent to all clients except sender
       var current_info = {
         id: newPlayer.id, 
@@ -152,25 +195,24 @@ io.on('connection', function(socket){
 
       var current_info_1;
       var current_info_2;
-      if(crear_polis){
-        current_info_1 = {
-          id: poli1.id, 
-          x: poli1.x,
-          y: poli1.y,
-          color:poli1.color,
-          angle:poli1.angle, 
-          size: poli1.size
-        };
-        current_info_2 = {
-          id: poli2.id, 
-          x: poli2.x,
-          y: poli2.y,
-          color:poli2.color,
-          angle:poli2.angle, 
-          size: poli2.size
-        };
-
-      }
+      // if(crear_polis){
+      //   current_info_1 = {
+      //     id: poli1.id, 
+      //     x: poli1.x,
+      //     y: poli1.y,
+      //     color:poli1.color,
+      //     angle:poli1.angle, 
+      //     size: poli1.size
+      //   };
+      //   current_info_2 = {
+      //     id: poli2.id, 
+      //     x: poli2.x,
+      //     y: poli2.y,
+      //     color:poli2.color,
+      //     angle:poli2.angle, 
+      //     size: poli2.size
+      //   };
+      // }
 
       //send to the new player about everyone who is already connected.   
       for (i = 0; i < player_lst.length; i++) {
@@ -178,6 +220,7 @@ io.on('connection', function(socket){
         existingPlayer = player_lst[i];
         var player_info = {
             id: existingPlayer.id,
+            username: existingPlayer.username,
             x: existingPlayer.x,
             y: existingPlayer.y  ,
             color:existingPlayer.color, 
@@ -190,10 +233,10 @@ io.on('connection', function(socket){
       }//END DEL FOR
       
       player_lst.push(newPlayer); //console.log(player_lst.length);
-      if(crear_polis){
-        player_lst.push(poli1);
-        player_lst.push(poli2);
-      }
+      // if(crear_polis){
+      //   player_lst.push(poli1);
+      //   player_lst.push(poli2);
+      // }
 
       //banderas del resto
       for (j = 0; j < game_instance.food_pickup.length; j++) {
@@ -202,12 +245,11 @@ io.on('connection', function(socket){
       }
 
 
-      if(crear_polis){
-        socket.broadcast.emit('new_enemyPlayer', current_info_1);
-        socket.broadcast.emit('new_enemyPlayer', current_info_2);
-      }
+      // if(crear_polis){
+      //   socket.broadcast.emit('new_enemyPlayer', current_info_1);
+      //   socket.broadcast.emit('new_enemyPlayer', current_info_2);
+      // }
       
-      //send message to every connected client except the sender
       //a todos los jugadores existentes excepto a mí, les mando mi info
       socket.broadcast.emit('new_enemyPlayer', current_info);
 
@@ -224,7 +266,7 @@ io.on('connection', function(socket){
           socket.broadcast.emit("item_update", foodentity);
       }
  
-
+      sortPlayerListByScore();
   }); //FIN 'new_player'------------------------------------------------------------
  
 
@@ -300,6 +342,7 @@ io.on('connection', function(socket){
       }
       game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
       //comunicar a todos los jugadores, incluyéndome
+      sortPlayerListByScore();
       socket.emit('itemremove', object);
       socket.broadcast.emit('itemremove', object); 
       //socket.emit('item_picked');//?????
@@ -340,7 +383,8 @@ io.on('connection', function(socket){
     //   this.broadcast.emit('remove_player', {id: enemyPlayer.id});
     //   playerKilled(enemyPlayer);
     // }
-    
+
+    sortPlayerListByScore();    
     console.log("someone ate someone!!!");
 
   }); //fin player collision
@@ -357,6 +401,7 @@ io.on('connection', function(socket){
         player_lst.splice(player_lst.indexOf(removePlayer), 1);
       }
       console.log("removing player " + this.id);
+      sortPlayerListByScore();
       //send message to every connected client except the sender
       socket.broadcast.emit('remove_player', {id: this.id});
       var arr=game_instance.food_pickup;
@@ -369,6 +414,8 @@ io.on('connection', function(socket){
 
 
     }); //fin disconnect
+
+    
 
 });//FIN DE CONNECTION  
 
@@ -432,4 +479,25 @@ function find_food (id) {
   }
   
   return false;
+}
+
+
+// when the player enters their name, trigger this function
+function onEntername (data) {
+  this.emit('join_game', {username: data.username, id: this.id});
+}
+
+
+function sortPlayerListByScore() {
+  player_lst.sort(function(a,b) {
+    return b.size - a.size;
+  });
+  
+  var playerListSorted = [];
+  for (var i = 0; i < player_lst.length; i++) {
+    // send the player username to the client so that clients can update the leaderboard.
+    playerListSorted.push({id: player_lst[i].id, username: player_lst[i].username, size: player_lst[i].size});
+  }
+  
+  io.emit("leader_board", playerListSorted);
 }

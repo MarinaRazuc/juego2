@@ -4,6 +4,14 @@ var cursors;
 var customBounds;
 var map;
 var layer,layer2;
+var username;
+
+var gameProperties = { 
+	gameWidth: 4000,
+	gameHeight: 4000,
+	game_elemnt: "gameDiv",
+	in_game: false,
+};
 //********************F
 
 var players;//yo
@@ -32,11 +40,31 @@ var violet_food, orange_food, green_food, blue_food, red_food, pink_food, yellow
 var enemies = [];
 var food_pickup=[];
 var customBounds;
+var USERNAME;
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
-Game.init=function(){
+Game.init=function(username){
+	USERNAME=username;
+	console.log("Game.init en game.js");
+	//console.log(username);
 	game.stage.disableVisibilityChange=true;//estaba en true
+	// when the socket connects, call the onsocketconnected and send its information to the server 
+	Client.loguear({username:username});
+
+	// socket.emit('logged_in', {username: username}); 
+	
+	// when the player enters the game 
+	// socket.on('enter_game', onsocketConnected);
 };
+
+Game.logueado=function(data){
+	console.log("connected to server, Game.logueado"); 
+	gameProperties.in_game = true;
+	username = data.username;
+	// send the server our initial position and tell it we are connected
+//	socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
+};
+
 
  Game.preload=function(){
 		 
@@ -72,7 +100,7 @@ Game.init=function(){
 Game.create=function() {
 
 	//game.world.setBounds(0, 0, 2000, 2000);
-
+	console.log ("create");
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
@@ -99,25 +127,22 @@ Game.create=function() {
     var height = this.game.height;
 	// para trackear a los jugadores
     Game.playerMap={};
-//    Game.add.sprite(0, 0, 'background');
-
     Game.scores={};
-    // game.policias=[];
-    // var poli1=new Poli();
-    // var poli2=new Poli();
-    // game.policias[1]=poli1;
-    // game.policias[2]=poli2;
 
-	Client.askNewPlayer(); 
+   // check for leaderboard
+	//socket.on ('leader_board', lbupdate); 
+	
+	//ver en que orden estos	
+	createLeaderBoard();
+	//Client.askNewPlayer(); 
+	Client.askNewPlayer({username: USERNAME, x:0, y:0, angle:0}); 
 
 };
 
-Game.update=function(){
-	 
 
+Game.update=function(){
 	Client.moverJugador(game.input.mousePointer);
-	// game.policias[1].update();
-	// game.policias[2].update();
+	//Client.moverPolicias();
 };
 
  
@@ -214,12 +239,16 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle){
 	game.physics.p2.enableBody(this.player, true);
 	this.player.body.clearShapes();
 	
+
 	// var jugador = players.create(this.x, this.y, color);//yo
  //    jugador.body.setCircle(16);//yo
 }	
 
 
-Game.create_player=function(data){
+Game.create_player=function(data){ //esto es lo q llama el cliente
+
+	//player=new Jugador(data, game, player, this);
+
 	id_jugador=data.id;
 	color_jugador=data.color;
     // var player = players.create(bounds.randomX, bounds.randomY, color_jugador);
@@ -232,6 +261,12 @@ Game.create_player=function(data){
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
+
+	// player follow text (set text to username)
+	//player.playertext = game.add.text(0, 0, data.username , style);
+	player.playertext = game.add.text(0, 0, data.username);
+	// add the text to player object to follw as child
+	player.addChild(player.playertext);
 };
 
 
@@ -262,9 +297,6 @@ var food_object = function (id, type, startx, starty) {
 	game.physics.p2.enableBody(this, true);
 }
 
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//---------------------------------------------------------------
-//las sgtes funciones todavia no fueron muy analizadas
 
 // function called when food needs to be removed in the client. 
 Game.onItemRemove=function(data) {
@@ -351,4 +383,70 @@ function finditembyid (id) {
 function render(){};
 
 
+//create leader board in here.
+function createLeaderBoard() {
+	var leaderBox = game.add.graphics(game.width * 0.81, game.height * 0.05);
+	leaderBox.fixedToCamera = true;
+	// draw a rectangle
+	leaderBox.beginFill(0xD3D3D3, 0.3);
+    leaderBox.lineStyle(2, 0x202226, 1);
+    leaderBox.drawRect(0, 0, 300, 400);
+	
+	var style = { font: "13px Press Start 2P", fill: "black", align: "left", fontSize: '22px'};
+	
+	leader_text = game.add.text(10, 10, "", style);
+	leader_text.anchor.set(0);
 
+	leaderBox.addChild(leader_text);
+}
+
+//leader board
+function lbupdate (data) {
+	//this is the final board string.
+	var board_string = ""; 
+	var maxlen = 10;
+	var maxPlayerDisplay = 10;
+	var mainPlayerShown = false;
+	
+	for (var i = 0;  i < data.length; i++) {
+		//if the mainplayer is shown along the iteration, set it to true
+	
+		if (mainPlayerShown && i >= maxPlayerDisplay) {
+			break;
+		}
+		
+		//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
+		// and then add three dots at the end, and show player's rank.
+		if (!mainPlayerShown && i >= maxPlayerDisplay - 1 && socket.id == data[i].id) {
+			board_string = board_string.concat(".\n");
+			board_string = board_string.concat(".\n");
+			board_string = board_string.concat(".\n");
+			mainPlayerShown = true;
+		}
+		
+		//here we are checking if user id is greater than 10 characters, if it is 
+		//it is too long, so we're going to trim it.
+		if (data[i].username.length >= 10) {
+			var username = data[i].username;
+			var temp = ""; 
+			for (var j = 0; j < maxlen; j++) {
+				temp += username[j];
+			}
+			
+			temp += "...";
+			username = temp;
+			
+			//change to player username instead of id.
+			board_string = board_string.concat(i + 1,": ");
+			board_string = board_string.concat(username," ",(data[i].size).toString() + "\n");
+		
+		} else {
+			board_string = board_string.concat(i + 1,": ");
+			board_string = board_string.concat(data[i].username," ",(data[i].size).toString() + "\n");
+		}
+		
+	}
+	
+	console.log(board_string);
+	leader_text.setText(board_string); 
+}

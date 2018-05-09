@@ -8,9 +8,14 @@ Client.socket = io.connect();
 
 /*Usa nuestro objeto socket y envía a través del mismo un mensaje al servidor
   Este msj tendrá la etiqueta 'new_player'*/
-Client.askNewPlayer=function(){
-   Client.socket.emit('new_player', {x: 0, y: 0, angle:0}  ); //  {x: randomInt(20, 30), y: randomInt(20, 30), angle:0}
+Client.askNewPlayer=function(data){
+  console.log("Client.askNewPlayer en client.js");
+   Client.socket.emit('new_player', data); //  {x: randomInt(20, 30), y: randomInt(20, 30), angle:0}
 };
+
+// Client.askNewPlayer=function(){
+//    Client.socket.emit('new_player', {x:0, y:0, angle:0}); //  {x: randomInt(20, 30), y: randomInt(20, 30), angle:0}
+// };
 
 Client.moverJugador = function(pointer){  
   Client.socket.emit('input_fired', {
@@ -29,6 +34,29 @@ Client.crearComida=function(color){
 Client.levantarBanderin=function(data){
   Client.socket.emit('item_picked', data); 
 };    
+
+Client.nombre_usr=function(data){
+  Client.socket.emit('enter_name', {username: data.username});
+}
+Client.loguear=function(data){
+  console.log("En Client.loguear");
+  Client.socket.emit('logged_in', {username: data.username});
+}
+
+Client.socket.on('logged_in', function(data){
+  console.log("Client.on logged_in");
+  Game.logueado({username: data.username});
+  //Client.socket.emit('enter_game', {username: data.username});
+});
+Client.socket.on('enter_game', function (data){
+  console.log("connected to server - desde cliente.js"); 
+  // gameProperties.in_game = true;
+  var username = data.username;
+  // send the server our initial position and tell it we are connected
+ // socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
+}); 
+
+ 
 
 Client.socket.on('move',function(data){//data es socket.player
     Game.movePlayer(data.id, data.x, data.y);
@@ -66,6 +94,13 @@ Client.socket.on("itemremove", function(data){
 Client.socket.on("remove_player", function(data){
   Game.onRemovePlayer(data);
 });
+
+Client.socket.on("enter_game", function(data){
+  console.log("client.js en enter_game");
+  Game.logueado({username: data.username});
+});
+
+ 
 
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
