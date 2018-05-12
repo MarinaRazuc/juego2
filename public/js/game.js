@@ -31,6 +31,7 @@ colores[0x08088A]='blue_player';
 colores[0xFF00BF]='pink_player';
 colores[0x151515]='black_player';
 colores[0x6E6E6E]='grey_player';
+colores[0x54451E]='brown_player';
 
 var violet_food, orange_food, green_food, blue_food, red_food, pink_food, yellow_food;
 // var game = new Phaser.Game(1200,1000,window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio,/*24*48, 17*48,/*canvas_width, canvas_height 
@@ -43,22 +44,19 @@ var customBounds;
 var USERNAME;
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
-Game.init=function(username){
+Game.init=function(username, tipo){
 	USERNAME=username;
-	console.log("Game.init en game.js");
+	TIPO_J=tipo;
+	console.log("username ", USERNAME);
+	console.log("tipo ", TIPO_J);
+
 	//console.log(username);
 	game.stage.disableVisibilityChange=true;//estaba en true
 	// when the socket connects, call the onsocketconnected and send its information to the server 
-	Client.loguear({username:username});
-
-	// socket.emit('logged_in', {username: username}); 
-	
-	// when the player enters the game 
-	// socket.on('enter_game', onsocketConnected);
+	Client.loguear({username:username, tipo:tipo});
 };
 
 Game.logueado=function(data){
-	console.log("connected to server, Game.logueado"); 
 	gameProperties.in_game = true;
 	username = data.username;
 	// send the server our initial position and tell it we are connected
@@ -83,6 +81,7 @@ Game.logueado=function(data){
 		game.load.image('yellow_player', '/assets/circulo_amarillo.png');
 		game.load.image('black_player', '/assets/circulo_negro.png');
 		game.load.image('grey_player', '/assets/circulo_gris.png');
+		game.load.image('brown_player', '/assets/circulo_marron.png');
 
 		game.load.image('violet_player_food', '/assets/banderinVioleta2.png');
 		game.load.image('orange_player_food', '/assets/banderinNaranja2.png');
@@ -100,7 +99,6 @@ Game.logueado=function(data){
 Game.create=function() {
 
 	//game.world.setBounds(0, 0, 2000, 2000);
-	console.log ("create");
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
@@ -129,13 +127,10 @@ Game.create=function() {
     Game.playerMap={};
     Game.scores={};
 
-   // check for leaderboard
-	//socket.on ('leader_board', lbupdate); 
-	
-	//ver en que orden estos	
+   //ver en que orden estos	
 	createLeaderBoard();
 	//Client.askNewPlayer(); 
-	Client.askNewPlayer({username: USERNAME, x:0, y:0, angle:0}); 
+	Client.askNewPlayer({username: USERNAME, tipo:TIPO_J, x:0, y:0, angle:0}); 
 
 };
 
@@ -200,7 +195,9 @@ Game.onInputRecieved=function(data) {
 	player.rotation = movetoPointer(player, speed, newPointer);
 
 //	console.log("Mi posición: ",player.x," ", player.y);
-	document.getElementById("MiPos").innerHTML="Mi posición: "+player.x+" "+player.y;
+	var equis=Math.round(player.x);
+	var ygriega=Math.round(player.y);
+	document.getElementById("MiPos").innerHTML="Mi posición: "+equis+" "+ygriega;
 
 };
 
@@ -238,16 +235,10 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle){
 	game.physics.p2.enable(player, Phaser.Physics.p2);
 	game.physics.p2.enableBody(this.player, true);
 	this.player.body.clearShapes();
-	
-
-	// var jugador = players.create(this.x, this.y, color);//yo
- //    jugador.body.setCircle(16);//yo
 }	
 
 
 Game.create_player=function(data){ //esto es lo q llama el cliente
-
-	//player=new Jugador(data, game, player, this);
 
 	id_jugador=data.id;
 	color_jugador=data.color;
@@ -261,7 +252,7 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
-
+	
 	// player follow text (set text to username)
 	//player.playertext = game.add.text(0, 0, data.username , style);
 	player.playertext = game.add.text(0, 0, data.username);
@@ -271,8 +262,6 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 
 
 Game.onItemUpdate=function(datos){
-	//console.log(datos);
-	//console.log(datos.id);
 	var nuevo_banderin=new food_object(datos.id, datos.type, datos.x, datos.y);
 	food_pickup.push(nuevo_banderin);
 };
@@ -300,32 +289,38 @@ var food_object = function (id, type, startx, starty) {
 
 // function called when food needs to be removed in the client. 
 Game.onItemRemove=function(data) {
-	
 	var removeItem; 
 	removeItem = finditembyid(data.id);
 	food_pickup.splice(food_pickup.indexOf(removeItem), 1); 
-	
 	//destroy the phaser object 
 	removeItem.item.destroy(true,false); //Cannot read property 'destroy' of undefined
 }
 
+function player_choque(player, otro){
+	print("HOLA");
+	print(player);
+	print(otro);
+}
 
-function player_coll (body, bodyB, shapeA, shapeB, equation) {
+function player_coll (body, bodyB, shapeA, shapeB, equation){
 	var key_player=player.key; 
-	if(body!=null){
+	console.log("key_player ", key_player);
+	console.log("body ", body);
+	console.log("bodyB ", bodyB);
+	console.log("shapeA ", shapeA);
+	console.log("shapeB ", shapeB);
+	console.log("equation ", equation);
+
+	if(body!=null){ //cuando body es null, te chocaste la pared
+					//body es el cuerpo que te chocas
 		if(body.data.parent.sprite!=null){
-			 
 			//the id of the collided body that player made contact with 
 			var key=body.data.parent.sprite.body.sprite.body.sprite.id;
 			//the type of the body the player made contact with 
 			var type = body.type; 
-			// console.log("body ", body);
-			// console.log("key de body ", key);
-			// console.log("bodyB ", bodyB);
 			var tipobody=body.sprite.key; //comida
 			var tipobodyB=bodyB.parent.sprite.key; //jugador
-			// console.log("tipobodyB ", tipobodyB);
-			// console.log("tipobody ", tipobody);
+		
 			if((key_player=="orange_player" && tipobody=="orange_player_food")||
 				(key_player=="red_player" && tipobody=="red_player_food")||
 				(key_player=="yellow_player" && tipobody=="yellow_player_food")||
@@ -339,7 +334,16 @@ function player_coll (body, bodyB, shapeA, shapeB, equation) {
 				document.getElementById("score").innerHTML="Banderines: "+score;
 			}
 
-
+			//Acá ver colisión entre ladron y poli
+			//tengo key_player
+			// console.log("key_player es ", key_player); //violet_player
+			// console.log("key es ", key); //2e4c38ea-4eac-494c-867f-3a7e8676ca6d
+			// console.log("type es ", type);b//1
+			// console.log("tipobody es ", tipobody); //orange_player_food
+			// console.log("tipobodyB es ", tipobodyB); //orange_player_food
+			 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
+			 console.log(key2);
+			 
 		// if (type == "player_body") { //CAPAZ Q EL TIPO ES DISTINTO, VER MAS ADELANTE
 		// 	//send the player collision
 		// 	//ACA VER COMO HACER CUANDO CHOCA CON UN POLICIA
