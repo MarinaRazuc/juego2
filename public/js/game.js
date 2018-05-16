@@ -216,7 +216,7 @@ function findplayerbyid (id) {
 //onNewPlayer sólo se llama cuando hay enemigos
 Game.onNewPlayer= function(data) {
 	//enemy object 
-	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle); 
+	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo); 
 	enemies.push(new_enemy);
 };
 
@@ -224,17 +224,26 @@ Game.onNewPlayer= function(data) {
 
 
 //clase enemiga
-var remote_player = function(id, startx, starty, color, startSize, startAngle){
+var remote_player = function(id, startx, starty, color, startSize, startAngle, type){
 	this.x = startx; 
 	this.y = starty; 
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id; 
 	this.angle = startAngle;
 	this.player=game.add.sprite(this.x, this.y, color);
+	console.log("this.player ", this.player);
 	this.player.type = "player_body"; //para colisiones
-	game.physics.p2.enable(player, Phaser.Physics.p2);
-	game.physics.p2.enableBody(this.player, true);
+	game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
+	//this.game.physics.p2.enableBody(this, true);
+	this.player.body.collideWorldBounds = true;
 	this.player.body.clearShapes();
+	this.player.body.setCircle(16);
+	this.player.body.data.shapes[0].sensor = true;
+
+	this.player.type=type;
+	this.player.body.type="player_body";
+	console.log("this: ",this);
+
 }	
 
 
@@ -247,11 +256,13 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
 	//player.body.collideWorldBounds = true;
-	// player.body.data.shapes[0].sensor = true;
+	player.body.data.shapes[0].sensor = true;
 	player.type = "player_body"; //necesario para las colisiones
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
+
+	player.body.type="player_body"
 	
 	// player follow text (set text to username)
 	//player.playertext = game.add.text(0, 0, data.username , style);
@@ -296,23 +307,21 @@ Game.onItemRemove=function(data) {
 	removeItem.item.destroy(true,false); //Cannot read property 'destroy' of undefined
 }
 
-function player_choque(player, otro){
-	print("HOLA");
-	print(player);
-	print(otro);
-}
 
 function player_coll (body, bodyB, shapeA, shapeB, equation){
 	var key_player=player.key; 
-	console.log("key_player ", key_player);
-	console.log("body ", body);
-	console.log("bodyB ", bodyB);
-	console.log("shapeA ", shapeA);
-	console.log("shapeB ", shapeB);
-	console.log("equation ", equation);
+	// console.log("key_player ", key_player);
+	// console.log("body ", body);
+	// console.log("bodyB ", bodyB);
+	// // console.log("bodyB ", bodyB);
+	// console.log("shapeA ", shapeA);
+	// console.log("shapeB ", shapeB);
+	// console.log("equation ", equation);
+
 
 	if(body!=null){ //cuando body es null, te chocaste la pared
 					//body es el cuerpo que te chocas
+
 		if(body.data.parent.sprite!=null){
 			//the id of the collided body that player made contact with 
 			var key=body.data.parent.sprite.body.sprite.body.sprite.id;
@@ -320,7 +329,15 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){
 			var type = body.type; 
 			var tipobody=body.sprite.key; //comida
 			var tipobodyB=bodyB.parent.sprite.key; //jugador
-		
+			
+			// console.log("tipobody es ", tipobody);
+			// console.log("tipobodyB es ", tipobodyB);
+
+			console.log("type: ", type);
+			console.log("tipobody: ", tipobody);
+			console.log("tipobodyB: ", tipobodyB);
+
+
 			if((key_player=="orange_player" && tipobody=="orange_player_food")||
 				(key_player=="red_player" && tipobody=="red_player_food")||
 				(key_player=="yellow_player" && tipobody=="yellow_player_food")||
@@ -342,8 +359,9 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){
 			// console.log("tipobody es ", tipobody); //orange_player_food
 			// console.log("tipobodyB es ", tipobodyB); //orange_player_food
 			 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
-			 console.log(key2);
-			 
+			 console.log("key2: ",key2);
+			 console.log("body.sprite.key: ",body.sprite.key);
+			 console.log("--------------------");
 		// if (type == "player_body") { //CAPAZ Q EL TIPO ES DISTINTO, VER MAS ADELANTE
 		// 	//send the player collision
 		// 	//ACA VER COMO HACER CUANDO CHOCA CON UN POLICIA

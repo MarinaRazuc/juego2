@@ -128,10 +128,12 @@ io.on('connection', function(socket){
       newPlayer.username = data.username;
       newPlayer.tipo=data.tipo;
       if(data.tipo=="lad"){ //es ladron
+        console.log("newPlayer.tipo ",newPlayer.tipo);
         c = http.lastPlayerID%7;
         newPlayer.color=colores[c];
         http.lastPlayerID++;
       }else{ //es policia
+        console.log("newPlayer.tipo ",newPlayer.tipo);
         c=http.lastPolID%3;
         newPlayer.color=coloresP[c];
         http.lastPolID++;
