@@ -30,8 +30,6 @@ var timeStep= 1/70;
 var unique=require('node-uuid');
 
 var game_setup = function() {
-  //The constant number of foods in the game
-//  this.food_num = 100; 
   //food object list
   this.food_pickup = [];
   //game size height
@@ -42,7 +40,8 @@ var game_setup = function() {
 
 // createa a new game instance
 var game_instance = new game_setup();
-
+var posx=451;
+var posy=377;
 const max_banderas=30;
 
 
@@ -85,7 +84,6 @@ function physics_handler() {
 
 
 io.on('connection', function(socket){
-
   
   socket.on('enter_name', function(data){
     socket.emit('join_game', {username: data.username, tipo:data.tipo_jugador, id: this.id});
@@ -119,8 +117,7 @@ io.on('connection', function(socket){
   var crear_polis=false;
   var poli1, poli2;
   socket.on('new_player', function(data) {
-    console.log("index.js new_player. Player name= "+data.username);
-
+      console.log("index.js new_player. Player name= "+data.username);
       //new player instance
       var newPlayer = new Player(data.x, data.y, data.angle);
       var c;
@@ -151,7 +148,7 @@ io.on('connection', function(socket){
       //Don’t forget to add the playerbody to the world with world.addBody(playerbody) !! or else your player's physics will not be calculated
       world.addBody(newPlayer.playerBody); 
 
-      socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo});
+      socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo, preso:false});
      
       //information to be sent to all clients except sender
       var current_info = {
@@ -162,7 +159,8 @@ io.on('connection', function(socket){
         angle:newPlayer.angle, 
         size: newPlayer.size,
         username: newPlayer.username,
-        tipo: newPlayer.tipo
+        tipo: newPlayer.tipo,
+        preso: false
       };
 
      
@@ -178,8 +176,8 @@ io.on('connection', function(socket){
             color:existingPlayer.color, 
             angle: existingPlayer.angle,
             size: existingPlayer.size,
-            username: existingPlayer.username,
-            tipo: existingPlayer.tipo
+            tipo: existingPlayer.tipo,
+            preso: existingPlayer.preso
         };
         // send message to the sender-client only
          //me llega la info de cada jugador existente antes que "yo"
@@ -200,7 +198,7 @@ io.on('connection', function(socket){
 
       //se crean banderitas propias solo si soy ladron
       if(data.tipo=="lad"){
-        for (var i = 0; i < max_banderas; i++) { //por ahora 15
+        for (var i = 0; i < max_banderas; i++) { 
             //create the unique id using node-uuid
             var unique_id = unique.v4(); 
             var str_clr=newPlayer.color+"_food";
@@ -219,10 +217,6 @@ io.on('connection', function(socket){
       //listen for new player inputs. 
       socket.on("input_fired", function(data) {
           var movePlayer = find_playerid(this.id/*, this.room*/); 
-          // if (impresora==0){
-          //   console.log("id del update" + this.id);
-          //   impresora++;
-          // }
           if (!movePlayer|| movePlayer.dead){/*console.log("entra aca");*/ return;}
           //when sendData is true, we send the data back to client. 
           if (!movePlayer.sendData) {
@@ -243,9 +237,9 @@ io.on('connection', function(socket){
           }
           //moving the player to the new inputs from the player
           // console.log(movePlayer.playerBody);
-          if (physicsPlayer.distanceToPointer(movePlayer, serverPointer) <=30) {
+          if(physicsPlayer.distanceToPointer(movePlayer, serverPointer) <=30) {
             movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, 0, serverPointer, 1000);
-          } else {
+          }else{
             movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, movePlayer.speed, serverPointer); 
           }
 
@@ -294,45 +288,63 @@ io.on('connection', function(socket){
       //socket.emit('item_picked');//?????
   }); //fin item picked
 
-
-  //Modificar esto en el caso de chocar con un policia
+//------------------------------------------------------------COLISION
+  //Esto en el caso de chocar con un policia
   socket.on("player_collision", function(data){
+    //console.log("entrando en player_collision de index.js");
     var movePlayer = find_playerid(this.id); 
+   // console.log("this.id ",this.id);
     var enemyPlayer = find_playerid(data.id); 
-    
-    
-    if (movePlayer.dead || enemyPlayer.dead)
-      return
-    
-    if (!movePlayer || !enemyPlayer)
-      return
+   
+    var new_info={
+      id:data.id,
+      username: movePlayer.username,
+      x:posx,
+      y:posy,
+      color:movePlayer.color,
+      angle:movePlayer.angle,
+      size:movePlayer.size,
+      tipo:movePlayer.tipo,
+      preso:true
+    }
+    socket.emit('create_player', new_info);
+    socket.emit("new_enemyPlayer", new_info);
 
+  
+   //  setTimeout(function() {enemyPlayer.sendData = true}, 20000);
+   //  enemyPlayer.sendData = false;
+   //  var serverPointer = { //posx y posy ctes
+   //      x: posx,
+   //      y: posy,
+   //      worldX: posx,    
+   //      worldY: posy
+   //  }
+   // // if(physicsPlayer.distanceToPointer(enemyPlayer, serverPointer) <=30) {
+   //  //  enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, 0, serverPointer, 1000);
+   // // }else{
+   //    enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, enemyPlayer.speed, serverPointer); 
+   // // }
+   //  enemyPlayer.x = enemyPlayer.playerBody.position[0]; 
+   //  enemyPlayer.y = enemyPlayer.playerBody.position[1];
+   //  var info = {
+   //    id:enemyPlayer.id,
+   //    x: enemyPlayer.playerBody.position[0], 
+   //    y: enemyPlayer.playerBody.position[1],
+   //    angle: enemyPlayer.playerBody.angle
+   //  } 
+   //  socket.emit("input_rec", info);
+   //  var moveplayerData = {
+   //    id: enemyPlayer.id, 
+   //    x: enemyPlayer.playerBody.position[0],
+   //    y: enemyPlayer.playerBody.position[1],
+   //    angle: enemyPlayer.playerBody.angle, 
+   //    size: enemyPlayer.size
+   //  }
+   //  socket.broadcast.emit('enemy_move', moveplayerData);
+   // // enemyPlayer.sendData = true;
     
-    // if (movePlayer.size == enemyPlayer)
-    //   return
-    // //the main player size is less than the enemy size
-    // else if (movePlayer.size < enemyPlayer.size) {
-    //   var gained_size = movePlayer.size / 2;
-    //   enemyPlayer.size += gained_size; 
-    //   this.emit("killed");
-    //   //provide the new size the enemy will become
-    //   this.broadcast.emit('remove_player', {id: this.id});
-    //   this.broadcast.to(data.id).emit("gained", {new_size: enemyPlayer.size}); 
-    //   playerKilled(movePlayer);
-    // } else {
-    //   var gained_size = enemyPlayer.size / 2;
-    //   movePlayer.size += gained_size;
-    //   this.emit('remove_player', {id: enemyPlayer.id}); 
-    //   this.emit("gained", {new_size: movePlayer.size}); 
-    //   this.broadcast.to(data.id).emit("killed"); 
-    //   //send to everyone except sender.
-    //   this.broadcast.emit('remove_player', {id: enemyPlayer.id});
-    //   playerKilled(enemyPlayer);
-    // }
-
-    sortPlayerListByScore();    
+    //se podrian descontar puntos en caso de puntaje y elevar los puntos del policia
     console.log("someone ate someone!!!");
-
   }); //fin player collision
 
 

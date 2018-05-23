@@ -1,6 +1,3 @@
-
-
-
 //setup onclick callback for when the user submits the submit button.
 document.getElementById("entername").onclick = function () {
 

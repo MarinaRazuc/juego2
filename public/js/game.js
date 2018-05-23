@@ -137,7 +137,6 @@ Game.create=function() {
 
 Game.update=function(){
 	Client.moverJugador(game.input.mousePointer);
-	//Client.moverPolicias();
 };
 
  
@@ -216,34 +215,40 @@ function findplayerbyid (id) {
 //onNewPlayer sólo se llama cuando hay enemigos
 Game.onNewPlayer= function(data) {
 	//enemy object 
-	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo); 
-	enemies.push(new_enemy);
+	if(!data.preso){
+		var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
+		enemies.push(new_enemy);
+	}else{
+		var enem=findplayerbyid(data.id);	
+		enem = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
+	}
 };
 
 
 
 
 //clase enemiga
-var remote_player = function(id, startx, starty, color, startSize, startAngle, type){
+var remote_player = function(id, startx, starty, color, startSize, startAngle, type, preso){
 	this.x = startx; 
 	this.y = starty; 
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id; 
 	this.angle = startAngle;
 	this.player=game.add.sprite(this.x, this.y, color);
-	console.log("this.player ", this.player);
+//	console.log("this.player ", this.player);
 	this.player.type = "player_body"; //para colisiones
+	console.log("game.physics.p2 ", game.physics.p2);
 	game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
 	//this.game.physics.p2.enableBody(this, true);
 	this.player.body.collideWorldBounds = true;
 	this.player.body.clearShapes();
 	this.player.body.setCircle(16);
 	this.player.body.data.shapes[0].sensor = true;
-
+	this.player.id=id;
 	this.player.type=type;
 	this.player.body.type="player_body";
+	this.preso=preso;
 	console.log("this: ",this);
-
 }	
 
 
@@ -252,17 +257,22 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	id_jugador=data.id;
 	color_jugador=data.color;
     // var player = players.create(bounds.randomX, bounds.randomY, color_jugador);
-	player = game.add.sprite(1200, 300, color_jugador); 
+    if(data.preso){
+		player = game.add.sprite(data.x, data.y, color_jugador); 
+    }else{
+		player = game.add.sprite(1200, 300, color_jugador); 
+    }
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
 	//player.body.collideWorldBounds = true;
 	player.body.data.shapes[0].sensor = true;
 	player.type = "player_body"; //necesario para las colisiones
+	player.preso=data.preso;
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
 
-	player.body.type="player_body"
+	player.body.type="player_body";
 	
 	// player follow text (set text to username)
 	//player.playertext = game.add.text(0, 0, data.username , style);
@@ -290,7 +300,7 @@ var food_object = function (id, type, startx, starty) {
 	
 	this.type=type;
 	this.item = game.add.sprite(startx, starty, type); 
-	game.physics.p2.enable(this.item, Phaser.Physics.p2);
+	game.physics.p2.enable(this.item, Phaser.Physics.p2);//problemas
 	this.item.body.collideWorldBounds = true;
 	this.item.body.data.shapes[0].sensor = true;
 	this.item.id=id;
@@ -302,26 +312,20 @@ var food_object = function (id, type, startx, starty) {
 Game.onItemRemove=function(data) {
 	var removeItem; 
 	removeItem = finditembyid(data.id);
-	food_pickup.splice(food_pickup.indexOf(removeItem), 1); 
-	//destroy the phaser object 
-	removeItem.item.destroy(true,false); //Cannot read property 'destroy' of undefined
+	if(removeItem){
+		food_pickup.splice(food_pickup.indexOf(removeItem), 1); 
+		//destroy the phaser object 
+		removeItem.item.destroy(true,false); 
+	}
 }
 
 
 function player_coll (body, bodyB, shapeA, shapeB, equation){
 	var key_player=player.key; 
-	// console.log("key_player ", key_player);
-	// console.log("body ", body);
-	// console.log("bodyB ", bodyB);
-	// // console.log("bodyB ", bodyB);
-	// console.log("shapeA ", shapeA);
-	// console.log("shapeB ", shapeB);
-	// console.log("equation ", equation);
-
+	var banderin=false;
 
 	if(body!=null){ //cuando body es null, te chocaste la pared
 					//body es el cuerpo que te chocas
-
 		if(body.data.parent.sprite!=null){
 			//the id of the collided body that player made contact with 
 			var key=body.data.parent.sprite.body.sprite.body.sprite.id;
@@ -349,34 +353,35 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){
 				score=score+1;
 				Client.levantarBanderin({id:key}); 
 				document.getElementById("score").innerHTML="Banderines: "+score;
+				banderin=true;
 			}
 
-			//Acá ver colisión entre ladron y poli
-			//tengo key_player
-			// console.log("key_player es ", key_player); //violet_player
-			// console.log("key es ", key); //2e4c38ea-4eac-494c-867f-3a7e8676ca6d
-			// console.log("type es ", type);b//1
-			// console.log("tipobody es ", tipobody); //orange_player_food
-			// console.log("tipobodyB es ", tipobodyB); //orange_player_food
-			 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
-			 console.log("key2: ",key2);
-			 console.log("body.sprite.key: ",body.sprite.key);
-			 console.log("--------------------");
-		// if (type == "player_body") { //CAPAZ Q EL TIPO ES DISTINTO, VER MAS ADELANTE
-		// 	//send the player collision
-		// 	//ACA VER COMO HACER CUANDO CHOCA CON UN POLICIA
-		// 	//socket.emit('player_collision', {id: key}); 
-		// } else if (type == "food_body") {
 
-		// 	console.log("items food");
-		// 	Client.levantarBanderin({id:key});
-		// 	//socket.emit('item_picked', {id: key}); 
-		// }
+			//Acá ver colisión entre ladron y poli
+			if(!banderin){
+				 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
+				 console.log("body, ", body);
+				 console.log("body.sprite.key: ",body.sprite.key); //tipobody
+				 console.log("key_player: ", key_player);
+				 console.log("body.sprite.id: "+body.sprite.id);
+				 console.log("--------------------");
+				 if((tipobody=="black_player" || tipobody=="grey_player"|| tipobody=="brown_player")&&
+				 	(key_player=="orange_player"||key_player=="violet_player"||key_player=="yellow_player"||
+				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
+				 	{
+				 		console.log("colision!!");
+				 		Client.colision({key:body.sprite.id});
+				 	}
+			}
 		}
 	}
 };
 
 
+
+// (key_player=="black_player" || key_player=="grey_player"|| key_player=="brown_player")&&
+// (tipobody=="orange_player"||tipobody=="violet_player"||tipobody=="yellow_player"||
+// 	tipobody=="red_player"||tipobody=="blue_player"||tipobody=="pink_player"||tipobody=="green_player")
 // When the server notifies us of client disconnection, we find the disconnected
 // enemy and remove from our game
 Game.onRemovePlayer=function(data) {

@@ -41,6 +41,10 @@ Client.loguear=function(data){
  // console.log("En Client.loguear");
   Client.socket.emit('logged_in', {username: data.username, tipo: data.tipo});
 }
+Client.colision=function(data){
+  console.log("colision en client.js");
+  Client.socket.emit('player_collision', {id:data.key});
+}
 
 Client.socket.on('logged_in', function(data){
   Game.logueado({username: data.username});
@@ -55,8 +59,6 @@ Client.socket.on('enter_game', function (data){
   // send the server our initial position and tell it we are connected
  // socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
 }); 
-
- 
 
 Client.socket.on('move',function(data){//data es socket.player
     Game.movePlayer(data.id, data.x, data.y);
@@ -100,7 +102,10 @@ Client.socket.on("enter_game", function(data){
   Game.logueado({username: data.username});
 });
 
- 
+Client.socket.on("encerrar", function(data){
+  
+  
+});
 
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
