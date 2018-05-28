@@ -107,6 +107,10 @@ Client.socket.on("encerrar", function(data){
   
 });
 
+Client.socket.on('salto', function(data){
+  Game.saltar({x:data.x, y:data.y});
+});
+
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
 };

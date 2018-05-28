@@ -291,59 +291,49 @@ io.on('connection', function(socket){
 //------------------------------------------------------------COLISION
   //Esto en el caso de chocar con un policia
   socket.on("player_collision", function(data){
-    //console.log("entrando en player_collision de index.js");
-    var movePlayer = find_playerid(this.id); 
-   // console.log("this.id ",this.id);
-    var enemyPlayer = find_playerid(data.id); 
-   
-    var new_info={
-      id:data.id,
-      username: movePlayer.username,
-      x:posx,
-      y:posy,
-      color:movePlayer.color,
-      angle:movePlayer.angle,
-      size:movePlayer.size,
-      tipo:movePlayer.tipo,
-      preso:true
-    }
-    socket.emit('create_player', new_info);
-    socket.emit("new_enemyPlayer", new_info);
-
+    var movePlayer = find_playerid(this.id);  //ladronciño
+    var enemyPlayer = find_playerid(data.id); //policiña
+    // console.log("movePlayer "+movePlayer.id+", "+movePlayer.color);
+    // console.log("enemyPlayer "+enemyPlayer.id+", "+enemyPlayer.color);
   
-   //  setTimeout(function() {enemyPlayer.sendData = true}, 20000);
-   //  enemyPlayer.sendData = false;
-   //  var serverPointer = { //posx y posy ctes
-   //      x: posx,
-   //      y: posy,
-   //      worldX: posx,    
-   //      worldY: posy
-   //  }
-   // // if(physicsPlayer.distanceToPointer(enemyPlayer, serverPointer) <=30) {
-   //  //  enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, 0, serverPointer, 1000);
-   // // }else{
-   //    enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, enemyPlayer.speed, serverPointer); 
-   // // }
-   //  enemyPlayer.x = enemyPlayer.playerBody.position[0]; 
-   //  enemyPlayer.y = enemyPlayer.playerBody.position[1];
-   //  var info = {
-   //    id:enemyPlayer.id,
-   //    x: enemyPlayer.playerBody.position[0], 
-   //    y: enemyPlayer.playerBody.position[1],
-   //    angle: enemyPlayer.playerBody.angle
-   //  } 
-   //  socket.emit("input_rec", info);
-   //  var moveplayerData = {
-   //    id: enemyPlayer.id, 
-   //    x: enemyPlayer.playerBody.position[0],
-   //    y: enemyPlayer.playerBody.position[1],
-   //    angle: enemyPlayer.playerBody.angle, 
-   //    size: enemyPlayer.size
-   //  }
-   //  socket.broadcast.emit('enemy_move', moveplayerData);
-   // // enemyPlayer.sendData = true;
+       
+    setTimeout(function() {enemyPlayer.sendData = true}, 20000);
+    enemyPlayer.sendData = false;
+   
     
+    var serverPointer = { //posx y posy ctes
+        x: posx,
+        y: posy,
+        worldX: posx,    
+        worldY: posy
+    }
+   // if(physicsPlayer.distanceToPointer(enemyPlayer, serverPointer) <=30) {
+    //  enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, 0, serverPointer, 1000);
+   // }else{
+      enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, enemyPlayer.speed, serverPointer); 
+   // }
+    enemyPlayer.x = enemyPlayer.playerBody.position[0]; 
+    enemyPlayer.y = enemyPlayer.playerBody.position[1];
+    var info = {
+      id:enemyPlayer.id,
+      x: enemyPlayer.playerBody.position[0], 
+      y: enemyPlayer.playerBody.position[1],
+      angle: enemyPlayer.playerBody.angle
+    } 
+    socket.emit("input_rec", info);
+    var moveplayerData = {
+      id: enemyPlayer.id, 
+      x: enemyPlayer.playerBody.position[0],
+      y: enemyPlayer.playerBody.position[1],
+      angle: enemyPlayer.playerBody.angle, 
+      size: enemyPlayer.size
+    }
+    socket.broadcast.emit('enemy_move', moveplayerData);
+   enemyPlayer.sendData = true;
+    socket.emit("salto", {x:posx, y:posy});//al ladron
+    //-----------
     //se podrian descontar puntos en caso de puntaje y elevar los puntos del policia
+    //--------
     console.log("someone ate someone!!!");
   }); //fin player collision
 

@@ -126,7 +126,7 @@ Game.create=function() {
 	// para trackear a los jugadores
     Game.playerMap={};
     Game.scores={};
-
+    cursors = game.input.keyboard.createCursorKeys();
    //ver en que orden estos	
 	createLeaderBoard();
 	//Client.askNewPlayer(); 
@@ -215,13 +215,14 @@ function findplayerbyid (id) {
 //onNewPlayer sólo se llama cuando hay enemigos
 Game.onNewPlayer= function(data) {
 	//enemy object 
-	if(!data.preso){
+	//if(!data.preso){
 		var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
 		enemies.push(new_enemy);
-	}else{
-		var enem=findplayerbyid(data.id);	
-		enem = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
-	}
+		console.log(data.id);
+//	}else{
+	//	var enem=findplayerbyid(data.id);	
+	//	enem = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
+	//}
 };
 
 
@@ -257,11 +258,13 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	id_jugador=data.id;
 	color_jugador=data.color;
     // var player = players.create(bounds.randomX, bounds.randomY, color_jugador);
-    if(data.preso){
-		player = game.add.sprite(data.x, data.y, color_jugador); 
-    }else{
+  //  if(data.preso){
+	//	Game.onRemovePlayer({id:data.id});
+	//	console.log("en create_player "+data.id);
+	//	player = game.add.sprite(data.x, data.y, color_jugador);
+	//}else{
 		player = game.add.sprite(1200, 300, color_jugador); 
-    }
+  //  }
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
 	//player.body.collideWorldBounds = true;
@@ -320,7 +323,7 @@ Game.onItemRemove=function(data) {
 }
 
 
-function player_coll (body, bodyB, shapeA, shapeB, equation){
+function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los ladrones
 	var key_player=player.key; 
 	var banderin=false;
 
@@ -337,9 +340,9 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){
 			// console.log("tipobody es ", tipobody);
 			// console.log("tipobodyB es ", tipobodyB);
 
-			console.log("type: ", type);
-			console.log("tipobody: ", tipobody);
-			console.log("tipobodyB: ", tipobodyB);
+			// console.log("type: ", type);
+			// console.log("tipobody: ", tipobody);
+			// console.log("tipobodyB: ", tipobodyB);
 
 
 			if((key_player=="orange_player" && tipobody=="orange_player_food")||
@@ -360,16 +363,16 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
 				 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
-				 console.log("body, ", body);
-				 console.log("body.sprite.key: ",body.sprite.key); //tipobody
-				 console.log("key_player: ", key_player);
-				 console.log("body.sprite.id: "+body.sprite.id);
-				 console.log("--------------------");
+				 // console.log("body, ", body);
+				 // console.log("body.sprite.key: ",body.sprite.key); //tipobody
+				 // console.log("key_player: ", key_player);
+				 // console.log("body.sprite.id: "+body.sprite.id);
+				 // console.log("--------------------");
 				 if((tipobody=="black_player" || tipobody=="grey_player"|| tipobody=="brown_player")&&
 				 	(key_player=="orange_player"||key_player=="violet_player"||key_player=="yellow_player"||
 				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
 				 	{
-				 		console.log("colision!!");
+				 		//console.log("colision!!");
 				 		Client.colision({key:body.sprite.id});
 				 	}
 			}
@@ -396,6 +399,33 @@ Game.onRemovePlayer=function(data) {
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 };
 
+Game.saltar=function(data){
+	console.log(player);
+	console.log(player.position.x);
+	console.log(player.position.y);
+	player.position.x=data.x;
+	player.position.y=data.y;
+	player.body.velocity.x = 0;
+	//player.body.velocity=0;
+	player.body.velocity.y=0;
+	console.log(player.position.x);
+	console.log(player.position.y);
+	console.log("HOLA");
+	game.pause=true;
+	demo();
+	game.pause=false;
+	player.body.velocity.x=100;
+	player.body.velocity.y=100;
+};
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function demo() {
+  console.log('Taking a break...');
+  await sleep(2000);
+  console.log('Two second later');
+}
 
 // search through food list to find the food object
 function finditembyid (id) {
