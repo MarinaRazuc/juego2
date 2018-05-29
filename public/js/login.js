@@ -36,8 +36,6 @@ var login = function(game){
 };
 
 login.prototype = {
-	
-
 	create: function () {
 		//console.log("login prototype");
 		game.stage.backgroundColor = "#AFF7F0";

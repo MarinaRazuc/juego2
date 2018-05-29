@@ -5,6 +5,7 @@ var customBounds;
 var map;
 var layer,layer2;
 var username;
+var leader_text;
 
 var gameProperties = { 
 	gameWidth: 4000,
@@ -53,15 +54,15 @@ Game.init=function(username, tipo){
 	//console.log(username);
 	game.stage.disableVisibilityChange=true;//estaba en true
 	// when the socket connects, call the onsocketconnected and send its information to the server 
-	Client.loguear({username:username, tipo:tipo});
+	//Client.loguear({username:username, tipo:tipo});
 };
 
-Game.logueado=function(data){
-	gameProperties.in_game = true;
-	username = data.username;
-	// send the server our initial position and tell it we are connected
-//	socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
-};
+// Game.logueado=function(data){
+// 	gameProperties.in_game = true;
+// 	username = data.username;
+// 	// send the server our initial position and tell it we are connected
+// //	socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
+// };
 
 
  Game.preload=function(){
@@ -136,14 +137,17 @@ Game.create=function() {
 
 
 Game.update=function(){
-	Client.moverJugador(game.input.mousePointer);
+	if(player){
+		if(!player.preso){
+			Client.moverJugador(game.input.mousePointer);
+		}else{
+			console.log("presum");
+		}
+	}
 };
 
  
 Game.removePlayer=function(id){
-    // var player=Game.playerMap[id].destroy();
-    // delete Game.playerMap[id];
-  	//  delete Game.food[id];
   	var removePlayer=findplayerbyid(id);
 	// Player not found
 	if (!removePlayer) {
@@ -214,22 +218,16 @@ function findplayerbyid (id) {
 //We create a new enemy in our game.
 //onNewPlayer sólo se llama cuando hay enemigos
 Game.onNewPlayer= function(data) {
-	//enemy object 
-	//if(!data.preso){
-		var new_enemy = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
-		enemies.push(new_enemy);
-		console.log(data.id);
-//	}else{
-	//	var enem=findplayerbyid(data.id);	
-	//	enem = new remote_player(data.id, data.x, data.y, data.color, data.size, data.angle, data.tipo, data.preso); 
-	//}
+	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, /*data.size,*/ data.angle, data.tipo, data.preso, data.puntos, data.username); 
+	enemies.push(new_enemy);
+	console.log(data.id);
 };
 
 
 
 
 //clase enemiga
-var remote_player = function(id, startx, starty, color, startSize, startAngle, type, preso){
+var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngle, type, preso, puntos, username){
 	this.x = startx; 
 	this.y = starty; 
 	//this is the unique socket id. We use it as a unique name for enemy
@@ -239,6 +237,7 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle, t
 //	console.log("this.player ", this.player);
 	this.player.type = "player_body"; //para colisiones
 	console.log("game.physics.p2 ", game.physics.p2);
+//	while(!game.physics.p2){console.log("esperando");}
 	game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
 	//this.game.physics.p2.enableBody(this, true);
 	this.player.body.collideWorldBounds = true;
@@ -249,7 +248,13 @@ var remote_player = function(id, startx, starty, color, startSize, startAngle, t
 	this.player.type=type;
 	this.player.body.type="player_body";
 	this.preso=preso;
-	console.log("this: ",this);
+	this.puntos=puntos; //????
+	// player follow text (set text to username)
+	var style = {fill: "white", align: "center", fontSize:'20px'};
+	this.player.playertext = game.add.text(0, 0, username , style);
+	// add the text to player object to follw as child
+	this.player.addChild(this.player.playertext);
+	//console.log("this: ",this);
 }	
 
 
@@ -271,6 +276,7 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	player.body.data.shapes[0].sensor = true;
 	player.type = "player_body"; //necesario para las colisiones
 	player.preso=data.preso;
+	player.puntos=data.puntos;
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
@@ -278,8 +284,8 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	player.body.type="player_body";
 	
 	// player follow text (set text to username)
-	//player.playertext = game.add.text(0, 0, data.username , style);
-	player.playertext = game.add.text(0, 0, data.username);
+	var style = {fill: "black", align: "center", fontSize:'18px'};
+	player.playertext = game.add.text(0, 0, data.username , style);
 	// add the text to player object to follw as child
 	player.addChild(player.playertext);
 };
@@ -336,14 +342,6 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 			var type = body.type; 
 			var tipobody=body.sprite.key; //comida
 			var tipobodyB=bodyB.parent.sprite.key; //jugador
-			
-			// console.log("tipobody es ", tipobody);
-			// console.log("tipobodyB es ", tipobodyB);
-
-			// console.log("type: ", type);
-			// console.log("tipobody: ", tipobody);
-			// console.log("tipobodyB: ", tipobodyB);
-
 
 			if((key_player=="orange_player" && tipobody=="orange_player_food")||
 				(key_player=="red_player" && tipobody=="red_player_food")||
@@ -354,6 +352,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				(key_player=="violet_player" && tipobody=="violet_player_food")){
 
 				score=score+1;
+				this.puntos=this.puntos+1;
 				Client.levantarBanderin({id:key}); 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
@@ -363,11 +362,6 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
 				 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
-				 // console.log("body, ", body);
-				 // console.log("body.sprite.key: ",body.sprite.key); //tipobody
-				 // console.log("key_player: ", key_player);
-				 // console.log("body.sprite.id: "+body.sprite.id);
-				 // console.log("--------------------");
 				 if((tipobody=="black_player" || tipobody=="grey_player"|| tipobody=="brown_player")&&
 				 	(key_player=="orange_player"||key_player=="violet_player"||key_player=="yellow_player"||
 				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
@@ -400,30 +394,41 @@ Game.onRemovePlayer=function(data) {
 };
 
 Game.saltar=function(data){
-	console.log(player);
-	console.log(player.position.x);
-	console.log(player.position.y);
-	player.position.x=data.x;
-	player.position.y=data.y;
-	player.body.velocity.x = 0;
-	//player.body.velocity=0;
-	player.body.velocity.y=0;
-	console.log(player.position.x);
-	console.log(player.position.y);
-	console.log("HOLA");
-	game.pause=true;
-	demo();
-	game.pause=false;
-	player.body.velocity.x=100;
-	player.body.velocity.y=100;
+	// console.log(player);
+	// console.log(player.position.x);
+	// console.log(player.position.y);
+	// player.body.velocity.x = 0;
+	// //player.body.velocity=0;
+	// player.body.velocity.y=0;
+	// console.log(player.position.x);
+	// console.log(player.position.y);
+	// console.log("HOLA");
+	// game.pause=true;
+	// demo();
+	// game.pause=false;
+	// player.body.velocity.x=100;
+	// player.body.velocity.y=100;
+
+	player.preso=true;
+	// player.position.x=data.x;
+	// player.position.y=data.y;
+	
+
+	demo(data);
 };
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function demo() {
+async function demo(data) {
   console.log('Taking a break...');
+  //console.log("posicion:: "+player.position.x+", "+player.position.y);
+  Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
   await sleep(2000);
+  
+  console.log(player.position);
+ 
+  player.preso=false;
   console.log('Two second later');
 }
 
@@ -447,18 +452,18 @@ function createLeaderBoard() {
 	// draw a rectangle
 	leaderBox.beginFill(0xD3D3D3, 0.3);
     leaderBox.lineStyle(2, 0x202226, 1);
-    leaderBox.drawRect(0, 0, 300, 400);
+    leaderBox.drawRect(0, 0, 250, 400);
 	
-	var style = { font: "13px Press Start 2P", fill: "black", align: "left", fontSize: '22px'};
+	var style = { font: "13px Press Start 2P", fill: "white", align: "left", fontSize: '18px'}; //por ahora white, ver
 	
-	leader_text = game.add.text(10, 10, "", style);
+	leader_text = game.add.text(10, 10, " ", style);
 	leader_text.anchor.set(0);
 
 	leaderBox.addChild(leader_text);
 }
 
 //leader board
-function lbupdate (data) {
+Game.lbupdate=function(data) {
 	//this is the final board string.
 	var board_string = ""; 
 	var maxlen = 10;
@@ -468,9 +473,9 @@ function lbupdate (data) {
 	for (var i = 0;  i < data.length; i++) {
 		//if the mainplayer is shown along the iteration, set it to true
 	
-		if (mainPlayerShown && i >= maxPlayerDisplay) {
-			break;
-		}
+		// if (mainPlayerShown && i >= maxPlayerDisplay) {
+		// 	break;
+		// }
 		
 		//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
 		// and then add three dots at the end, and show player's rank.
@@ -481,6 +486,7 @@ function lbupdate (data) {
 			mainPlayerShown = true;
 		}
 		
+
 		//here we are checking if user id is greater than 10 characters, if it is 
 		//it is too long, so we're going to trim it.
 		if (data[i].username.length >= 10) {
@@ -495,11 +501,11 @@ function lbupdate (data) {
 			
 			//change to player username instead of id.
 			board_string = board_string.concat(i + 1,": ");
-			board_string = board_string.concat(username," ",(data[i].size).toString() + "\n");
+			board_string = board_string.concat(username," ",(data[i].puntos).toString() + "\n");
 		
 		} else {
 			board_string = board_string.concat(i + 1,": ");
-			board_string = board_string.concat(data[i].username," ",(data[i].size).toString() + "\n");
+			board_string = board_string.concat(data[i].username," ",(data[i].puntos).toString() + "\n");
 		}
 		
 	}

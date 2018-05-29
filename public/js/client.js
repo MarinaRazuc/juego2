@@ -37,28 +37,28 @@ Client.levantarBanderin=function(data){
 Client.nombre_usr=function(data){
   Client.socket.emit('enter_name', {username: data.username});
 }
-Client.loguear=function(data){
- // console.log("En Client.loguear");
-  Client.socket.emit('logged_in', {username: data.username, tipo: data.tipo});
-}
+// Client.loguear=function(data){
+//  // console.log("En Client.loguear");
+//   Client.socket.emit('logged_in', {username: data.username, tipo: data.tipo});
+// }
 Client.colision=function(data){
   console.log("colision en client.js");
   Client.socket.emit('player_collision', {id:data.key});
 }
 
-Client.socket.on('logged_in', function(data){
-  Game.logueado({username: data.username});
-  //Client.socket.emit('enter_game', {username: data.username});
-});
+// Client.socket.on('logged_in', function(data){
+//   Game.logueado({username: data.username});
+//   //Client.socket.emit('enter_game', {username: data.username});
+// });
 
-//CREO QUE ESTO NO ES NECESARIO PORQUE ESTO SE HACIA PARA INICIAR EL JUGADOR, Y LO HACEMOS EN GAME.
-Client.socket.on('enter_game', function (data){
-  // gameProperties.in_game = true;
-  var username = data.username;
-  var tipo=data.tipo;
-  // send the server our initial position and tell it we are connected
- // socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
-}); 
+// //CREO QUE ESTO NO ES NECESARIO PORQUE ESTO SE HACIA PARA INICIAR EL JUGADOR, Y LO HACEMOS EN GAME.
+// Client.socket.on('enter_game', function (data){
+//   // gameProperties.in_game = true;
+//   var username = data.username;
+//   var tipo=data.tipo;
+//   // send the server our initial position and tell it we are connected
+//  // socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
+// }); 
 
 Client.socket.on('move',function(data){//data es socket.player
     Game.movePlayer(data.id, data.x, data.y);
@@ -102,11 +102,12 @@ Client.socket.on("enter_game", function(data){
   Game.logueado({username: data.username});
 });
 
-Client.socket.on("encerrar", function(data){
-  
-  
+Client.socket.on("leader_board", function(data){
+  Game.lbupdate(data);
 });
-
+function listar(data){
+  Game.lbupdate(data);
+};
 Client.socket.on('salto', function(data){
   Game.saltar({x:data.x, y:data.y});
 });

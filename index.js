@@ -85,28 +85,36 @@ function physics_handler() {
 
 io.on('connection', function(socket){
   
+  // when the player enters their name, trigger this function
   socket.on('enter_name', function(data){
-    socket.emit('join_game', {username: data.username, tipo:data.tipo_jugador, id: this.id});
+    var usrname;
+    if(data.username.length==0){
+      temp=(this.id).toString();
+      temp=temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
+      usrname="player_"+temp;
+    }else{
+      usrname=data.username;
+    }
+    socket.emit('join_game', {username: usrname, tipo:data.tipo_jugador, id: this.id});
     //login
   }); 
 
-
   //when the player logs in
-  socket.on('logged_in', function(data){
-    console.log("socket.on logged_in");
-    //no se si lo siguiente es necesario
-    socket.emit('enter_game', {username: data.username, tipo: data.tipo}); 
-  }); 
+  // socket.on('logged_in', function(data){
+  //   console.log("socket.on logged_in");
+  //   //no se si lo siguiente es necesario
+  //   socket.emit('enter_game', {username: data.username, tipo: data.tipo}); 
+  // }); 
     
    //when the player enters the game 
-  socket.on('enter_game', function(data){
-    console.log("connected to server"); 
-    gameProperties.in_game = true;
-    var username = data.username;
-    //when the socket connects, call the onsocketconnected and send its information to the server 
-    socket.emit('logged_in', {username: username}); 
-    // send the server our initial position and tell it we are connected
-  });
+  // socket.on('enter_game', function(data){
+  //   console.log("connected to server"); 
+  //   gameProperties.in_game = true;
+  //   var username = data.username;
+  //   //when the socket connects, call the onsocketconnected and send its information to the server 
+  //   socket.emit('logged_in', {username: username}); 
+  //   // send the server our initial position and tell it we are connected
+  // });
   //socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
   //Client.askNewPlayer({username:data.username, x:0, y:0, angle:0})
 
@@ -124,13 +132,13 @@ io.on('connection', function(socket){
       newPlayer.id = this.id;  /*console.log(newPlayer.id);*/
       newPlayer.username = data.username;
       newPlayer.tipo=data.tipo;
+      newPlayer.puntos=0;
+
       if(data.tipo=="lad"){ //es ladron
-        console.log("newPlayer.tipo ",newPlayer.tipo);
         c = http.lastPlayerID%7;
         newPlayer.color=colores[c];
         http.lastPlayerID++;
       }else{ //es policia
-        console.log("newPlayer.tipo ",newPlayer.tipo);
         c=http.lastPolID%3;
         newPlayer.color=coloresP[c];
         http.lastPolID++;
@@ -148,7 +156,7 @@ io.on('connection', function(socket){
       //Don’t forget to add the playerbody to the world with world.addBody(playerbody) !! or else your player's physics will not be calculated
       world.addBody(newPlayer.playerBody); 
 
-      socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo, preso:false});
+      socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo, preso:false, puntos:newPlayer.puntos});
      
       //information to be sent to all clients except sender
       var current_info = {
@@ -160,7 +168,8 @@ io.on('connection', function(socket){
         size: newPlayer.size,
         username: newPlayer.username,
         tipo: newPlayer.tipo,
-        preso: false
+        preso: false, 
+        puntos: newPlayer.puntos
       };
 
      
@@ -177,7 +186,8 @@ io.on('connection', function(socket){
             angle: existingPlayer.angle,
             size: existingPlayer.size,
             tipo: existingPlayer.tipo,
-            preso: existingPlayer.preso
+            preso: existingPlayer.preso,
+            puntos: existingPlayer.puntos
         };
         // send message to the sender-client only
          //me llega la info de cada jugador existente antes que "yo"
@@ -210,7 +220,8 @@ io.on('connection', function(socket){
             socket.broadcast.emit("item_update", foodentity);
         }
       }
-      sortPlayerListByScore();
+      socket.emit("leader_board",sortPlayerListByScore());
+      socket.broadcast.emit("leader_board",sortPlayerListByScore());
   }); //FIN 'new_player'------------------------------------------------------------
  
 
@@ -281,10 +292,13 @@ io.on('connection', function(socket){
         return;
       }
       game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
+      movePlayer.puntos=movePlayer.puntos+1; //por ahora +1, despues se vera
+     socket.emit("leader_board",sortPlayerListByScore());
+      socket.broadcast.emit("leader_board",sortPlayerListByScore());
       //comunicar a todos los jugadores, incluyéndome
-      sortPlayerListByScore();
       socket.emit('itemremove', object);
       socket.broadcast.emit('itemremove', object); 
+
       //socket.emit('item_picked');//?????
   }); //fin item picked
 
@@ -295,41 +309,38 @@ io.on('connection', function(socket){
     var enemyPlayer = find_playerid(data.id); //policiña
     // console.log("movePlayer "+movePlayer.id+", "+movePlayer.color);
     // console.log("enemyPlayer "+enemyPlayer.id+", "+enemyPlayer.color);
-  
-       
-    setTimeout(function() {enemyPlayer.sendData = true}, 20000);
-    enemyPlayer.sendData = false;
-   
-    
-    var serverPointer = { //posx y posy ctes
-        x: posx,
-        y: posy,
-        worldX: posx,    
-        worldY: posy
-    }
-   // if(physicsPlayer.distanceToPointer(enemyPlayer, serverPointer) <=30) {
-    //  enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, 0, serverPointer, 1000);
-   // }else{
-      enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, enemyPlayer.speed, serverPointer); 
-   // }
-    enemyPlayer.x = enemyPlayer.playerBody.position[0]; 
-    enemyPlayer.y = enemyPlayer.playerBody.position[1];
-    var info = {
-      id:enemyPlayer.id,
-      x: enemyPlayer.playerBody.position[0], 
-      y: enemyPlayer.playerBody.position[1],
-      angle: enemyPlayer.playerBody.angle
-    } 
-    socket.emit("input_rec", info);
-    var moveplayerData = {
-      id: enemyPlayer.id, 
-      x: enemyPlayer.playerBody.position[0],
-      y: enemyPlayer.playerBody.position[1],
-      angle: enemyPlayer.playerBody.angle, 
-      size: enemyPlayer.size
-    }
-    socket.broadcast.emit('enemy_move', moveplayerData);
-   enemyPlayer.sendData = true;
+        
+   //  setTimeout(function() {enemyPlayer.sendData = true}, 20000);
+   //  enemyPlayer.sendData = false;
+   //  var serverPointer = { //posx y posy ctes
+   //      x: posx,
+   //      y: posy,
+   //      worldX: posx,    
+   //      worldY: posy
+   //  }
+   // // if(physicsPlayer.distanceToPointer(enemyPlayer, serverPointer) <=30) {
+   //  //  enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, 0, serverPointer, 1000);
+   // // }else{
+   //    enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, enemyPlayer.speed, serverPointer); 
+   // // }
+   //  enemyPlayer.x = enemyPlayer.playerBody.position[0]; 
+   //  enemyPlayer.y = enemyPlayer.playerBody.position[1];
+   //  var info = {
+   //    id:enemyPlayer.id,
+   //    x: enemyPlayer.playerBody.position[0], 
+   //    y: enemyPlayer.playerBody.position[1],
+   //    angle: enemyPlayer.playerBody.angle
+   //  } 
+   //  socket.emit("input_rec", info);
+   //  var moveplayerData = {
+   //    id: enemyPlayer.id, 
+   //    x: enemyPlayer.playerBody.position[0],
+   //    y: enemyPlayer.playerBody.position[1],
+   //    angle: enemyPlayer.playerBody.angle, 
+   //    size: enemyPlayer.size
+   //  }
+   //  socket.broadcast.emit('enemy_move', moveplayerData);
+   //  enemyPlayer.sendData = true;
     socket.emit("salto", {x:posx, y:posy});//al ladron
     //-----------
     //se podrian descontar puntos en caso de puntaje y elevar los puntos del policia
@@ -349,7 +360,8 @@ io.on('connection', function(socket){
         player_lst.splice(player_lst.indexOf(removePlayer), 1);
       }
       console.log("removing player " + this.id);
-      sortPlayerListByScore();
+      socket.emit("leader_board",sortPlayerListByScore());
+      socket.broadcast.emit("leader_board",sortPlayerListByScore());
       //send message to every connected client except the sender
       socket.broadcast.emit('remove_player', {id: this.id});
       var arr=game_instance.food_pickup;
@@ -373,10 +385,6 @@ function find_playerid(id) {
     //console.log("id del primero en la lista" + player_lst[0].id);
     for (var i = 0; i < player_lst.length; i++) {
       if (player_lst[i].id == id) {
-        // if (impresora == 0){ 
-        //   console.log(player_lst[i].id + " " +id);
-        //   impresora++;
-        // }
         return player_lst[i]; 
       }
     }
@@ -417,9 +425,6 @@ function getRandomArbitrary(min, max) {
 function find_food (id) {
   //el id que me llega no tiene nada que ver con el id que tienen las comidas
   var arr=game_instance.food_pickup;
- // console.log("arr ",arr);
-  //console.log("arr.length ", arr.length);
-
   for (var i = 0; i < arr.length; i++) {
     if (game_instance.food_pickup[i].id == id) {
       return game_instance.food_pickup[i]; 
@@ -430,22 +435,19 @@ function find_food (id) {
 }
 
 
-// when the player enters their name, trigger this function
-function onEntername (data) {
-  this.emit('join_game', {username: data.username, id: this.id});
-}
+
 
 
 function sortPlayerListByScore() {
   player_lst.sort(function(a,b) {
-    return b.size - a.size;
+    return b.puntos - a.puntos;
   });
   
   var playerListSorted = [];
   for (var i = 0; i < player_lst.length; i++) {
     // send the player username to the client so that clients can update the leaderboard.
-    playerListSorted.push({id: player_lst[i].id, username: player_lst[i].username, size: player_lst[i].size});
+    playerListSorted.push({id: player_lst[i].id, username: player_lst[i].username, puntos: player_lst[i].puntos});
   }
-  
-  io.emit("leader_board", playerListSorted);
+  return playerListSorted;
+  //this.emit("leader_board", playerListSorted);
 }
