@@ -16,7 +16,7 @@ var gameProperties = {
 //********************F
 
 var players;//yo
-
+var id_tile;
 var bounds;
 var speed = 80;
 var score = 0;
@@ -43,6 +43,13 @@ var enemies = [];
 var food_pickup=[];
 var customBounds;
 var USERNAME;
+var test;
+var paredes;
+var spriteMaterial;
+var worldMaterial;
+var playerCollisionGroup;
+var prisonCollisionGroup;
+
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
 Game.init=function(username, tipo){
@@ -50,26 +57,12 @@ Game.init=function(username, tipo){
 	TIPO_J=tipo;
 	console.log("username ", USERNAME);
 	console.log("tipo ", TIPO_J);
-
-	//console.log(username);
 	game.stage.disableVisibilityChange=true;//estaba en true
-	// when the socket connects, call the onsocketconnected and send its information to the server 
-	//Client.loguear({username:username, tipo:tipo});
 };
 
-// Game.logueado=function(data){
-// 	gameProperties.in_game = true;
-// 	username = data.username;
-// 	// send the server our initial position and tell it we are connected
-// //	socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
-// };
 
-
- Game.preload=function(){
-		 
+Game.preload=function(){
 		game.load.tilemap('mapa', '/assets/mapa_4.json', null, Phaser.Tilemap.TILED_JSON);
-		//game.load.tilemap('mapa', '/assets/mapa_4.json', null, Phaser.Tilemap.TILED_JSON);
-
 		game.load.image('tiles', '/assets/PathAndObjects.png');
 		game.load.image('tiles', '/assets/castle_tileset_part3.png');
 
@@ -92,50 +85,147 @@ Game.init=function(username, tipo){
 		game.load.image('pink_player_food', '/assets/banderinRosa2.png');
 		game.load.image('red_player_food', '/assets/banderinRojo2.png');
 
-		// game.load.image('ship', '/assets/blue-square.png', 32, 32);
-  //   	game.load.image('ball', '/assets/comida_rosa.png');
-
+		game.load.image('pared', '/assets/castleCenter.png');
+		game.load.image("prison", "/assets/prison_2.png");
 }
 
 Game.create=function() {
-
 	//game.world.setBounds(0, 0, 2000, 2000);
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
-	 
-	Capa_3 = map.createLayer('Capa_3');
+	 var bounds = new Phaser.Rectangle(200, 200, 400, 400);
+	//Capa_3 = map.createLayer('Capa_3');
 	Capa_1 = map.createLayer('Capa_1');
-	Capa_2 = map.createLayer('Capa_2');
-	
-	Capa_1.resizeWorld();
-  	//Capa_2.resizeWorld();
-  
-	game.physics.startSystem(Phaser.Physics.P2JS);
-	// map.setCollision(252,true, 'Capa_3');
-	//map.setCollision([84,85,86, 87, 88, 89,100, 102, 103, 105, 116, 117, 118, 119, 120, 121, 197],true, 'Capa_2');
-	map.setCollisionBetween(252, 252, true, 'Capa_3');
-	game.physics.p2.convertTilemap(map, 'Capa_3');
+	//Capa_2 = map.createLayer('Capa_2');
 
-	// Make things a bit more bouncey
+	Capa_1.resizeWorld();
+	game.physics.startSystem(Phaser.Physics.P2JS);
+
+	game.physics.p2.setImpactEvents(true);
+   // Make things a bit more bouncey
 	game.physics.p2.restitution = 0.3;	
+	 //  Create our collision groups. One for the player, one for the pandas (prision)
+    // playerCollisionGroup = game.physics.p2.createCollisionGroup();
+    // prisonCollisionGroup = game.physics.p2.createCollisionGroup();
+    // //  This part is vital if you want the objects with their own collision groups to still collide with the world bounds
+    //  (which we do) - what this does is adjust the bounds to use its own collision group.
+    game.physics.p2.updateBoundsCollisionGroup();
+
 	game.physics.p2.gravity.y = 0;
 	game.physics.p2.applyGravity = false; 
 	game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
 	var width = this.game.width;
     var height = this.game.height;
+
 	// para trackear a los jugadores
     Game.playerMap={};
-    Game.scores={};
-    cursors = game.input.keyboard.createCursorKeys();
-   //ver en que orden estos	
+    // customBounds = { left: null, right: null, top: null, bottom: null };
+    // createPreviewBounds(bounds.x, bounds.y, bounds.width, bounds.height);
+    //  //  Just to display the bounds
+    // var graphics = game.add.graphics(bounds.x, bounds.y);
+    // graphics.lineStyle(4, 0xffd900, 1);
+    // graphics.drawRect(0, 0, bounds.width, bounds.height);
+    //COMENTADO POR AHORA
+    var prison=game.add.sprite(450,368,"prison");
+    game.physics.p2.enable(prison, Phaser.Physics.p2);
+   	prison.body.data.shapes[0].sensor=true;
+    prison.type="pared";
+    prison.body.type="pared";
+ 	
+ 	// worldMaterial = game.physics.p2.createMaterial('worldMaterial');
+ 	// prisonMaterial=game.physics.p2.createMaterial('prisonMaterial', prison.body);
+  //   game.physics.p2.setWorldMaterial(worldMaterial, true, true, true, true);
+    //  Here is the contact material. It's a combination of 2 materials, so whenever shapes with
+    //  those 2 materials collide it uses the following settings.
+    //  A single material can be used by as many different sprites as you like.
+
+    // var grupoprision = game.add.group();
+    // grupoprision.enableBody = true;
+    // grupoprision.physicsBodyType = Phaser.Physics.P2JS;
+    
+    // var posicionX, posicionY;
+    // posicionX=[];
+    // posicionY=[];
+    // posicionX[1]=200; posicionY[1]=200;
+    // posicionX[2]=300; posicionY[2]=200;
+    // posicionX[3]=400; posicionY[3]=200;
+    // posicionX[4]=500; posicionY[4]=200;
+    // posicionX[5]=200; posicionY[5]=300;
+    // posicionX[6]=500; posicionY[6]=300;
+    // posicionX[7]=200; posicionY[7]=400;
+    // posicionX[8]=500; posicionY[8]=400;
+    // posicionX[9]=200; posicionY[9]=500;
+    // posicionX[10]=500; posicionY[10]=500;
+  
+    
+    // for (var i = 0; i <= 10; i++)
+    // {
+    //     var panda = grupoprision.create(posicionX[i], posicionY[i], 'pared');
+    //     panda.body.setRectangle(40, 40);
+    //     game.physics.p2.enable(panda, Phaser.Physics.p2);
+    //     panda.body.data.shapes[0].sensor=true;
+    //     //  Tell the panda to use the pandaCollisionGroup 
+    //     panda.body.setCollisionGroup(prisonCollisionGroup);
+
+    //     //  Pandas will collide against themselves and the player
+    //     //  If you don't set this they'll not collide with anything.
+    //     //  The first parameter is either an array or a single collision group.
+    //     panda.body.collides([prisonCollisionGroup, playerCollisionGroup]);
+    //     panda.body.kinematic=true;
+    // }
+
+
 	createLeaderBoard();
-	//Client.askNewPlayer(); 
 	Client.askNewPlayer({username: USERNAME, tipo:TIPO_J, x:0, y:0, angle:0}); 
 
+
+    // var contactMaterial = game.physics.p2.createContactMaterial(spriteMaterial, worldMaterial);
+    // var prisonplayer=game.physics.p2.createContactMaterial(spriteMaterial, prisonMaterial);
+    // contactMaterial.friction = 0.3;     // Friction to use in the contact of these two materials.
+    // contactMaterial.restitution = 1.0;  // Restitution (i.e. how bouncy it is!) to use in the contact of these two materials.
+    // contactMaterial.stiffness = 1e7;    // Stiffness of the resulting ContactEquation that this ContactMaterial generate.
+    // contactMaterial.relaxation = 3;     // Relaxation of the resulting ContactEquation that this ContactMaterial generate.
+    // contactMaterial.frictionStiffness = 1e7;    // Stiffness of the resulting FrictionEquation that this ContactMaterial generate.
+    // contactMaterial.frictionRelaxation = 3;     // Relaxation of the resulting FrictionEquation that this ContactMaterial generate.
+    // contactMaterial.surfaceVelocity = 0;    	
+    // prisonplayer.friction = 0.3;     
+    // prisonplayer.restitution = 1.0;  
+    // prisonplayer.stiffness = 1e7;    
+    // prisonplayer.relaxation = 3;     
+    // prisonplayer.frictionStiffness = 1e7;    
+    // prisonplayer.frictionRelaxation = 3;     
+    // prisonplayer.surfaceVelocity = 0;   
 };
+// function createPreviewBounds(x, y, w, h) {
 
+//     var sim = game.physics.p2;
 
+//     //  If you want to use your own collision group then set it here and un-comment the lines below
+//     var mask = sim.boundsCollisionGroup.mask;
+
+//     customBounds.left = new p2.Body({ mass: 0, position: [ sim.pxmi(x), sim.pxmi(y) ], angle: 1.5707963267948966 });
+//     customBounds.left.addShape(new p2.Plane());
+//     // customBounds.left.shapes[0].collisionGroup = mask;
+
+//     customBounds.right = new p2.Body({ mass: 0, position: [ sim.pxmi(x + w), sim.pxmi(y) ], angle: -1.5707963267948966 });
+//     customBounds.right.addShape(new p2.Plane());
+//     // customBounds.right.shapes[0].collisionGroup = mask;
+
+//     customBounds.top = new p2.Body({ mass: 0, position: [ sim.pxmi(x), sim.pxmi(y) ], angle: -3.141592653589793 });
+//     customBounds.top.addShape(new p2.Plane());
+//     // customBounds.top.shapes[0].collisionGroup = mask;
+
+//     customBounds.bottom = new p2.Body({ mass: 0, position: [ sim.pxmi(x), sim.pxmi(y + h) ] });
+//     customBounds.bottom.addShape(new p2.Plane());
+//     // customBounds.bottom.shapes[0].collisionGroup = mask;
+
+//     sim.world.addBody(customBounds.left);
+//    	sim.world.addBody(customBounds.right);
+//     sim.world.addBody(customBounds.top);
+//     sim.world.addBody(customBounds.bottom);
+
+// }
 Game.update=function(){
 	if(player){
 		if(!player.preso){
@@ -170,7 +260,6 @@ Game.onEnemyMove=function(data) {
 		worldX: data.x,
 		worldY: data.y
 	}
-	
 	var distance = distanceToPointer(movePlayer.player , newPointer);
 	speed = distance/0.05;
 	movePlayer.rotation = movetoPointer(movePlayer.player , speed, newPointer); //error cannot get velocity of null
@@ -179,7 +268,6 @@ Game.onEnemyMove=function(data) {
 
 //we're receiving the calculated position from the server and changing the player position
 Game.onInputRecieved=function(data) {
-
 	if(player==null){return;}
  	var newPointer = {
 		x: data.x,
@@ -187,8 +275,6 @@ Game.onInputRecieved=function(data) {
 		worldX: data.x,
 		worldY: data.y, 
 	}
-	 
-//	var distance = distanceToPointer(player.player, newPointer);
 	var distance = distanceToPointer(player, newPointer);
 	//we're receiving player position every 50ms. We're interpolating 
 	//between the current position and the new position so that player
@@ -196,12 +282,9 @@ Game.onInputRecieved=function(data) {
 	speed = distance/0.05;
 	//move to the new position. 
 	player.rotation = movetoPointer(player, speed, newPointer);
-
-//	console.log("Mi posición: ",player.x," ", player.y);
 	var equis=Math.round(player.x);
 	var ygriega=Math.round(player.y);
 	document.getElementById("MiPos").innerHTML="Mi posición: "+equis+" "+ygriega;
-
 };
 
 //This is where we use the socket id. 
@@ -250,7 +333,7 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 	this.preso=preso;
 	this.puntos=puntos; //????
 	// player follow text (set text to username)
-	var style = {fill: "white", align: "center", fontSize:'20px'};
+	var style = {fill: "black", align: "center", fontSize:'18px'};
 	this.player.playertext = game.add.text(0, 0, username , style);
 	// add the text to player object to follw as child
 	this.player.addChild(this.player.playertext);
@@ -259,36 +342,37 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 
 
 Game.create_player=function(data){ //esto es lo q llama el cliente
-
 	id_jugador=data.id;
 	color_jugador=data.color;
-    // var player = players.create(bounds.randomX, bounds.randomY, color_jugador);
-  //  if(data.preso){
-	//	Game.onRemovePlayer({id:data.id});
-	//	console.log("en create_player "+data.id);
-	//	player = game.add.sprite(data.x, data.y, color_jugador);
-	//}else{
-		player = game.add.sprite(1200, 300, color_jugador); 
-  //  }
+	player = game.add.sprite(1200, 300, color_jugador); 
+	//player.scale.set(2);
+	player.smoothed=false;
+	//  Enable if for physics. This creates a default rectangular body.
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
+	//player.body.fixedRotation = true;
 	//player.body.collideWorldBounds = true;
-	player.body.data.shapes[0].sensor = true;
+	//player.body.data.shapes[0].sensor = true;
 	player.type = "player_body"; //necesario para las colisiones
 	player.preso=data.preso;
 	player.puntos=data.puntos;
 	//camera follow
+
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
 
 	player.body.type="player_body";
 	
 	// player follow text (set text to username)
-	var style = {fill: "black", align: "center", fontSize:'18px'};
+	var style = {fill: "white", align: "right", fontSize:'20px'};
 	player.playertext = game.add.text(0, 0, data.username , style);
 	// add the text to player object to follw as child
 	player.addChild(player.playertext);
+
+	//spriteMaterial = game.physics.p2.createMaterial('spriteMaterial', player.body);
 };
+
+
 
 
 Game.onItemUpdate=function(datos){
@@ -302,11 +386,8 @@ Game.onItemUpdate=function(datos){
 var food_object = function (id, type, startx, starty) {
 	//generated in the server with node-uuid
 	this.id = id; 
-//	console.log(this.id);
-	//pos of the food
 	this.posx = startx;  
 	this.posy = starty; 
-	
 	this.type=type;
 	this.item = game.add.sprite(startx, starty, type); 
 	game.physics.p2.enable(this.item, Phaser.Physics.p2);//problemas
@@ -357,8 +438,6 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
 			}
-
-
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
 				 var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
@@ -367,18 +446,32 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
 				 	{
 				 		//console.log("colision!!");
+				 		banderin=true;
 				 		Client.colision({key:body.sprite.id});
 				 	}
+			}
+			console.log("tipobody "+tipobody);
+			if(tipobody=="prison"){
+				var result=[];
+				console.log("ME CHOQUE LA PARED");
+				// if (game.input.activePointer.x > player.x){
+				// 	console.log("UNO");
+				// 	player.body.reset(200,200);
+				// }else{
+				// 	console.log("DOS");
+				// 	player.body.reset(500,200);
+				// }
+				// if (game.input.activePointer.y < player.y){
+				// 	console.log("TRES");
+				// 	player.body.reset(200,200);
+				// }else{
+				// 	console.log("CUATRO");
+				// 	player.body.reset(500,200);
+				// }
 			}
 		}
 	}
 };
-
-
-
-// (key_player=="black_player" || key_player=="grey_player"|| key_player=="brown_player")&&
-// (tipobody=="orange_player"||tipobody=="violet_player"||tipobody=="yellow_player"||
-// 	tipobody=="red_player"||tipobody=="blue_player"||tipobody=="pink_player"||tipobody=="green_player")
 // When the server notifies us of client disconnection, we find the disconnected
 // enemy and remove from our game
 Game.onRemovePlayer=function(data) {
@@ -388,34 +481,15 @@ Game.onRemovePlayer=function(data) {
 		console.log('Player not found: ', data.id)
 		return;
 	}
-	
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 };
 
 Game.saltar=function(data){
-	// console.log(player);
-	// console.log(player.position.x);
-	// console.log(player.position.y);
-	// player.body.velocity.x = 0;
-	// //player.body.velocity=0;
-	// player.body.velocity.y=0;
-	// console.log(player.position.x);
-	// console.log(player.position.y);
-	// console.log("HOLA");
-	// game.pause=true;
-	// demo();
-	// game.pause=false;
-	// player.body.velocity.x=100;
-	// player.body.velocity.y=100;
-
 	player.preso=true;
-	// player.position.x=data.x;
-	// player.position.y=data.y;
-	
-
 	demo(data);
 };
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -424,8 +498,8 @@ async function demo(data) {
   console.log('Taking a break...');
   //console.log("posicion:: "+player.position.x+", "+player.position.y);
   Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
+  player.reset(data.x, data.y);
   await sleep(2000);
-  
   console.log(player.position);
  
   player.preso=false;
@@ -471,12 +545,6 @@ Game.lbupdate=function(data) {
 	var mainPlayerShown = false;
 	
 	for (var i = 0;  i < data.length; i++) {
-		//if the mainplayer is shown along the iteration, set it to true
-	
-		// if (mainPlayerShown && i >= maxPlayerDisplay) {
-		// 	break;
-		// }
-		
 		//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
 		// and then add three dots at the end, and show player's rank.
 		if (!mainPlayerShown && i >= maxPlayerDisplay - 1 && socket.id == data[i].id) {
@@ -485,8 +553,6 @@ Game.lbupdate=function(data) {
 			board_string = board_string.concat(".\n");
 			mainPlayerShown = true;
 		}
-		
-
 		//here we are checking if user id is greater than 10 characters, if it is 
 		//it is too long, so we're going to trim it.
 		if (data[i].username.length >= 10) {
@@ -495,21 +561,16 @@ Game.lbupdate=function(data) {
 			for (var j = 0; j < maxlen; j++) {
 				temp += username[j];
 			}
-			
 			temp += "...";
 			username = temp;
-			
 			//change to player username instead of id.
 			board_string = board_string.concat(i + 1,": ");
 			board_string = board_string.concat(username," ",(data[i].puntos).toString() + "\n");
-		
-		} else {
+		}else{
 			board_string = board_string.concat(i + 1,": ");
 			board_string = board_string.concat(data[i].username," ",(data[i].puntos).toString() + "\n");
 		}
-		
 	}
-	
 	console.log(board_string);
 	leader_text.setText(board_string); 
 }
