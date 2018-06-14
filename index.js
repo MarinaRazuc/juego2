@@ -42,8 +42,15 @@ var game_setup = function() {
 var game_instance = new game_setup();
 var posx=451;
 var posy=377;
+const maxPX=633;
+const minPX=267;
+const maxPY=502;
+const minPY=237;
 const max_banderas=30;
-
+const puntos_banderin=15;
+const puntos_prision=-5
+const puntos_atrapar=20;
+const puntos_liberar=6;
 
 app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
@@ -99,24 +106,6 @@ io.on('connection', function(socket){
     //login
   }); 
 
-  //when the player logs in
-  // socket.on('logged_in', function(data){
-  //   console.log("socket.on logged_in");
-  //   //no se si lo siguiente es necesario
-  //   socket.emit('enter_game', {username: data.username, tipo: data.tipo}); 
-  // }); 
-    
-   //when the player enters the game 
-  // socket.on('enter_game', function(data){
-  //   console.log("connected to server"); 
-  //   gameProperties.in_game = true;
-  //   var username = data.username;
-  //   //when the socket connects, call the onsocketconnected and send its information to the server 
-  //   socket.emit('logged_in', {username: username}); 
-  //   // send the server our initial position and tell it we are connected
-  // });
-  //socket.emit('new_player', {username: data.username, x: 0, y: 0, angle: 0});
-  //Client.askNewPlayer({username:data.username, x:0, y:0, angle:0})
 
 
 
@@ -292,7 +281,7 @@ io.on('connection', function(socket){
         return;
       }
       game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
-      movePlayer.puntos=movePlayer.puntos+1; //por ahora +1, despues se vera
+      movePlayer.puntos=movePlayer.puntos+puntos_banderin; //por ahora +1, despues se vera
      socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
       //comunicar a todos los jugadores, incluyéndome
@@ -307,47 +296,29 @@ io.on('connection', function(socket){
   socket.on("player_collision", function(data){
     var movePlayer = find_playerid(this.id);  //ladronciño
     var enemyPlayer = find_playerid(data.id); //policiña
-    // console.log("movePlayer "+movePlayer.id+", "+movePlayer.color);
-    // console.log("enemyPlayer "+enemyPlayer.id+", "+enemyPlayer.color);
-        
-   //  setTimeout(function() {enemyPlayer.sendData = true}, 20000);
-   //  enemyPlayer.sendData = false;
-   //  var serverPointer = { //posx y posy ctes
-   //      x: posx,
-   //      y: posy,
-   //      worldX: posx,    
-   //      worldY: posy
-   //  }
-   // // if(physicsPlayer.distanceToPointer(enemyPlayer, serverPointer) <=30) {
-   //  //  enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, 0, serverPointer, 1000);
-   // // }else{
-   //    enemyPlayer.playerBody.angle = physicsPlayer.movetoPointer(enemyPlayer, enemyPlayer.speed, serverPointer); 
-   // // }
-   //  enemyPlayer.x = enemyPlayer.playerBody.position[0]; 
-   //  enemyPlayer.y = enemyPlayer.playerBody.position[1];
-   //  var info = {
-   //    id:enemyPlayer.id,
-   //    x: enemyPlayer.playerBody.position[0], 
-   //    y: enemyPlayer.playerBody.position[1],
-   //    angle: enemyPlayer.playerBody.angle
-   //  } 
-   //  socket.emit("input_rec", info);
-   //  var moveplayerData = {
-   //    id: enemyPlayer.id, 
-   //    x: enemyPlayer.playerBody.position[0],
-   //    y: enemyPlayer.playerBody.position[1],
-   //    angle: enemyPlayer.playerBody.angle, 
-   //    size: enemyPlayer.size
-   //  }
-   //  socket.broadcast.emit('enemy_move', moveplayerData);
-   //  enemyPlayer.sendData = true;
-    socket.emit("salto", {x:posx, y:posy});//al ladron
+    var equis=Math.random() * (maxPX - minPX) + minPX;
+    var ygriega=Math.random() * (maxPY - minPY) + minPY;
+    movePlayer.puntos+=puntos_prision;
+    enemyPlayer.puntos+=puntos_atrapar;
+  //  console.log("enemyPlayer.puntos actuales ", enemyPlayer.puntos);
+    socket.emit("salto", {x:equis, y:ygriega});//al ladron
     //-----------
     //se podrian descontar puntos en caso de puntaje y elevar los puntos del policia
     //--------
-    console.log("someone ate someone!!!");
   }); //fin player collision
 
+  socket.on("liberar_prisioneros", function(data){
+    var movePlayer=find_playerid(this.id);
+    movePlayer.puntos=movePlayer.puntos+data.p*puntos_liberar;
+    // var liberados;
+    socket.broadcast.emit("liberar");
+    // console.log("Liberados? "+liberados);
+    // if(liberados){
+    //   var movePlayer = find_playerid(this.id);
+    //   movePlayer.puntos+=puntos_liberar;
+    //   socket.emit("puntos");
+    // }
+  });
 
 
     //call when a client disconnects and tell the clients except sender to remove the disconnected player
@@ -371,12 +342,7 @@ io.on('connection', function(socket){
           socket.broadcast.emit("itemremove", b);
         }
       }
-
-
     }); //fin disconnect
-
-    
-
 });//FIN DE CONNECTION  
 
 //find player by the the unique socket id 
@@ -433,10 +399,6 @@ function find_food (id) {
   
   return false;
 }
-
-
-
-
 
 function sortPlayerListByScore() {
   player_lst.sort(function(a,b) {
