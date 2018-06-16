@@ -2,9 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Ejemplillo</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/lib/phaser.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href ="/css/estilos.css">
    	<link rel="icon" href="/assets/esfera.png">
 
@@ -12,21 +14,33 @@
 
 </head>
 <body>
-    <div><p id="MiPos">Mi posición: </p></div>
-    <div><p id="score">Banderines: </p></div>
-    <!-- <div><p id="PosEne">Enemigo: </p></div> -->
-    <div id="elegir">
-        <form name="form_jugador">
-          <input type="radio" name="tipo_jugador" value="lad" checked> Ladrón <br>
-          <input type="radio" name="tipo_jugador" value="pol"> Policía <br>
-        </form>
-    </div>
-    <div id="signDiv">
-          <div class="sign-up">Ingresar nombre:</div>
-          <form class="hidden form">
-            <input id="signdivusername" type="text" placeholder="Nombre de usuario"/>
-          </form>
-          <button id="entername" class="hidden"><span class="text">¡Jugar!</span></button>
+    <div class="container">
+      <div class="row" id="datos">
+        <div  class= "col-xs-12 col-sm-6 col-md-6"><p id="MiPos">Mi posición: </p></div>
+        <div  class="col-xs-12 col-sm-6 col-md-6"><p id="score">Banderines: </p></div>
+      </div>
+      <!-- <div id="cartel"> (Sólo 'ladrón' disponible) </div> -->
+      <div id="signDiv" class="container container2">
+            <div class=row>   </div>
+            <div class="sign-up row">Ingresar nombre: </div>
+            <div class="row">
+              <form class="hidden form">
+                <input id="signdivusername" type="text" placeholder="Nombre de usuario"/>
+              </form>
+            </div>
+            <div class="row">
+              <button id="entername" class="hidden"><span class="text"> ¡Jugar! </span></button>
+            </div>
+      </div>
+      <div id="elegir" class="container container1">
+          <div class="row div1"><p id="inicio">Elegir cómo jugar: </p></div>
+          <div class="row div1">
+            <form name="form_jugador" class="div1">
+              <input type="radio" name="tipo_jugador" value="lad" checked id="ladr"> Ladrón <br>
+              <input type="radio" name="tipo_jugador" value="pol" id="poli"> Policía <br>
+            </form>
+          </div>
+      </div>
     </div>
     <div id="game"></div>
 
@@ -35,5 +49,9 @@
     <script src="/js/login.js" type="text/javascript"></script>
     <script src="/js/main.js" type="text/javascript"></script>
     <script src="/js/client.js" type="text/javascript"></script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
 </body>
 </html>

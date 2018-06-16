@@ -10,3 +10,33 @@ body{
 	background-image:url("/assets/fondo_9.jpg");
 	border: 5px solid black;
 }*/
+.container1{
+	background-color: #A9E2F3;
+	font-size: 20px;
+    text-align: left;
+    padding-left: 40px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.container2{
+	font-size: 20px;
+    text-align: center;
+	background-color: #A9BCF5;
+	padding-left: 40px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
+.div1{
+	text-align: center;
+	border-spacing: 10px;
+}
+.row{
+	border-spacing: 10px;
+
+}
+
+button{
+	background-size: cover;
+}

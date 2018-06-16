@@ -42,6 +42,9 @@ var game_setup = function() {
 var game_instance = new game_setup();
 var posx=451;
 var posy=377;
+var ladrones=0;
+var policias=0;
+
 const maxPX=633;
 const minPX=267;
 const maxPY=502;
@@ -111,8 +114,8 @@ io.on('connection', function(socket){
 
   console.log('a user connected, ID: ', http.lastPlayerID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
-  var crear_polis=false;
-  var poli1, poli2;
+  // var crear_polis=false;
+  // var poli1, poli2;
   socket.on('new_player', function(data) {
       console.log("index.js new_player. Player name= "+data.username);
       //new player instance
@@ -208,6 +211,11 @@ io.on('connection', function(socket){
             socket.emit("item_update", foodentity); 
             socket.broadcast.emit("item_update", foodentity);
         }
+        ladrones+=1;
+        //gameProperties.cantL=ladrones;
+      }else{
+        policias+=1;
+        //gameProperties.cantP=policias;
       }
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());

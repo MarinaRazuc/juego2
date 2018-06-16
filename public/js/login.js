@@ -1,21 +1,25 @@
-//setup onclick callback for when the user submits the submit button.
-document.getElementById("entername").onclick = function () {
 
+// if(gameProperties.cantL>2){
+// 	console.log("EN EL IF");
+// 	document.getElementById("poli").disabled=false;
+// 	cartel.style.display='none';
+// }else{
+// 	console.log("EN EL ELSE");
+// 	document.getElementById("poli").disabled=true;
+// }
+document.getElementById("datos").style.display='none';
+document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {
 		gameProperties.in_game = true; 
-		//hide the signdiv so that game div shows
 		signDiv.style.display = 'none'; 
 		elegir.style.display='none';
-
+		datos.style.display='block';
+		//cartel.style.display='none';
 		var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
 	}
-	
-// 	//hide the signdiv so that game div shows
-// 	signDiv.style.display = 'none';
-// //	Client.nombre_usr({username: signdivusername.value})
-// 	socket.emit('enter_name', {username: signdivusername.value});
 }
+
 
 function getRadioButtonSelectedValue(ctrl){
     for(i=0;i<ctrl.length;i++){
@@ -25,6 +29,12 @@ function getRadioButtonSelectedValue(ctrl){
 }
 
 function join_game (data) {
+	console.log("data.tipo "+data.tipo);
+	if(data.tipo=="lad"){
+		gameProperties.cantL+=1;
+	}else{
+		gameProperties.cantP+=1;
+	}
 	game.state.start(
         'Game', true, false, data.username, data.tipo
     );

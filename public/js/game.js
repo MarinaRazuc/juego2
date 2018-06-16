@@ -12,6 +12,8 @@ var gameProperties = {
 	gameHeight: 4000,
 	game_elemnt: "gameDiv",
 	in_game: false,
+	cantL: 0,
+	cantP: 0,
 };
 //********************F
 
@@ -59,6 +61,12 @@ Game.init=function(username, tipo){
 	USERNAME=username;
 	TIPO_J=tipo;
 	game.stage.disableVisibilityChange=true;//estaba en true
+	// if(TIPO_J=="lad"){
+	// 	gameProperties.cantL+=1;
+	// }else{
+	// 	gameProperties.cantP+=1;
+	// }
+	console.log("cants "+gameProperties.cantP+" "+gameProperties.cantL);
 };
 
 
