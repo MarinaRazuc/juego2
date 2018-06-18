@@ -211,11 +211,8 @@ io.on('connection', function(socket){
             socket.emit("item_update", foodentity); 
             socket.broadcast.emit("item_update", foodentity);
         }
-        ladrones+=1;
+        //ladrones+=1;
         //gameProperties.cantL=ladrones;
-      }else{
-        policias+=1;
-        //gameProperties.cantP=policias;
       }
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());

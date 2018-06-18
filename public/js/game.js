@@ -11,9 +11,7 @@ var gameProperties = {
 	gameWidth: 4000,
 	gameHeight: 4000,
 	game_elemnt: "gameDiv",
-	in_game: false,
-	cantL: 0,
-	cantP: 0,
+	in_game: false
 };
 //********************F
 
@@ -66,7 +64,7 @@ Game.init=function(username, tipo){
 	// }else{
 	// 	gameProperties.cantP+=1;
 	// }
-	console.log("cants "+gameProperties.cantP+" "+gameProperties.cantL);
+	//console.log("cants "+gameProperties.cantP+" "+gameProperties.cantL);
 };
 
 
@@ -103,12 +101,12 @@ Game.create=function() {
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
-	 var bounds = new Phaser.Rectangle(200, 200, 400, 400);
+	 //var bounds = new Phaser.Rectangle(200, 200, 400, 400);
 	//Capa_3 = map.createLayer('Capa_3');
 	Capa_1 = map.createLayer('Capa_1');
 	//Capa_2 = map.createLayer('Capa_2');
 
-	Capa_1.resizeWorld();
+//	Capa_1.resizeWorld();
 	game.physics.startSystem(Phaser.Physics.P2JS);
 
 	game.physics.p2.setImpactEvents(true);
