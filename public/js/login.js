@@ -7,14 +7,17 @@
 // 	console.log("EN EL ELSE");
 // 	document.getElementById("poli").disabled=true;
 // }
-//document.getElementById("datos").style.display='none';
+
+document.getElementById("datos").style.display='none';
 document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {
 		gameProperties.in_game = true; 
 		signDiv.style.display = 'none'; 
 		elegir.style.display='none';
-	//	datos.style.display='block';
-		//cartel.style.display='none';
+		
+		datos.style.display='block';
+		boton.style.display='none';
+		
 		var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
 	}

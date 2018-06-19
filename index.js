@@ -307,9 +307,6 @@ io.on('connection', function(socket){
     enemyPlayer.puntos+=puntos_atrapar;
   //  console.log("enemyPlayer.puntos actuales ", enemyPlayer.puntos);
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
-    //-----------
-    //se podrian descontar puntos en caso de puntaje y elevar los puntos del policia
-    //--------
   }); //fin player collision
 
   socket.on("liberar_prisioneros", function(data){

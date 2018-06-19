@@ -8,14 +8,14 @@ var username;
 var leader_text;
 
 var gameProperties = { 
-	gameWidth: 4000,
-	gameHeight: 4000,
+	gameWidth: window.innerWidth * window.devicePixelRatio,
+	gameHeight: window.innerHeight * window.devicePixelRatio,
 	game_elemnt: "gameDiv",
 	in_game: false
 };
 //********************F
 
-var players;//yo
+var players;
 var id_tile;
 var bounds;
 var speed = 80;
@@ -41,14 +41,14 @@ var violet_food, orange_food, green_food, blue_food, red_food, pink_food, yellow
 //the enemy player list 
 var enemies = [];
 var food_pickup=[];
-// var customBounds;
+var customBounds;
 var USERNAME;
 var test;
 var paredes;
-// var spriteMaterial;
-// var worldMaterial;
-// var playerCollisionGroup;
-// var prisonCollisionGroup;
+var spriteMaterial;
+var worldMaterial;
+var playerCollisionGroup;
+var prisonCollisionGroup;
 const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
@@ -97,22 +97,22 @@ Game.preload=function(){
 }
 
 Game.create=function() {
-	//game.world.setBounds(0, 0, 2000, 2000);
+	game.world.setBounds(0, 0, window.innerHeight * window.devicePixelRatio+10, window.innerWidth * window.devicePixelRatio+10);
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
-	 //var bounds = new Phaser.Rectangle(200, 200, 400, 400);
+	//bounds = new Phaser.Rectangle(200, 200, 400, 400);
 	//Capa_3 = map.createLayer('Capa_3');
 	Capa_1 = map.createLayer('Capa_1');
-	//Capa_2 = map.createLayer('Capa_2');
+	Capa_2 = map.createLayer('Capa_2');
 
-//	Capa_1.resizeWorld();
+	Capa_1.resizeWorld();
 	game.physics.startSystem(Phaser.Physics.P2JS);
 
 	game.physics.p2.setImpactEvents(true);
    // Make things a bit more bouncey
 	game.physics.p2.restitution = 0.3;	
-    game.physics.p2.updateBoundsCollisionGroup();
+ //   game.physics.p2.updateBoundsCollisionGroup();
 
 	game.physics.p2.gravity.y = 0;
 	game.physics.p2.applyGravity = false; 
@@ -165,6 +165,7 @@ Game.removePlayer=function(id){
 //Server tells us there is a new enemy movement. We find the moved enemy and sync the enemy movement with the server
 Game.onEnemyMove=function(data) {
 	//var movePlayer = Game.playerMap[data.id] ; 
+	//console.log("onEnemyMove "+data.x+" "+data.y);
 	var movePlayer = findplayerbyid (data.id); 
 	if (!movePlayer) {return;}
 	var newPointer = {
@@ -255,9 +256,11 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	//  Enable if for physics. This creates a default rectangular body.
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
-	//player.body.fixedRotation = true;
-	//player.body.collideWorldBounds = true;
-	//player.body.data.shapes[0].sensor = true;
+//--------------------------------------------------
+	player.body.fixedRotation = true;
+	player.body.collideWorldBounds = true;
+	player.body.data.shapes[0].sensor = true;
+//--------------------------------------------------	
 	player.type = "player_body"; //necesario para las colisiones
 	player.preso=data.preso;
 	player.puntos=data.puntos;
@@ -360,10 +363,10 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				var presos=cant_presos();
 				console.log("CANTIDAD DE PRESOS: "+presos);
 
-				if(presos>0){
+				//if(presos>0){
 					this.puntos=this.puntos+puntos_prision*presos;
 					Client.liberar({p:presos});
-				}
+				//}
 			}
 		}
 	}
@@ -394,6 +397,8 @@ Game.onRemovePlayer=function(data) {
 };
 
 Game.saltar=function(data){
+	console.log("GAME.SALTAR");
+	Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
 	player.preso=true;
 	this.preso=true;
 	this.puntos=this.puntos+puntos_prision;
@@ -405,12 +410,13 @@ function sleep(ms) {
 }
 
 async function demo(data) {
-	 Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
+	console.log("DEMO");
 	 while(player.preso){
 		  player.reset(data.x, data.y);
 		  await sleep(2000);
 		  //console.log(player.position);
 	 }
+	 console.log("SALI DE PRISION");
 	 //player.preso=false;
 }
 
@@ -434,7 +440,6 @@ function cant_presos(){
 			presos=presos+1; 
 		}
 	}
-
 	return presos;
 };
 
