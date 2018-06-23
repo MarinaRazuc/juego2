@@ -1,6 +1,6 @@
 body{
 	/*background-color: #1F1F1F;*/
-	/*background-image: url(../assets/MapaJ2.png);*/
+	background-image: url(../assets/MapaJ2.png);
 }
 
 #game{
@@ -12,25 +12,31 @@ body{
 	border: 5px solid black;
 }*/
 .container1{
-	background-color: #A9E2F3;
+	/*background-color: #A9E2F3;*/
 	/*background-color: #D8D8D8;*/
+	background-color: white;
 	font-size: 20px;
     text-align: left;
     padding-left: 40px;
     padding-top: 15px;
     padding-bottom: 15px;
-    height: 200px;
+    height: 150px;
+    width:1000px;
+    opacity: 0.9;
 }
 
 .container2{
-	background-color: #E6E6E6;
+	/*background-color: #E6E6E6;*/
+	background-color: silver;
 	font-size: 20px;
     text-align: center;
-	background-color: #A9BCF5;
+	/*background-color: #A9BCF5;*/
 	padding-left: 40px;
 	padding-top: 15px;
 	padding-bottom: 15px;
-    height: 200px;
+    height: 150px;
+    width:1000px;
+    opacity: 0.9;
 }
 
 .container3{
@@ -40,19 +46,24 @@ body{
 
 
 .container4{
-	background-color: #A9F5D0;
+	/*background-color: #A9F5D0;*/
+	background-color: silver;
+	background-opacity:0.2;
 	font-size: 20px;
     text-align: center;
 	/*background-color: #A9BCF5;*/
 	padding-left: 40px;
 	padding-top: 15px;
 	padding-bottom: 15px;
-    height: 200px;
+    height: 150px;
+    width:1000px;
+    opacity: 0.9;
 }
 
 .div1{
 	text-align: left;
 	border-spacing: 10px;
+	opacity: 1;
 }
 
 .div2{
@@ -61,10 +72,16 @@ body{
 
 .row{
 	border-spacing: 10px;
+	opacity: 1;
 }
 
 button{
 	background-size: cover;
 	border-spacing: 5px;
+	opacity: 1;
+}
+
+div{
+	
 }
 

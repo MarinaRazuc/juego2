@@ -69,7 +69,7 @@ Game.init=function(username, tipo){
 
 
 Game.preload=function(){
-		game.load.tilemap('mapa', '/assets/mapa_4.json', null, Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('mapa', '/assets/Mapa_5.json', null, Phaser.Tilemap.TILED_JSON);
 		game.load.image('tiles', '/assets/PathAndObjects.png');
 		game.load.image('tiles', '/assets/castle_tileset_part3.png');
 
@@ -104,7 +104,7 @@ Game.create=function() {
 	//bounds = new Phaser.Rectangle(200, 200, 400, 400);
 	//Capa_3 = map.createLayer('Capa_3');
 	Capa_1 = map.createLayer('Capa_1');
-	Capa_2 = map.createLayer('Capa_2');
+	//Capa_2 = map.createLayer('Capa_2');
 
 	Capa_1.resizeWorld();
 	game.physics.startSystem(Phaser.Physics.P2JS);
@@ -174,31 +174,41 @@ Game.onEnemyMove=function(data) {
 		worldX: data.x,
 		worldY: data.y
 	}
-	var distance = distanceToPointer(movePlayer.player , newPointer);
-	speed = distance/0.05;
-	movePlayer.rotation = movetoPointer(movePlayer.player , speed, newPointer); //error cannot get velocity of null
+	if(movePlayer.preso){
+		movePlayer.player.reset(data.x, data.y)
+		console.log("onEnemyMove, cayo un preso.");
+	}else{
+		var distance = distanceToPointer(movePlayer.player , newPointer);
+		speed = distance/0.05;
+		movePlayer.rotation = movetoPointer(movePlayer.player , speed, newPointer); //error cannot get velocity of null
+	}
 };
 
 
 //we're receiving the calculated position from the server and changing the player position
 Game.onInputRecieved=function(data) {
-	if(player==null){return;}
- 	var newPointer = {
-		x: data.x,
-		y: data.y, 
-		worldX: data.x,
-		worldY: data.y, 
+	if(!player.preso){
+		if(player==null){return;}
+	 	var newPointer = {
+			x: data.x,
+			y: data.y, 
+			worldX: data.x,
+			worldY: data.y, 
+		}
+		var distance = distanceToPointer(player, newPointer);
+		//we're receiving player position every 50ms. We're interpolating 
+		//between the current position and the new position so that player
+		//does jerk. 
+		speed = distance/0.05;
+		//move to the new position. 
+		player.rotation = movetoPointer(player, speed, newPointer);
+		var equis=Math.round(player.x);
+		var ygriega=Math.round(player.y);
+		document.getElementById("MiPos").innerHTML="Mi posición: "+equis+" "+ygriega;
+	}else{
+		console.log("preso onInputRecieved");
 	}
-	var distance = distanceToPointer(player, newPointer);
-	//we're receiving player position every 50ms. We're interpolating 
-	//between the current position and the new position so that player
-	//does jerk. 
-	speed = distance/0.05;
-	//move to the new position. 
-	player.rotation = movetoPointer(player, speed, newPointer);
-	var equis=Math.round(player.x);
-	var ygriega=Math.round(player.y);
-	document.getElementById("MiPos").innerHTML="Mi posición: "+equis+" "+ygriega;
+
 };
 
 //This is where we use the socket id. 
@@ -257,7 +267,7 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	game.physics.p2.enable(player, Phaser.Physics.p2);
     player.body.setCircle(16);
 //--------------------------------------------------
-	player.body.fixedRotation = true;
+	//player.body.fixedRotation = true;
 	player.body.collideWorldBounds = true;
 	player.body.data.shapes[0].sensor = true;
 //--------------------------------------------------	
@@ -340,20 +350,17 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 			}
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
-				 //var key2=body.data.parent.sprite.body.sprite.body.sprite.body.data.id;
 				 if((tipobody=="black_player" || tipobody=="grey_player"|| tipobody=="brown_player")&&
 				 	(key_player=="orange_player"||key_player=="violet_player"||key_player=="yellow_player"||
 				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
 				 	{
 				 		banderin=true;
 				 		this.puntos=this.puntos+puntos_prision;
+				 		console.log("player_coll en game.js");
 				 		Client.colision({key:body.sprite.id});
 				 	}
 			}
-			//console.log("tipobody "+tipobody);
-			if(tipobody=="prison"){
-				
-			}
+		
 			if(tipobody=="pared" && 
 				(key_player=="orange_player" || key_player=="red_player" || key_player=="violet_player" ||
 					key_player=="pink_player" || key_player=="green_player" || key_player=="yellow_player"||
@@ -398,7 +405,6 @@ Game.onRemovePlayer=function(data) {
 
 Game.saltar=function(data){
 	console.log("GAME.SALTAR");
-	Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
 	player.preso=true;
 	this.preso=true;
 	this.puntos=this.puntos+puntos_prision;
@@ -410,11 +416,17 @@ function sleep(ms) {
 }
 
 async function demo(data) {
+	var primero=true;
 	console.log("DEMO");
 	 while(player.preso){
-		  player.reset(data.x, data.y);
-		  await sleep(2000);
-		  //console.log(player.position);
+		player.reset(data.x, data.y);
+		if(primero){
+			primero=false;
+			console.log("Actualizo jugador en prision!");
+			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
+		}
+		await sleep(2000);
+		//console.log(player.position);
 	 }
 	 console.log("SALI DE PRISION");
 	 //player.preso=false;
@@ -435,8 +447,10 @@ function render(){};
 function cant_presos(){
 	var presos=0;
 	var cant=enemies.length;
+	console.log("cant "+cant);
 	for (var i = 0; i < cant; i++){
-		if (enemies[i].preso) {
+		console.log("enemies[i].preso "+enemies[i].preso);
+		if(enemies[i].preso==true){
 			presos=presos+1; 
 		}
 	}
@@ -468,34 +482,35 @@ Game.lbupdate=function(data) {
 	var maxlen = 10;
 	var maxPlayerDisplay = 10;
 	var mainPlayerShown = false;
-	
-	for (var i = 0;  i < data.length; i++) {
-		//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
-		// and then add three dots at the end, and show player's rank.
-		if (!mainPlayerShown && i >= maxPlayerDisplay - 1 && socket.id == data[i].id) {
-			board_string = board_string.concat(".\n");
-			board_string = board_string.concat(".\n");
-			board_string = board_string.concat(".\n");
-			mainPlayerShown = true;
-		}
-		//here we are checking if user id is greater than 10 characters, if it is 
-		//it is too long, so we're going to trim it.
-		if (data[i].username.length >= 10) {
-			var username = data[i].username;
-			var temp = ""; 
-			for (var j = 0; j < maxlen; j++) {
-				temp += username[j];
+	if(leader_text!=null){
+		for (var i = 0;  i < data.length; i++) {
+			//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
+			// and then add three dots at the end, and show player's rank.
+			if (!mainPlayerShown && i >= maxPlayerDisplay - 1 && socket.id == data[i].id) {
+				board_string = board_string.concat(".\n");
+				board_string = board_string.concat(".\n");
+				board_string = board_string.concat(".\n");
+				mainPlayerShown = true;
 			}
-			temp += "...";
-			username = temp;
-			//change to player username instead of id.
-			board_string = board_string.concat(i + 1,": ");
-			board_string = board_string.concat(username," ",(data[i].puntos).toString() + "\n");
-		}else{
-			board_string = board_string.concat(i + 1,": ");
-			board_string = board_string.concat(data[i].username," ",(data[i].puntos).toString() + "\n");
+			//here we are checking if user id is greater than 10 characters, if it is 
+			//it is too long, so we're going to trim it.
+			if (data[i].username.length >= 10) {
+				var username = data[i].username;
+				var temp = ""; 
+				for (var j = 0; j < maxlen; j++) {
+					temp += username[j];
+				}
+				temp += "...";
+				username = temp;
+				//change to player username instead of id.
+				board_string = board_string.concat(i + 1,": ");
+				board_string = board_string.concat(username," ",(data[i].puntos).toString() + "\n");
+			}else{
+				board_string = board_string.concat(i + 1,": ");
+				board_string = board_string.concat(data[i].username," ",(data[i].puntos).toString() + "\n");
+			}
 		}
+		//console.log(board_string);
+		leader_text.setText(board_string); 
 	}
-	//console.log(board_string);
-	leader_text.setText(board_string); 
 }

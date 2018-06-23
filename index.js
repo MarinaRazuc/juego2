@@ -33,9 +33,9 @@ var game_setup = function() {
   //food object list
   this.food_pickup = [];
   //game size height
-  this.canvas_height =2000;
+  this.canvas_height =4000;//2000;
   //game size width
-  this.canvas_width =2000; 
+  this.canvas_width =4000;//2000; 
 }
 
 // createa a new game instance
@@ -205,7 +205,7 @@ io.on('connection', function(socket){
             var unique_id = unique.v4(); 
             var str_clr=newPlayer.color+"_food";
                      
-            var foodentity = new foodpickup(game_instance.canvas_width-250, game_instance.canvas_height-250, str_clr/*'food'*/, unique_id);
+            var foodentity = new foodpickup(2500, 2500, str_clr/*'food'*/, unique_id);
             game_instance.food_pickup.push(foodentity); 
             //set the food data back to client
             socket.emit("item_update", foodentity); 
@@ -228,7 +228,6 @@ io.on('connection', function(socket){
             //console.log("en verdad entro aca");
             return;
           }
-          
           setTimeout(function() {movePlayer.sendData = true}, 50);
           //we set sendData to false when we send the data. 
           movePlayer.sendData = false;
@@ -305,7 +304,7 @@ io.on('connection', function(socket){
     var ygriega=Math.random() * (maxPY - minPY) + minPY;
     movePlayer.puntos+=puntos_prision;
     enemyPlayer.puntos+=puntos_atrapar;
-  //  console.log("enemyPlayer.puntos actuales ", enemyPlayer.puntos);
+    movePlayer.preso=true;
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
   }); //fin player collision
 

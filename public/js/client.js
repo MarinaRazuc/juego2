@@ -37,10 +37,7 @@ Client.levantarBanderin=function(data){
 Client.nombre_usr=function(data){
   Client.socket.emit('enter_name', {username: data.username});
 }
-// Client.loguear=function(data){
-//  // console.log("En Client.loguear");
-//   Client.socket.emit('logged_in', {username: data.username, tipo: data.tipo});
-// }
+
 Client.colision=function(data){
   console.log("colision en client.js");
   Client.socket.emit('player_collision', {id:data.key});
