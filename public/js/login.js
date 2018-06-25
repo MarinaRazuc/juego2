@@ -1,13 +1,3 @@
-
-// if(gameProperties.cantL>2){
-// 	console.log("EN EL IF");
-// 	document.getElementById("poli").disabled=false;
-// 	cartel.style.display='none';
-// }else{
-// 	console.log("EN EL ELSE");
-// 	document.getElementById("poli").disabled=true;
-// }
-
 document.getElementById("datos").style.display='none';
 document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {

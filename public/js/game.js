@@ -52,7 +52,7 @@ var prisonCollisionGroup;
 const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
-const puntos_liberar=6;
+const puntos_liberar=5;
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
 Game.init=function(username, tipo){
@@ -65,10 +65,13 @@ Game.init=function(username, tipo){
 	// 	gameProperties.cantP+=1;
 	// }
 	//console.log("cants "+gameProperties.cantP+" "+gameProperties.cantL);
+	demo2();
 };
 
 
 Game.preload=function(){
+
+
 		game.load.tilemap('mapa', '/assets/Mapa_5.json', null, Phaser.Tilemap.TILED_JSON);
 		game.load.image('tiles', '/assets/PathAndObjects.png');
 		game.load.image('tiles', '/assets/castle_tileset_part3.png');
@@ -97,6 +100,7 @@ Game.preload=function(){
 }
 
 Game.create=function() {
+	game.load.reset(true);
 	game.world.setBounds(0, 0, window.innerHeight * window.devicePixelRatio+10, window.innerWidth * window.devicePixelRatio+10);
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
@@ -367,12 +371,12 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 					key_player=="blue_player"))
 			{
 				console.log("Liberando prisioneros...");
-				var presos=cant_presos();
-				console.log("CANTIDAD DE PRESOS: "+presos);
+				// var presos=cant_presos();
+				// console.log("CANTIDAD DE PRESOS: "+presos);
 
 				//if(presos>0){
-					this.puntos=this.puntos+puntos_prision*presos;
-					Client.liberar({p:presos});
+					Client.liberar();
+					//this.puntos=this.puntos+puntos_prision*presos;
 				//}
 			}
 		}
@@ -381,13 +385,16 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 
 
 Game.Liberar=function(data){
-	player.preso=false;
-	this.preso=false;
+	if(player.preso){
+		player.preso=false;
+		this.preso=false;
+		Client.salir_de_prision();
+	}
 };
 
-Game.aumentar=function(){
-	console.log("aumente puntos por liberar jugadores");
-	this.puntos=this.puntos+puntos_liberar;
+Game.aumentar=function(data){
+	console.log("aumente puntos por liberar jugadores: "+data.presos);
+	this.puntos=this.puntos+puntos_liberar*data.presos;
 };
 
 // When the server notifies us of client disconnection, we find the disconnected
@@ -432,6 +439,10 @@ async function demo(data) {
 	 //player.preso=false;
 }
 
+async function demo2(){
+	await sleep(2000);
+}
+
 // search through food list to find the food object
 function finditembyid (id) {
 	for (var i = 0; i < food_pickup.length; i++) {
@@ -446,15 +457,20 @@ function render(){};
 
 function cant_presos(){
 	var presos=0;
-	var cant=enemies.length;
-	console.log("cant "+cant);
-	for (var i = 0; i < cant; i++){
-		console.log("enemies[i].preso "+enemies[i].preso);
-		if(enemies[i].preso==true){
-			presos=presos+1; 
-		}
-	}
-	return presos;
+	// var cant=enemies.length;
+	// console.log("cant "+cant);
+	// for (var i = 0; i < cant; i++){
+	// 	console.log("enemies[i].preso "+enemies[i].preso);
+	// 	if(enemies[i].preso==true){
+	// 		presos=presos+1; 
+	// 	}
+	// }
+	// return presos;
+
+	Client.npresos({presos:presos});
+	console.log("presos luego de conteo: "+presos);
+	return presos; 
+
 };
 
 

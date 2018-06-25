@@ -53,7 +53,7 @@ const max_banderas=30;
 const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
-const puntos_liberar=6;
+const puntos_liberar=5;
 
 app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
@@ -98,7 +98,7 @@ io.on('connection', function(socket){
   // when the player enters their name, trigger this function
   socket.on('enter_name', function(data){
     var usrname;
-    if(data.username.length==0){
+    if(data.username.length==0 || data.username=="" || data.username==" " || data.username[0]==" "){
       temp=(this.id).toString();
       temp=temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
       usrname="player_"+temp;
@@ -305,14 +305,29 @@ io.on('connection', function(socket){
     movePlayer.puntos+=puntos_prision;
     enemyPlayer.puntos+=puntos_atrapar;
     movePlayer.preso=true;
+    socket.emit("leader_board",sortPlayerListByScore());
+    socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
   }); //fin player collision
 
-  socket.on("liberar_prisioneros", function(data){
+  socket.on("liberar_prisioneros", function(){
     var movePlayer=find_playerid(this.id);
-    movePlayer.puntos=movePlayer.puntos+data.p*puntos_liberar;
-    // var liberados;
-    socket.broadcast.emit("liberar");
+    
+    var presos=0;
+    if (player_lst.length>0){
+      for (var i = 0; i < player_lst.length; i++) {
+        if (player_lst[i].preso){
+          presos=presos+1; 
+        }
+      }
+    }
+    console.log("presos "+presos);
+    movePlayer.puntos=movePlayer.puntos+presos*puntos_liberar;
+    socket.emit("leader_board",sortPlayerListByScore());
+    socket.broadcast.emit("leader_board",sortPlayerListByScore());
+    socket.broadcast.emit("liberar"); //para todos los demas
+    socket.emit("liberados",{cant:presos}); //para el q libero
+
     // console.log("Liberados? "+liberados);
     // if(liberados){
     //   var movePlayer = find_playerid(this.id);
@@ -321,6 +336,24 @@ io.on('connection', function(socket){
     // }
   });
 
+  // socket.on("contar_presos", function(data){
+  //   var presos=0;
+  //   if (player_lst.length>0){
+  //     for (var i = 0; i < player_lst.length; i++) {
+  //       if (player_lst[i].preso){
+  //         presos=presos+1; 
+  //       }
+  //     }
+  //   }
+  //   console.log("presos "+presos);
+  //   data.presos=presos; 
+  //  // return presos;
+  // });
+
+  socket.on("salir_de_prision", function(){
+    var movePlayer=find_playerid(this.id);
+    movePlayer.preso=false;
+  });
 
     //call when a client disconnects and tell the clients except sender to remove the disconnected player
     socket.on("disconnect", function(){

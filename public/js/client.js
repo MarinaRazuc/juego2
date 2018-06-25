@@ -43,8 +43,18 @@ Client.colision=function(data){
   Client.socket.emit('player_collision', {id:data.key});
 }
 
-Client.liberar=function(data){
-  Client.socket.emit('liberar_prisioneros', {p:data.p});
+Client.liberar=function(){
+  Client.socket.emit('liberar_prisioneros');
+}
+
+Client.npresos=function(data){
+  var p=0;
+  Client.socket.emit("contar_presos", {presos: p});
+  data.presos=p;
+}
+
+Client.salir_de_prision=function(){
+  Client.socket.emit("salir_de_prision");
 }
 
 Client.socket.on('move',function(data){//data es socket.player
@@ -93,9 +103,9 @@ Client.socket.on("leader_board", function(data){
   Game.lbupdate(data);
 });
 
-Client.socket.on("puntos", function(){
-  Game.aumentar();
-});
+// Client.socket.on("puntos", function(){
+//   Game.aumentar();
+// });
 
 function listar(data){
   Game.lbupdate(data);
@@ -106,6 +116,10 @@ Client.socket.on('salto', function(data){
 
 Client.socket.on('liberar', function(data){
   Game.Liberar(data);
+});
+
+Client.socket.on("liberados", function(data){
+  Game.aumentar({presos: data.cant});
 });
 
 function randomInt(low, high){
