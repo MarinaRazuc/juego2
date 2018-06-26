@@ -45,26 +45,30 @@ var customBounds;
 var USERNAME;
 var test;
 var paredes;
-var spriteMaterial;
-var worldMaterial;
-var playerCollisionGroup;
-var prisonCollisionGroup;
+// var spriteMaterial;
+// var worldMaterial;
+// var playerCollisionGroup;
+// var prisonCollisionGroup;
+var ladrones=0;
+var=cant_presos=0;
+var listo=false;
+var bandlev=0;
+const max_banderas=30;
 const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
+
+
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
 Game.init=function(username, tipo){
 	USERNAME=username;
 	TIPO_J=tipo;
+	if(tipo=="lad"){
+		ladrones=ladrones+1;
+	}
 	game.stage.disableVisibilityChange=true;//estaba en true
-	// if(TIPO_J=="lad"){
-	// 	gameProperties.cantL+=1;
-	// }else{
-	// 	gameProperties.cantP+=1;
-	// }
-	//console.log("cants "+gameProperties.cantP+" "+gameProperties.cantL);
 	demo2();
 };
 
@@ -97,6 +101,8 @@ Game.preload=function(){
 
 		game.load.image('pared', '/assets/castleCenter.png');
 		game.load.image("prison", "/assets/prison_2.png");
+
+		game.load.start();
 }
 
 Game.create=function() {
@@ -160,6 +166,9 @@ Game.removePlayer=function(id){
 	if (!removePlayer) {
 		//console.log('Player not found: ', data.id)
 		return;
+	}
+	if(removePlayer.tipo=="lad"){
+		ladrones=ladrones-1;
 	}
  	removePlayer.player.destroy();
    	enemies.splice(enemies.indexOf(removeplayer), 1);
@@ -351,6 +360,11 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				Client.levantarBanderin({id:key}); 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
+				bandlev=bandlev+1;
+				if(bandlev==max_banderas){
+					listo=true;
+					//enviar al servidor que está listo.
+				}
 			}
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
@@ -361,7 +375,11 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 		banderin=true;
 				 		this.puntos=this.puntos+puntos_prision;
 				 		console.log("player_coll en game.js");
+				 		document.getElementById('prison').style.display='block';
 				 		Client.colision({key:body.sprite.id});
+				 		if(cant_presos==ladrones){
+				 			console.log("Finalizar juego, ganan policías.");
+				 		}
 				 	}
 			}
 		
@@ -371,13 +389,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 					key_player=="blue_player"))
 			{
 				console.log("Liberando prisioneros...");
-				// var presos=cant_presos();
-				// console.log("CANTIDAD DE PRESOS: "+presos);
-
-				//if(presos>0){
-					Client.liberar();
-					//this.puntos=this.puntos+puntos_prision*presos;
-				//}
+				Client.liberar();
 			}
 		}
 	}
@@ -388,7 +400,9 @@ Game.Liberar=function(data){
 	if(player.preso){
 		player.preso=false;
 		this.preso=false;
+		document.getElementById('prison').style.display='none';
 		Client.salir_de_prision();
+		cant_presos=cant_presos-1; //o ponerlo directamente en 0
 	}
 };
 
@@ -414,6 +428,7 @@ Game.saltar=function(data){
 	console.log("GAME.SALTAR");
 	player.preso=true;
 	this.preso=true;
+	cant_presos=cant_presos+1;
 	this.puntos=this.puntos+puntos_prision;
 	demo(data);
 };
@@ -454,25 +469,6 @@ function finditembyid (id) {
 };
 
 function render(){};
-
-function cant_presos(){
-	var presos=0;
-	// var cant=enemies.length;
-	// console.log("cant "+cant);
-	// for (var i = 0; i < cant; i++){
-	// 	console.log("enemies[i].preso "+enemies[i].preso);
-	// 	if(enemies[i].preso==true){
-	// 		presos=presos+1; 
-	// 	}
-	// }
-	// return presos;
-
-	Client.npresos({presos:presos});
-	console.log("presos luego de conteo: "+presos);
-	return presos; 
-
-};
-
 
 //create leader board in here.
 function createLeaderBoard() {

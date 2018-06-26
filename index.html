@@ -12,10 +12,13 @@
 </head>
 <body>
     <div class="container">
-      <div class="row container3"></div>
-      <div class="row div2" id="datos">
-        <div  class= "col-xs-12 col-sm-6 col-md-6"><p id="MiPos">Mi posición: </p></div>
-        <div  class="col-xs-12 col-sm-6 col-md-6"><p id="score">Banderines: </p></div>
+      <div class="row container3">
+        <div class="row container3"> </div>
+        <div class="col div2" id="datos">
+          <div  class= "col-xs-12 col-sm-6 col-md-6"><p id="MiPos">Mi posición: </p></div>
+          <div  class="col-xs-12 col-sm-6 col-md-6"><p id="score">Banderines: </p></div>
+          <div class="col-xs-12 col-sm-6 col-md-6"><p id="prison">¡Estás en prisión! Esperá a que te liberen.</p></div>
+        </div>
       </div>
       <!-- <div id="cartel"> (Sólo 'ladrón' disponible) </div> -->
       <div id="signDiv" class="container container2">
@@ -44,6 +47,21 @@
     </div>
     
     <div id="game"></div>
+    <div id="cartelGanar">¡Fin del juego! Ganador: </div>
+    
+   <!--  <script type="text/javascript">
+      function mostrarVentana(){
+        var ventana = document.getElementById('miVentana');
+        ventana.style.marginTop = "100px";
+        ventana.style.left = ((document.body.clientWidth-350) / 2) +  "px";
+        ventana.style.display = 'block';
+      }
+
+      function ocultarVentana(){
+        var ventana = document.getElementById('miVentana');
+        ventana.style.display = 'none';
+      }
+    </script> -->
 
     <script src="/js/game.js" type="text/javascript"></script>
     <script src="/js/player.js" type="text/javascript"></script>

@@ -1,4 +1,6 @@
+document.getElementById("prison").style.display='none';
 document.getElementById("datos").style.display='none';
+document.getElementById("cartelGanar").style.display='none';
 document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {
 		gameProperties.in_game = true; 

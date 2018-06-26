@@ -286,13 +286,14 @@ io.on('connection', function(socket){
       }
       game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
       movePlayer.puntos=movePlayer.puntos+puntos_banderin; //por ahora +1, despues se vera
-     socket.emit("leader_board",sortPlayerListByScore());
+      socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
       //comunicar a todos los jugadores, incluyéndome
       socket.emit('itemremove', object);
       socket.broadcast.emit('itemremove', object); 
 
-      //socket.emit('item_picked');//?????
+      /* preguntar por todos los jugadores, si están todos listos, ganaron*/
+
   }); //fin item picked
 
 //------------------------------------------------------------COLISION
