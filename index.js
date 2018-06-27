@@ -228,50 +228,54 @@ io.on('connection', function(socket){
             //console.log("en verdad entro aca");
             return;
           }
-          setTimeout(function() {movePlayer.sendData = true}, 50);
-          //we set sendData to false when we send the data. 
-          movePlayer.sendData = false;
-          //Make a new pointer with the new inputs from the client. 
-          //contains player positions in server
-          var serverPointer = {
-            x: data.pointer_x,
-            y: data.pointer_y,
-            worldX: data.pointer_worldx,    
-            worldY: data.pointer_worldy
-          }
-          //moving the player to the new inputs from the player
-          // console.log(movePlayer.playerBody);
-          if(physicsPlayer.distanceToPointer(movePlayer, serverPointer) <=30) {
-            movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, 0, serverPointer, 1000);
-          }else{
-            movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, movePlayer.speed, serverPointer); 
-          }
 
-          movePlayer.x = movePlayer.playerBody.position[0]; 
-          movePlayer.y = movePlayer.playerBody.position[1];
+          //if(data.preso){
+           //   movePlayer.reset(data.x, data.y);
+          //}else{
+              setTimeout(function() {movePlayer.sendData = true}, 50);
+              //we set sendData to false when we send the data. 
+              movePlayer.sendData = false;
+              //Make a new pointer with the new inputs from the client. 
+              //contains player positions in server
+              var serverPointer = {
+                x: data.pointer_x,
+                y: data.pointer_y,
+                worldX: data.pointer_worldx,    
+                worldY: data.pointer_worldy
+              }
+              //moving the player to the new inputs from the player
+              // console.log(movePlayer.playerBody);
+              if(physicsPlayer.distanceToPointer(movePlayer, serverPointer) <=30) {
+                movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, 0, serverPointer, 1000);
+              }else{
+                movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, movePlayer.speed, serverPointer); 
+              }
 
-         //new player position to be sent back to client. 
-         var info = {
+              movePlayer.x = movePlayer.playerBody.position[0]; 
+              movePlayer.y = movePlayer.playerBody.position[1];
+
+             //new player position to be sent back to client. 
+             var info = {
+                id:movePlayer.id,
+                x: movePlayer.playerBody.position[0], 
+                y: movePlayer.playerBody.position[1],
+                angle: movePlayer.playerBody.angle
+              } 
+
+              //send to sender (not to every clients). 
+              socket.emit("input_rec", info);
              
-            id:movePlayer.id,
-            x: movePlayer.playerBody.position[0], 
-            y: movePlayer.playerBody.position[1],
-            angle: movePlayer.playerBody.angle
-          } 
-
-          //send to sender (not to every clients). 
-          socket.emit("input_rec", info);
-         
-          //data to be sent back to everyone except sender 
-          var moveplayerData = {
-            id: movePlayer.id, 
-            x: movePlayer.playerBody.position[0],
-            y: movePlayer.playerBody.position[1],
-            angle: movePlayer.playerBody.angle, 
-            size: movePlayer.size
-          }
-          //send to everyone except sender 
-          socket.broadcast.emit('enemy_move', moveplayerData);
+              //data to be sent back to everyone except sender 
+              var moveplayerData = {
+                id: movePlayer.id, 
+                x: movePlayer.playerBody.position[0],
+                y: movePlayer.playerBody.position[1],
+                angle: movePlayer.playerBody.angle, 
+                size: movePlayer.size
+              }
+              //send to everyone except sender 
+              socket.broadcast.emit('enemy_move', moveplayerData);
+          //}
   }); //fin input fired
 
 

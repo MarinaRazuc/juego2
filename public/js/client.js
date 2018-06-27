@@ -22,6 +22,7 @@ Client.moverJugador = function(pointer){
     pointer_y: pointer.y, 
     pointer_worldx: pointer.worldX, 
     pointer_worldy: pointer.worldY, 
+    preso: pointer.preso
   });
  // Client.socket.emit('moverJugador',{x:pointer.x, y:pointer.y});
 };

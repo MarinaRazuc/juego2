@@ -14,7 +14,8 @@ var gameProperties = {
 	in_game: false
 };
 //********************F
-
+var posx=451;
+var posy=377;
 var players;
 var id_tile;
 var bounds;
@@ -50,7 +51,7 @@ var paredes;
 // var playerCollisionGroup;
 // var prisonCollisionGroup;
 var ladrones=0;
-var=cant_presos=0;
+var cant_presos=0;
 var listo=false;
 var bandlev=0;
 const max_banderas=30;
@@ -74,8 +75,6 @@ Game.init=function(username, tipo){
 
 
 Game.preload=function(){
-
-
 		game.load.tilemap('mapa', '/assets/Mapa_5.json', null, Phaser.Tilemap.TILED_JSON);
 		game.load.image('tiles', '/assets/PathAndObjects.png');
 		game.load.image('tiles', '/assets/castle_tileset_part3.png');
@@ -154,7 +153,7 @@ Game.update=function(){
 		if(!player.preso){
 			Client.moverJugador(game.input.mousePointer);
 		}else{
-			//console.log("presum");
+			//Client.moverJugador(posx, posy);
 		}
 	}
 };
@@ -254,6 +253,9 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 	this.player=game.add.sprite(this.x, this.y, color);
 	this.player.type = "player_body"; //para colisiones
 	console.log("game.physics.p2 ", game.physics.p2);
+	if(game.physics.p2==null){
+		Game.preload();
+	}
 	game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
 	this.player.body.collideWorldBounds = true;
 	this.player.body.clearShapes();
@@ -445,10 +447,10 @@ async function demo(data) {
 		if(primero){
 			primero=false;
 			console.log("Actualizo jugador en prision!");
-			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y});
+			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y, preso:true});
 		}
 		await sleep(2000);
-		//console.log(player.position);
+		console.log(player.position);
 	 }
 	 console.log("SALI DE PRISION");
 	 //player.preso=false;
