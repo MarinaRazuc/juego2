@@ -123,6 +123,14 @@ Client.socket.on("liberados", function(data){
   Game.aumentar({presos: data.cant});
 });
 
+Client.socket.on('player_preso', function(data){
+  Game.resetear({id: data.id, x:data.x, y:data.y});
+});
+
+Client.socket.on('player_liberado', function(data){
+  Game.resetear({id:data.id, x:data.x, y:data.y});
+});
+
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
 };

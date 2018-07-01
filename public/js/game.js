@@ -60,7 +60,7 @@ const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
 
-
+var carga = 0;
 //No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
 //incluso cuando la ventana del juego no esté en foco 
 Game.init=function(username, tipo){
@@ -70,7 +70,8 @@ Game.init=function(username, tipo){
 		ladrones=ladrones+1;
 	}
 	game.stage.disableVisibilityChange=true;//estaba en true
-	demo2();
+	game.physics.startSystem(Phaser.Physics.P2JS);
+	carga++;console.log("carga "+carga);
 };
 
 
@@ -100,13 +101,27 @@ Game.preload=function(){
 
 		game.load.image('pared', '/assets/castleCenter.png');
 		game.load.image("prison", "/assets/prison_2.png");
+		game.load.image("prison1", "/assets/p_arriba.png");
+		game.load.image("prison2", "/assets/p_abajo.png");
+		game.load.image("prison3", "/assets/p_derecha.png");
+		game.load.image("prison4", "/assets/p_izquierdo.png");
 
-		game.load.start();
+		game.physics.startSystem(Phaser.Physics.P2JS);
+		game.physics.p2.restitution = 0.3;	
+		game.physics.p2.gravity.y = 0;
+		game.physics.p2.applyGravity = false; 
+		game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
+		
+		carga++;console.log("carga "+carga);
+
+				// game.load.start();
 }
 
 Game.create=function() {
-	game.load.reset(true);
+
+	// game.load.reset(true);
 	game.world.setBounds(0, 0, window.innerHeight * window.devicePixelRatio+10, window.innerWidth * window.devicePixelRatio+10);
+	// game.physics.startSystem(Phaser.Physics.P2JS);
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
@@ -116,27 +131,40 @@ Game.create=function() {
 	//Capa_2 = map.createLayer('Capa_2');
 
 	Capa_1.resizeWorld();
-	game.physics.startSystem(Phaser.Physics.P2JS);
 
-	game.physics.p2.setImpactEvents(true);
-   // Make things a bit more bouncey
-	game.physics.p2.restitution = 0.3;	
- //   game.physics.p2.updateBoundsCollisionGroup();
+	//game.physics.p2.setImpactEvents(true);
+ //   // Make things a bit more bouncey
+	// game.physics.p2.restitution = 0.3;	
+ // //   game.physics.p2.updateBoundsCollisionGroup();
 
-	game.physics.p2.gravity.y = 0;
-	game.physics.p2.applyGravity = false; 
-	game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
+	// game.physics.p2.gravity.y = 0;
+	// game.physics.p2.applyGravity = false; 
+	// game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
 	var width = this.game.width;
     var height = this.game.height;
 
 	// para trackear a los jugadores
     Game.playerMap={};
-    var prison=game.add.sprite(450,368,"prison");
-    game.physics.p2.enable(prison, Phaser.Physics.p2);
-   	prison.body.data.shapes[0].sensor=true;
-    prison.type="pared";
-    prison.body.type="pared";
- 	
+   // var prison=game.add.sprite(450,368,"prison");
+    var prison1, prison2, prison3, prison4;
+    prison1=game.add.sprite(450, 205, "prison1");
+    prison2=game.add.sprite(450, 532, "prison2");
+    prison3=game.add.sprite(660, 368, "prison3");
+    prison4=game.add.sprite(235, 365, "prison4");
+    
+    game.physics.p2.enable(prison1);
+    game.physics.p2.enable(prison2);
+    game.physics.p2.enable(prison3);
+    game.physics.p2.enable(prison4);
+
+   //	prison.body.data.shapes[0].sensor=true;
+    prison1.body.kinematic = true;
+    prison2.body.kinematic = true;
+    prison3.body.kinematic = true;
+    prison4.body.kinematic = true;
+   // prison.body.velocity.x = 10;
+    //prison.type="pared";
+    //prison.body.type="pared";
 
 	var sitio=game.add.sprite(200,300,"pared");
     game.physics.p2.enable(sitio, Phaser.Physics.p2);
@@ -146,15 +174,18 @@ Game.create=function() {
 
 	createLeaderBoard();
 	Client.askNewPlayer({username: USERNAME, tipo:TIPO_J, x:0, y:0, angle:0}); 
+	carga++;console.log("carga "+carga);
+
 };
 
 Game.update=function(){
 	if(player){
-		if(!player.preso){
+		 if(!player.preso){
 			Client.moverJugador(game.input.mousePointer);
-		}else{
-			//Client.moverJugador(posx, posy);
-		}
+		 }
+		 //else{
+		// 	//Client.moverJugador(posx, posy);
+		// }
 	}
 };
 
@@ -252,18 +283,20 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 	this.angle = startAngle;
 	this.player=game.add.sprite(this.x, this.y, color);
 	this.player.type = "player_body"; //para colisiones
-	console.log("game.physics.p2 ", game.physics.p2);
+	// console.log("game.physics.p2 ", game.physics.p2);
 	if(game.physics.p2==null){
 		Game.preload();
 	}
 	game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
+	//game.physics.p2.enable(this.player, Phaser.Physics.p2);
 	this.player.body.collideWorldBounds = true;
 	this.player.body.clearShapes();
 	this.player.body.setCircle(16);
-	this.player.body.data.shapes[0].sensor = true;
+	this.player.kinematic=true;
+	//this.player.body.data.shapes[0].sensor = true;
 	this.player.id=id;
-	this.player.type=type;
-	this.player.body.type="player_body";
+	// this.player.type=type;
+	// this.player.body.type="player_body";
 	this.preso=preso;
 	this.puntos=puntos; //????
 	var style = {fill: "black", align: "center", fontSize:'18px'};
@@ -279,20 +312,21 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	//player.scale.set(2);
 	player.smoothed=false;
 	//  Enable if for physics. This creates a default rectangular body.
-	game.physics.p2.enable(player, Phaser.Physics.p2);
+	game.physics.p2.enable(player);
     player.body.setCircle(16);
 //--------------------------------------------------
 	//player.body.fixedRotation = true;
-	player.body.collideWorldBounds = true;
-	player.body.data.shapes[0].sensor = true;
+	//player.body.collideWorldBounds = true;
+	//player.body.data.shapes[0].sensor = true;
 //--------------------------------------------------	
 	player.type = "player_body"; //necesario para las colisiones
 	player.preso=data.preso;
 	player.puntos=data.puntos;
+	player.kinematic=true;
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
-	player.body.type="player_body";
+	//player.body.type="player_body";
 	// player follow text (set text to username)
 	var style = {fill: "white", align: "right", fontSize:'20px'};
 	player.playertext = game.add.text(0, 0, data.username , style);
@@ -384,6 +418,9 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 		}
 				 	}
 			}
+			if(tipobody=="prison"){
+				console.log("choque prision");
+			}
 		
 			if(tipobody=="pared" && 
 				(key_player=="orange_player" || key_player=="red_player" || key_player=="violet_player" ||
@@ -403,6 +440,7 @@ Game.Liberar=function(data){
 		player.preso=false;
 		this.preso=false;
 		document.getElementById('prison').style.display='none';
+		player.reset(150,150);
 		Client.salir_de_prision();
 		cant_presos=cant_presos-1; //o ponerlo directamente en 0
 	}
@@ -432,7 +470,15 @@ Game.saltar=function(data){
 	this.preso=true;
 	cant_presos=cant_presos+1;
 	this.puntos=this.puntos+puntos_prision;
-	demo(data);
+	player.reset(data.x, data.y);
+	console.log("Actualizo jugador en prision!");
+	
+	//demo(data);
+};
+Game.resetear=function(data) {
+	var movePlayer=findplayerbyid(data.id);
+	movePlayer.player.reset(158, 16);
+	console.log("movePlayerrrrrrrrrrrrrr "+movePlayer);
 };
 
 function sleep(ms) {
@@ -446,19 +492,15 @@ async function demo(data) {
 		player.reset(data.x, data.y);
 		if(primero){
 			primero=false;
-			console.log("Actualizo jugador en prision!");
 			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y, preso:true});
 		}
 		await sleep(2000);
-		console.log(player.position);
+		//console.log(player.position);
 	 }
 	 console.log("SALI DE PRISION");
 	 //player.preso=false;
 }
 
-async function demo2(){
-	await sleep(2000);
-}
 
 // search through food list to find the food object
 function finditembyid (id) {

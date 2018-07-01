@@ -313,6 +313,8 @@ io.on('connection', function(socket){
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
+    socket.broadcast.emit("player_preso",{id:this.id, x:equis, y:ygriega});
+
   }); //fin player collision
 
   socket.on("liberar_prisioneros", function(){
@@ -332,32 +334,13 @@ io.on('connection', function(socket){
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("liberar"); //para todos los demas
     socket.emit("liberados",{cant:presos}); //para el q libero
-
-    // console.log("Liberados? "+liberados);
-    // if(liberados){
-    //   var movePlayer = find_playerid(this.id);
-    //   movePlayer.puntos+=puntos_liberar;
-    //   socket.emit("puntos");
-    // }
   });
 
-  // socket.on("contar_presos", function(data){
-  //   var presos=0;
-  //   if (player_lst.length>0){
-  //     for (var i = 0; i < player_lst.length; i++) {
-  //       if (player_lst[i].preso){
-  //         presos=presos+1; 
-  //       }
-  //     }
-  //   }
-  //   console.log("presos "+presos);
-  //   data.presos=presos; 
-  //  // return presos;
-  // });
 
   socket.on("salir_de_prision", function(){
     var movePlayer=find_playerid(this.id);
     movePlayer.preso=false;
+    socket.broadcast.emit("player_liberado", {id:this.id, x:150, y:150});
   });
 
     //call when a client disconnects and tell the clients except sender to remove the disconnected player
