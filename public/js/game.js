@@ -46,12 +46,7 @@ var customBounds;
 var USERNAME;
 var test;
 var paredes;
-// var spriteMaterial;
-// var worldMaterial;
-// var playerCollisionGroup;
-// var prisonCollisionGroup;
-var ladrones=0;
-var cant_presos=0;
+
 var listo=false;
 var bandlev=0;
 const max_banderas=30;
@@ -66,9 +61,6 @@ var carga = 0;
 Game.init=function(username, tipo){
 	USERNAME=username;
 	TIPO_J=tipo;
-	if(tipo=="lad"){
-		ladrones=ladrones+1;
-	}
 	game.stage.disableVisibilityChange=true;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
 	carga++;console.log("carga "+carga);
@@ -99,7 +91,7 @@ Game.preload=function(){
 		game.load.image('pink_player_food', '/assets/banderinRosa2.png');
 		game.load.image('red_player_food', '/assets/banderinRojo2.png');
 
-		game.load.image('pared', '/assets/castleCenter.png');
+		game.load.image('pared', '/assets/castleCenter_2.png');
 		game.load.image("prison", "/assets/prison_2.png");
 		game.load.image("prison1", "/assets/p_arriba.png");
 		game.load.image("prison2", "/assets/p_abajo.png");
@@ -172,10 +164,82 @@ Game.create=function() {
     sitio.type="sitio";
     sitio.body.type="sitio";
 
+//---------------------------------------------------------------
+
+    Client.socket.on('move',function(data){//data es socket.player
+    	Game.movePlayer(data.id, data.x, data.y);
+	});
+
+	Client.socket.on('remove',function(id){
+	    Game.removePlayer(id);
+	});
+
+	Client.socket.on("enemy_move", function(data){
+	    Game.onEnemyMove(data); 
+	});
+	Client.socket.on("input_rec", function(data){ 
+	  Game.onInputRecieved(data);
+	//Game.movePlayer(data.id, data.x, data.y);
+	});
+
+	//listen to new enemy connections
+	Client.socket.on("new_enemyPlayer", function(data){
+	    Game.onNewPlayer(data);
+	});
+
+	Client.socket.on("create_player", function(data){
+	  Game.create_player(data);
+	});
+
+	Client.socket.on("item_update", function(data){
+	  Game.onItemUpdate(data);
+	});
+
+	Client.socket.on("itemremove", function(data){
+	  Game.onItemRemove(data);
+	});
+
+	Client.socket.on("remove_player", function(data){
+	  Game.onRemovePlayer(data);
+	});
+
+	Client.socket.on("enter_game", function(data){
+	  console.log("client.js en enter_game");
+	  Game.logueado({username: data.username});
+	});
+
+	Client.socket.on("leader_board", function(data){
+	  Game.lbupdate(data);
+	});
+
+	// Client.socket.on("puntos", function(){
+	//   Game.aumentar();
+	// });
+
+	Client.socket.on('salto', function(data){
+	  Game.saltar({x:data.x, y:data.y});
+	});
+
+	Client.socket.on('liberar', function(data){
+	  Game.Liberar(data);
+	});
+
+	Client.socket.on("liberados", function(data){
+	  Game.aumentar({presos: data.cant});
+	});
+
+	Client.socket.on('player_reset', function(data){
+	  Game.resetear({id: data.id, x:data.x, y:data.y});
+	});
+
+
+//------------------------------------------------------------
+
+
+
 	createLeaderBoard();
 	Client.askNewPlayer({username: USERNAME, tipo:TIPO_J, x:0, y:0, angle:0}); 
 	carga++;console.log("carga "+carga);
-
 };
 
 Game.update=function(){
@@ -183,9 +247,7 @@ Game.update=function(){
 		 if(!player.preso){
 			Client.moverJugador(game.input.mousePointer);
 		 }
-		 //else{
-		// 	//Client.moverJugador(posx, posy);
-		// }
+
 	}
 };
 
@@ -197,9 +259,7 @@ Game.removePlayer=function(id){
 		//console.log('Player not found: ', data.id)
 		return;
 	}
-	if(removePlayer.tipo=="lad"){
-		ladrones=ladrones-1;
-	}
+	
  	removePlayer.player.destroy();
    	enemies.splice(enemies.indexOf(removeplayer), 1);
 };
@@ -217,14 +277,14 @@ Game.onEnemyMove=function(data) {
 		worldX: data.x,
 		worldY: data.y
 	}
-	if(movePlayer.preso){
-		movePlayer.player.reset(data.x, data.y)
-		console.log("onEnemyMove, cayo un preso.");
-	}else{
+	// if(movePlayer.player.preso){
+	// 	movePlayer.player.reset(data.x, data.y)
+	// 	console.log("onEnemyMove, cayo un preso.");
+	//}else{
 		var distance = distanceToPointer(movePlayer.player , newPointer);
 		speed = distance/0.05;
 		movePlayer.rotation = movetoPointer(movePlayer.player , speed, newPointer); //error cannot get velocity of null
-	}
+	//}
 };
 
 
@@ -287,8 +347,8 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 	if(game.physics.p2==null){
 		Game.preload();
 	}
-	game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
-	//game.physics.p2.enable(this.player, Phaser.Physics.p2);
+	//game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
+	game.physics.p2.enable(this.player, Phaser.Physics.p2);
 	this.player.body.collideWorldBounds = true;
 	this.player.body.clearShapes();
 	this.player.body.setCircle(16);
@@ -413,9 +473,10 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 		console.log("player_coll en game.js");
 				 		document.getElementById('prison').style.display='block';
 				 		Client.colision({key:body.sprite.id});
-				 		if(cant_presos==ladrones){
-				 			console.log("Finalizar juego, ganan policías.");
-				 		}
+				 		//el servidor tiene que ver la relacion entre ladrones y presos
+				 		//y determinar si polis ganan juego o no
+
+				 		
 				 	}
 			}
 			if(tipobody=="prison"){
@@ -440,9 +501,9 @@ Game.Liberar=function(data){
 		player.preso=false;
 		this.preso=false;
 		document.getElementById('prison').style.display='none';
-		player.reset(150,150);
+		player.reset(data.x,data.y);
 		Client.salir_de_prision();
-		cant_presos=cant_presos-1; //o ponerlo directamente en 0
+		
 	}
 };
 
@@ -451,13 +512,13 @@ Game.aumentar=function(data){
 	this.puntos=this.puntos+puntos_liberar*data.presos;
 };
 
-// When the server notifies us of client disconnection, we find the disconnected
-// enemy and remove from our game
+// Cuando el servidor avisa que un cliente se desconectó, 
+//se busca el enemigo desconectado y se lo remmueve del juego
 Game.onRemovePlayer=function(data) {
 	var removePlayer = findplayerbyid(data.id);
 	// Player not found
 	if (!removePlayer) {
-		console.log('Player not found: ', data.id)
+		//console.log('Player not found: ', data.id)
 		return;
 	}
 	removePlayer.player.destroy();
@@ -468,38 +529,37 @@ Game.saltar=function(data){
 	console.log("GAME.SALTAR");
 	player.preso=true;
 	this.preso=true;
-	cant_presos=cant_presos+1;
 	this.puntos=this.puntos+puntos_prision;
 	player.reset(data.x, data.y);
 	console.log("Actualizo jugador en prision!");
-	
 	//demo(data);
 };
 Game.resetear=function(data) {
 	var movePlayer=findplayerbyid(data.id);
-	movePlayer.player.reset(158, 16);
-	console.log("movePlayerrrrrrrrrrrrrr "+movePlayer);
+	movePlayer.player.reset(data.x, data.y);
+	//movePlayer.player.reset(22,17);
+	console.log("Reseteando jugador: "+movePlayer.player);
 };
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+// function sleep(ms) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
-async function demo(data) {
-	var primero=true;
-	console.log("DEMO");
-	 while(player.preso){
-		player.reset(data.x, data.y);
-		if(primero){
-			primero=false;
-			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y, preso:true});
-		}
-		await sleep(2000);
-		//console.log(player.position);
-	 }
-	 console.log("SALI DE PRISION");
-	 //player.preso=false;
-}
+// async function demo(data) {
+// 	var primero=true;
+// 	console.log("DEMO");
+// 	 while(player.preso){
+// 		player.reset(data.x, data.y);
+// 		if(primero){
+// 			primero=false;
+// 			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y, preso:true});
+// 		}
+// 		await sleep(2000);
+// 		//console.log(player.position);
+// 	 }
+// 	 console.log("SALI DE PRISION");
+// 	 //player.preso=false;
+// }
 
 
 // search through food list to find the food object

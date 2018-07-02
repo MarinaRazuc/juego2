@@ -10,7 +10,8 @@ function movetoPointer (displayObject, speed, pointer, maxTime) {
                 speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
             }
     		
-    	   //console.log("displayObject.body ",displayObject.body);
+    	   //console.log("displayObject ",displayObject);
+
             displayObject.body.velocity.x = Math.cos(angle) * speed;
     		displayObject.body.velocity.y = Math.sin(angle) * speed;
 

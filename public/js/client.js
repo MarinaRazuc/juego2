@@ -58,79 +58,79 @@ Client.salir_de_prision=function(){
   Client.socket.emit("salir_de_prision");
 }
 
-Client.socket.on('move',function(data){//data es socket.player
-    Game.movePlayer(data.id, data.x, data.y);
-});
-
-Client.socket.on('remove',function(id){
-    Game.removePlayer(id);
-});
-
-Client.socket.on("enemy_move", function(data){
-    Game.onEnemyMove(data); 
-});
-Client.socket.on("input_rec", function(data){ 
-  Game.onInputRecieved(data);
-//Game.movePlayer(data.id, data.x, data.y);
-});
-
-//listen to new enemy connections
-Client.socket.on("new_enemyPlayer", function(data){
-    Game.onNewPlayer(data);
-});
-
-Client.socket.on("create_player", function(data){
-  Game.create_player(data);
-});
-
-Client.socket.on("item_update", function(data){
-  Game.onItemUpdate(data);
-});
-
-Client.socket.on("itemremove", function(data){
-  Game.onItemRemove(data);
-});
-
-Client.socket.on("remove_player", function(data){
-  Game.onRemovePlayer(data);
-});
-
-Client.socket.on("enter_game", function(data){
-  console.log("client.js en enter_game");
-  Game.logueado({username: data.username});
-});
-
-Client.socket.on("leader_board", function(data){
-  Game.lbupdate(data);
-});
-
-// Client.socket.on("puntos", function(){
-//   Game.aumentar();
+// Client.socket.on('move',function(data){//data es socket.player
+//     Game.movePlayer(data.id, data.x, data.y);
 // });
 
-function listar(data){
-  Game.lbupdate(data);
-};
-Client.socket.on('salto', function(data){
-  Game.saltar({x:data.x, y:data.y});
-});
+// Client.socket.on('remove',function(id){
+//     Game.removePlayer(id);
+// });
 
-Client.socket.on('liberar', function(data){
-  Game.Liberar(data);
-});
+// Client.socket.on("enemy_move", function(data){
+//     Game.onEnemyMove(data); 
+// });
+// Client.socket.on("input_rec", function(data){ 
+//   Game.onInputRecieved(data);
+// //Game.movePlayer(data.id, data.x, data.y);
+// });
 
-Client.socket.on("liberados", function(data){
-  Game.aumentar({presos: data.cant});
-});
+// //listen to new enemy connections
+// Client.socket.on("new_enemyPlayer", function(data){
+//     Game.onNewPlayer(data);
+// });
 
-Client.socket.on('player_preso', function(data){
-  Game.resetear({id: data.id, x:data.x, y:data.y});
-});
+// Client.socket.on("create_player", function(data){
+//   Game.create_player(data);
+// });
 
-Client.socket.on('player_liberado', function(data){
-  Game.resetear({id:data.id, x:data.x, y:data.y});
-});
+// Client.socket.on("item_update", function(data){
+//   Game.onItemUpdate(data);
+// });
+
+// Client.socket.on("itemremove", function(data){
+//   Game.onItemRemove(data);
+// });
+
+// Client.socket.on("remove_player", function(data){
+//   Game.onRemovePlayer(data);
+// });
+
+// Client.socket.on("enter_game", function(data){
+//   console.log("client.js en enter_game");
+//   Game.logueado({username: data.username});
+// });
+
+// Client.socket.on("leader_board", function(data){
+//   Game.lbupdate(data);
+// });
+
+// // Client.socket.on("puntos", function(){
+// //   Game.aumentar();
+// // });
+
+// Client.socket.on('salto', function(data){
+//   Game.saltar({x:data.x, y:data.y});
+// });
+
+// Client.socket.on('liberar', function(data){
+//   Game.Liberar(data);
+// });
+
+// Client.socket.on("liberados", function(data){
+//   Game.aumentar({presos: data.cant});
+// });
+
+// Client.socket.on('player_preso', function(data){
+//   Game.resetear({id: data.id, x:data.x, y:data.y});
+// });
+
+// Client.socket.on('player_liberado', function(data){
+//   Game.resetear({id:data.id, x:data.x, y:data.y});
+// });
 
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
+};
+function listar(data){
+  Game.lbupdate(data);
 };

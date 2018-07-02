@@ -9,7 +9,7 @@ var p2 = require('p2');
 var world = new p2.World({
   gravity : [0,0]
 });
-var impresora = 0;
+
 var colores=[];
 colores[0]='orange_player'//"0xFF8000";
 colores[1]='violet_player'//"0xBF00FF";
@@ -44,7 +44,7 @@ var posx=451;
 var posy=377;
 var ladrones=0;
 var policias=0;
-
+var apresados=0;
 const maxPX=633;
 const minPX=267;
 const maxPY=502;
@@ -88,10 +88,6 @@ function physics_handler() {
     dt = Math.min(1 / 10, dt);
     world.step(timeStep);
 }
-//Then I listen on the connection event for incoming sockets, and I log it to the console.
-//Each socket also fires a special disconnect event:
-
-
 
 io.on('connection', function(socket){
   
@@ -313,7 +309,7 @@ io.on('connection', function(socket){
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
-    socket.broadcast.emit("player_preso",{id:this.id, x:equis, y:ygriega});
+    socket.broadcast.emit("player_reset",{id:this.id, x:equis, y:ygriega});
 
   }); //fin player collision
 
@@ -332,7 +328,7 @@ io.on('connection', function(socket){
     movePlayer.puntos=movePlayer.puntos+presos*puntos_liberar;
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
-    socket.broadcast.emit("liberar"); //para todos los demas
+    socket.broadcast.emit("liberar", {x:723, y:476}); //para todos los demas
     socket.emit("liberados",{cant:presos}); //para el q libero
   });
 
@@ -340,11 +336,12 @@ io.on('connection', function(socket){
   socket.on("salir_de_prision", function(){
     var movePlayer=find_playerid(this.id);
     movePlayer.preso=false;
-    socket.broadcast.emit("player_liberado", {id:this.id, x:150, y:150});
+    socket.broadcast.emit("player_reset", {id:this.id, x:723, y:476});
   });
 
-    //call when a client disconnects and tell the clients except sender to remove the disconnected player
-    socket.on("disconnect", function(){
+    //call when a client disconnects and tell the clients except sender to 
+    //remove the disconnected player
+     socket.on("disconnect", function(){
       console.log('disconnect'); 
       var removePlayer = find_playerid(this.id);
       var clave=removePlayer.color;
@@ -352,11 +349,9 @@ io.on('connection', function(socket){
       if (removePlayer) {
         player_lst.splice(player_lst.indexOf(removePlayer), 1);
       }
-      console.log("removing player " + this.id);
-      socket.emit("leader_board",sortPlayerListByScore());
-      socket.broadcast.emit("leader_board",sortPlayerListByScore());
-      //send message to every connected client except the sender
       socket.broadcast.emit('remove_player', {id: this.id});
+      console.log("removing player " + this.id);
+      //send message to every connected client except the sender
       var arr=game_instance.food_pickup;
       for (var i = 0; i < arr.length; i++) {
         var b=arr[i];
@@ -364,6 +359,8 @@ io.on('connection', function(socket){
           socket.broadcast.emit("itemremove", b);
         }
       }
+      socket.emit("leader_board",sortPlayerListByScore());
+      socket.broadcast.emit("leader_board",sortPlayerListByScore());
     }); //fin disconnect
 });//FIN DE CONNECTION  
 
@@ -394,13 +391,19 @@ var Player = function (startX, startY, angle) {
 
 
 var foodpickup = function (max_x, max_y, type, id) {
-  this.x =getRandomArbitrary(1, max_x)  ;
-  this.y =getRandomArbitrary(1, max_y) ;
- // console.log("x e y ", this.x, ", ", this.y);
+  var bandera=false
+  var ex, guay;
+  while(!bandera){
+    ex=getRandomArbitrary(1, max_x);
+    guay =getRandomArbitrary(1, max_y);
+    if(ex<minPX-5 || ex>maxPX+5 || guay<minPY-5|| guay>maxPY+5){
+      bandera=true
+    }
+  }
+  this.x =ex;
+  this.y =guay;
   this.type = type; 
-  //console.log("this ", this);
   this.id = id; 
- 
 }
 
 
