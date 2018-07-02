@@ -97,6 +97,7 @@ Game.preload=function(){
 		game.load.image("prison2", "/assets/p_abajo.png");
 		game.load.image("prison3", "/assets/p_derecha.png");
 		game.load.image("prison4", "/assets/p_izquierdo.png");
+		game.load.image("llave", "/assets/llave.png");
 
 		game.physics.startSystem(Phaser.Physics.P2JS);
 		game.physics.p2.restitution = 0.3;	
@@ -159,6 +160,7 @@ Game.create=function() {
     //prison.body.type="pared";
 
 	var sitio=game.add.sprite(200,300,"pared");
+	game.add.sprite(200,300,"llave");
     game.physics.p2.enable(sitio, Phaser.Physics.p2);
    	sitio.body.data.shapes[0].sensor=true;
     sitio.type="sitio";

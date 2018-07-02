@@ -101,6 +101,15 @@ io.on('connection', function(socket){
     }else{
       usrname=data.username;
     }
+    if(data.tipo_jugador=="lad"){
+      console.log("soy ladron");
+      ladrones=ladrones+1;
+      console.log("ladrones "+ladrones);
+    }else{
+      console.log("soy policia");
+      policias=policias+1;
+      console.log("policias "+policias);
+    }
     socket.emit('join_game', {username: usrname, tipo:data.tipo_jugador, id: this.id});
     //login
   }); 
@@ -306,6 +315,8 @@ io.on('connection', function(socket){
     movePlayer.puntos+=puntos_prision;
     enemyPlayer.puntos+=puntos_atrapar;
     movePlayer.preso=true;
+    apresados=apresados+1;
+    //if apresados==ladrones --> fin del juego, ganan los policias
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
@@ -347,6 +358,15 @@ io.on('connection', function(socket){
       var clave=removePlayer.color;
       var str=clave+"_food";
       if (removePlayer) {
+        if(removePlayer.tipo=="lad"){
+          console.log("remuevo ladron");
+          ladrones=ladrones-1;
+          console.log("ladrones: "+ladrones);
+        }else{
+          console.log("remuevo policia");
+          policias=policias-1;
+          console.log("policias: "+policias);
+        }
         player_lst.splice(player_lst.indexOf(removePlayer), 1);
       }
       socket.broadcast.emit('remove_player', {id: this.id});
