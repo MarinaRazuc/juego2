@@ -58,6 +58,10 @@ Client.salir_de_prision=function(){
   Client.socket.emit("salir_de_prision");
 }
 
+Client.socket.on('toggle', function(data){
+  Game.toggle(data);
+});
+
 // Client.socket.on('move',function(data){//data es socket.player
 //     Game.movePlayer(data.id, data.x, data.y);
 // });

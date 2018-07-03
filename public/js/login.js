@@ -1,3 +1,6 @@
+// var num=hola();
+// console.log("IDS "+num);
+// document.getElementById("poli").disabled=true;
 document.getElementById("prison").style.display='none';
 document.getElementById("datos").style.display='none';
 document.getElementById("cartelGanar").style.display='none';
@@ -6,7 +9,6 @@ document.getElementById("entername").onclick = function () {
 		gameProperties.in_game = true; 
 		signDiv.style.display = 'none'; 
 		elegir.style.display='none';
-		
 		datos.style.display='block';
 		boton.style.display='none';
 		
@@ -24,16 +26,9 @@ function getRadioButtonSelectedValue(ctrl){
 }
 
 function join_game (data) {
-	// console.log("data.tipo "+data.tipo);
-	// if(data.tipo=="lad"){
-	// 	gameProperties.cantL+=1;
-	// }else{
-	// 	gameProperties.cantP+=1;
-	// }
 	game.state.start(
         'Game', true, false, data.username, data.tipo
     );
-   //Game.init(data.username);
 }
 
 var login = function(game){

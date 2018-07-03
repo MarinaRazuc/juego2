@@ -54,6 +54,7 @@ const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
+var pagina;
 
 app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
@@ -67,6 +68,9 @@ var physicsPlayer = require('./public/physics/playerMovement.js');
 app.get('/', function(req, res){
   //Let’s refactor our route handler to use sendFile instead
   res.sendFile(__dirname + '/index.html');
+  pagina=res;
+ // console.log(pagina);
+ 
 });
 
 http.listen(4000, function(){
@@ -90,20 +94,22 @@ function physics_handler() {
 }
 
 io.on('connection', function(socket){
-  
   // when the player enters their name, trigger this function
   socket.on('enter_name', function(data){
     var usrname;
     if(data.username.length==0 || data.username=="" || data.username==" " || data.username[0]==" "){
       temp=(this.id).toString();
       temp=temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
-      usrname="player_"+temp;
+      usrname="plyr_"+temp;
     }else{
       usrname=data.username;
     }
     if(data.tipo_jugador=="lad"){
-      console.log("soy ladron");
+      //console.log("soy ladron");
       ladrones=ladrones+1;
+      if(ladrones>=3){
+        socket.broadcast.emit("toggle", {valor:true});
+      }
       console.log("ladrones "+ladrones);
     }else{
       console.log("soy policia");
@@ -116,11 +122,8 @@ io.on('connection', function(socket){
 
 
 
-
   console.log('a user connected, ID: ', http.lastPlayerID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
-  // var crear_polis=false;
-  // var poli1, poli2;
   socket.on('new_player', function(data) {
       console.log("index.js new_player. Player name= "+data.username);
       //new player instance
@@ -285,7 +288,6 @@ io.on('connection', function(socket){
 
 
   socket.on('item_picked', function(data){
-     // console.log("item_picked");
       var movePlayer = find_playerid(this.id); 
       var object = find_food(data.id);  
       if (!object) {
@@ -326,7 +328,6 @@ io.on('connection', function(socket){
 
   socket.on("liberar_prisioneros", function(){
     var movePlayer=find_playerid(this.id);
-    
     var presos=0;
     if (player_lst.length>0){
       for (var i = 0; i < player_lst.length; i++) {
@@ -359,8 +360,10 @@ io.on('connection', function(socket){
       var str=clave+"_food";
       if (removePlayer) {
         if(removePlayer.tipo=="lad"){
-          console.log("remuevo ladron");
           ladrones=ladrones-1;
+          if(ladrones<3){
+            socket.broadcast.emit("toggle", {valor:false});
+          }
           console.log("ladrones: "+ladrones);
         }else{
           console.log("remuevo policia");
@@ -416,7 +419,7 @@ var foodpickup = function (max_x, max_y, type, id) {
   while(!bandera){
     ex=getRandomArbitrary(1, max_x);
     guay =getRandomArbitrary(1, max_y);
-    if(ex<minPX-5 || ex>maxPX+5 || guay<minPY-5|| guay>maxPY+5){
+    if(ex<(minPX-5) || ex>(maxPX+5) || guay<(minPY-5)|| guay>(maxPY+5)){
       bandera=true
     }
   }
@@ -457,4 +460,8 @@ function sortPlayerListByScore() {
   }
   return playerListSorted;
   //this.emit("leader_board", playerListSorted);
+}
+
+function hola(){
+  return 5;
 }
