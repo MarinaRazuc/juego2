@@ -22,6 +22,9 @@ var coloresP=[]
 coloresP[0]='black_player'
 coloresP[1]='grey_player'
 coloresP[2]='brown_player'
+
+
+
 //needed for physics update 
 var startTime = (new Date).getTime();
 var lastTime;
@@ -107,9 +110,9 @@ io.on('connection', function(socket){
     if(data.tipo_jugador=="lad"){
       //console.log("soy ladron");
       ladrones=ladrones+1;
-      if(ladrones>=3){
-        socket.broadcast.emit("toggle", {valor:true});
-      }
+      // if(ladrones>=3){
+      //   socket.broadcast.emit("toggle", {valor:true});
+      // }
       console.log("ladrones "+ladrones);
     }else{
       console.log("soy policia");
@@ -351,6 +354,36 @@ io.on('connection', function(socket){
     socket.broadcast.emit("player_reset", {id:this.id, x:723, y:476});
   });
 
+  socket.on("pregunta", function(){
+    if(ladrones>=3 && policias<3){
+      // console.log("emito habilitar"); //habilito policias
+      socket.broadcast.emit("habilitar");
+      if(policias==0){
+        socket.broadcast.emit("des_ladrones");
+      }else{
+        if(ladrones<7){
+          socket.broadcast.emit("hab_ladrones");
+        }
+      }
+    }else{//si los ladrones son pocos y los policias muchos, deshabilito polis
+      // console.log("emito deshabilitar");
+      socket.broadcast.emit("deshabilitar");
+    }
+    if(ladrones==5 && policias==1){
+      socket.broadcast.emit("des_ladrones");
+    }
+    if(ladrones==7 && policias==3){
+      socket.broadcast.emit("sala_llena");
+    }else{
+      socket.broadcast.emit("sala_libre");
+    }
+    if(policias==3){
+      socket.broadcast.emit("deshabilitar");
+    }
+
+  });
+
+
     //call when a client disconnects and tell the clients except sender to 
     //remove the disconnected player
      socket.on("disconnect", function(){
@@ -361,9 +394,9 @@ io.on('connection', function(socket){
       if (removePlayer) {
         if(removePlayer.tipo=="lad"){
           ladrones=ladrones-1;
-          if(ladrones<3){
-            socket.broadcast.emit("toggle", {valor:false});
-          }
+          // if(ladrones<3){
+          //   socket.broadcast.emit("toggle", {valor:false});
+          // }
           console.log("ladrones: "+ladrones);
         }else{
           console.log("remuevo policia");

@@ -62,6 +62,38 @@ Client.socket.on('toggle', function(data){
   Game.toggle(data);
 });
 
+
+Client.socket.on("habilitar", function(){
+  document.getElementById("poli").disabled=false;
+});
+
+Client.socket.on("deshabilitar", function(){
+  var bp=document.getElementById("poli");
+  bp.disabled=true;
+  bp.checked=false;
+  document.getElementById("ladr").checked=true;
+});
+
+Client.socket.on("hab_ladrones", function(){
+  document.getElementById("ladr").disabled=false;
+});
+
+Client.socket.on("des_ladrones", function(){
+  var bl=document.getElementById("ladr");
+  bl.disabled=true;
+  bl.checked=false;
+  document.getElementById("poli").checked=true;
+});
+
+Client.socket.on("sala_llena", function(){
+  document.getElementById("entername").disabled=true;
+  document.getElementById("sala_llena").style.display="block";
+});
+
+Client.socket.on("sala_libre", function(){
+  document.getElementById("entername").disabled=false;
+});
+
 // Client.socket.on('move',function(data){//data es socket.player
 //     Game.movePlayer(data.id, data.x, data.y);
 // });

@@ -64,6 +64,8 @@ Game.init=function(username, tipo){
 	game.stage.disableVisibilityChange=true;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
 	carga++;console.log("carga "+carga);
+	//document.getElementById("poli").disabled=true;
+	Inicio.preguntar();
 };
 
 
@@ -261,7 +263,7 @@ Game.removePlayer=function(id){
 		//console.log('Player not found: ', data.id)
 		return;
 	}
-	
+	Inicio.preguntar();
  	removePlayer.player.destroy();
    	enemies.splice(enemies.indexOf(removeplayer), 1);
 };
@@ -547,26 +549,6 @@ Game.resetear=function(data) {
 	//movePlayer.player.reset(22,17);
 	console.log("Reseteando jugador: "+movePlayer.player);
 };
-
-// function sleep(ms) {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
-
-// async function demo(data) {
-// 	var primero=true;
-// 	console.log("DEMO");
-// 	 while(player.preso){
-// 		player.reset(data.x, data.y);
-// 		if(primero){
-// 			primero=false;
-// 			Client.moverJugador({x:data.x, y:data.y, worldX:data.x, worldY:data.y, preso:true});
-// 		}
-// 		await sleep(2000);
-// 		//console.log(player.position);
-// 	 }
-// 	 console.log("SALI DE PRISION");
-// 	 //player.preso=false;
-// }
 
 
 // search through food list to find the food object
