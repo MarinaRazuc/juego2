@@ -170,69 +170,69 @@ Game.create=function() {
 
 //---------------------------------------------------------------
 
-    Client.socket.on('move',function(data){//data es socket.player
+    socket.on('move',function(data){//data es socket.player
     	Game.movePlayer(data.id, data.x, data.y);
 	});
 
-	Client.socket.on('remove',function(id){
+	socket.on('remove',function(id){
 	    Game.removePlayer(id);
 	});
 
-	Client.socket.on("enemy_move", function(data){
+	socket.on("enemy_move", function(data){
 	    Game.onEnemyMove(data); 
 	});
-	Client.socket.on("input_rec", function(data){ 
+	socket.on("input_rec", function(data){ 
 	  Game.onInputRecieved(data);
 	//Game.movePlayer(data.id, data.x, data.y);
 	});
 
 	//listen to new enemy connections
-	Client.socket.on("new_enemyPlayer", function(data){
+	socket.on("new_enemyPlayer", function(data){
 	    Game.onNewPlayer(data);
 	});
 
-	Client.socket.on("create_player", function(data){
+	socket.on("create_player", function(data){
 	  Game.create_player(data);
 	});
 
-	Client.socket.on("item_update", function(data){
+	socket.on("item_update", function(data){
 	  Game.onItemUpdate(data);
 	});
 
-	Client.socket.on("itemremove", function(data){
+	socket.on("itemremove", function(data){
 	  Game.onItemRemove(data);
 	});
 
-	Client.socket.on("remove_player", function(data){
+	socket.on("remove_player", function(data){
 	  Game.onRemovePlayer(data);
 	});
 
-	Client.socket.on("enter_game", function(data){
+	socket.on("enter_game", function(data){
 	  console.log("client.js en enter_game");
 	  Game.logueado({username: data.username});
 	});
 
-	Client.socket.on("leader_board", function(data){
+	socket.on("leader_board", function(data){
 	  Game.lbupdate(data);
 	});
 
-	// Client.socket.on("puntos", function(){
+	// socket.on("puntos", function(){
 	//   Game.aumentar();
 	// });
 
-	Client.socket.on('salto', function(data){
+	socket.on('salto', function(data){
 	  Game.saltar({x:data.x, y:data.y});
 	});
 
-	Client.socket.on('liberar', function(data){
+	socket.on('liberar', function(data){
 	  Game.Liberar(data);
 	});
 
-	Client.socket.on("liberados", function(data){
+	socket.on("liberados", function(data){
 	  Game.aumentar({presos: data.cant});
 	});
 
-	Client.socket.on('player_reset', function(data){
+	socket.on('player_reset', function(data){
 	  Game.resetear({id: data.id, x:data.x, y:data.y});
 	});
 

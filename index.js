@@ -356,29 +356,29 @@ io.on('connection', function(socket){
 
   socket.on("pregunta", function(){
     if(ladrones>=3 && policias<3){
-      // console.log("emito habilitar"); //habilito policias
-      socket.broadcast.emit("habilitar");
+       console.log("emito habilitar"); //habilito policias
+      socket.emit("habilitar");
       if(policias==0){
-        socket.broadcast.emit("des_ladrones");
+        socket.emit("des_ladrones");
       }else{
         if(ladrones<7){
-          socket.broadcast.emit("hab_ladrones");
+          socket.emit("hab_ladrones");
         }
       }
     }else{//si los ladrones son pocos y los policias muchos, deshabilito polis
-      // console.log("emito deshabilitar");
-      socket.broadcast.emit("deshabilitar");
+       console.log("emito deshabilitar");
+      socket.emit("deshabilitar");
     }
     if(ladrones==5 && policias==1){
-      socket.broadcast.emit("des_ladrones");
+      socket.emit("des_ladrones");
     }
     if(ladrones==7 && policias==3){
-      socket.broadcast.emit("sala_llena");
+      socket.emit("sala_llena");
     }else{
-      socket.broadcast.emit("sala_libre");
+      socket.emit("sala_libre");
     }
     if(policias==3){
-      socket.broadcast.emit("deshabilitar");
+      socket.emit("deshabilitar");
     }
 
   });
@@ -405,16 +405,20 @@ io.on('connection', function(socket){
         }
         player_lst.splice(player_lst.indexOf(removePlayer), 1);
       }
-      socket.broadcast.emit('remove_player', {id: this.id});
-      console.log("removing player " + this.id);
       //send message to every connected client except the sender
-      var arr=game_instance.food_pickup;
-      for (var i = 0; i < arr.length; i++) {
-        var b=arr[i];
-        if (b.type == str) {
-          socket.broadcast.emit("itemremove", b);
+      var comiditas=game_instance.food_pickup;
+      let largo = comiditas.length-1;
+      //console.log ("largo comiditas :) "+comiditas.length );
+      for(i=largo; i>=0; i--){
+        var banderin=comiditas[i];
+        if(banderin.type==str){
+          socket.broadcast.emit("itemremove", banderin);
+          comiditas.splice(i, 1);
         }
       }
+      
+      socket.broadcast.emit('remove_player', {id: this.id});
+      console.log("removing player " + this.id);
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
     }); //fin disconnect
