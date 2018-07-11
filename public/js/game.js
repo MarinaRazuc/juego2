@@ -1,4 +1,3 @@
-//********************I
 var ship;
 var cursors;
 var customBounds;
@@ -6,6 +5,7 @@ var map;
 var layer,layer2;
 var username;
 var leader_text;
+var ranking;
 
 var gameProperties = { 
 	gameWidth: window.innerWidth * window.devicePixelRatio,
@@ -13,7 +13,7 @@ var gameProperties = {
 	game_elemnt: "gameDiv",
 	in_game: false
 };
-//********************F
+
 var posx=451;
 var posy=377;
 var players;
@@ -36,8 +36,6 @@ colores[0x6E6E6E]='grey_player';
 colores[0x54451E]='brown_player';
 
 var violet_food, orange_food, green_food, blue_food, red_food, pink_food, yellow_food;
-// var game = new Phaser.Game(1200,1000,window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio,/*24*48, 17*48,/*canvas_width, canvas_height 
-// 	Phaser.CANVAS, document.getElementById('game'),null, true);
 
 //the enemy player list 
 var enemies = [];
@@ -63,9 +61,9 @@ Game.init=function(username, tipo){
 	TIPO_J=tipo;
 	game.stage.disableVisibilityChange=true;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
-	carga++;console.log("carga "+carga);
+	// carga++;console.log("carga "+carga);
 	//document.getElementById("poli").disabled=true;
-	Inicio.preguntar();
+	//Inicio.preguntar();
 };
 
 
@@ -106,10 +104,6 @@ Game.preload=function(){
 		game.physics.p2.gravity.y = 0;
 		game.physics.p2.applyGravity = false; 
 		game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
-		
-		carga++;console.log("carga "+carga);
-
-				// game.load.start();
 }
 
 Game.create=function() {
@@ -236,6 +230,15 @@ Game.create=function() {
 	  Game.resetear({id: data.id, x:data.x, y:data.y});
 	});
 
+	socket.on("ganan_L", function(){
+		console.log("Ganan ladrones");
+		mostrarCartel("Ladrones");
+	});
+
+	socket.on("ganan_P", function(){
+		console.log("Ganan policias");
+		mostrarCartel("Policías");
+	});
 
 //------------------------------------------------------------
 
@@ -271,8 +274,6 @@ Game.removePlayer=function(id){
 
 //Server tells us there is a new enemy movement. We find the moved enemy and sync the enemy movement with the server
 Game.onEnemyMove=function(data) {
-	//var movePlayer = Game.playerMap[data.id] ; 
-	//console.log("onEnemyMove "+data.x+" "+data.y);
 	var movePlayer = findplayerbyid (data.id); 
 	if (!movePlayer) {return;}
 	var newPointer = {
@@ -281,14 +282,9 @@ Game.onEnemyMove=function(data) {
 		worldX: data.x,
 		worldY: data.y
 	}
-	// if(movePlayer.player.preso){
-	// 	movePlayer.player.reset(data.x, data.y)
-	// 	console.log("onEnemyMove, cayo un preso.");
-	//}else{
-		var distance = distanceToPointer(movePlayer.player , newPointer);
-		speed = distance/0.05;
-		movePlayer.rotation = movetoPointer(movePlayer.player , speed, newPointer); //error cannot get velocity of null
-	//}
+	var distance = distanceToPointer(movePlayer.player , newPointer);
+	speed = distance/0.05;
+	movePlayer.rotation = movetoPointer(movePlayer.player , speed, newPointer); //error cannot get velocity of null
 };
 
 
@@ -464,6 +460,9 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				if(bandlev==max_banderas){
 					listo=true;
 					//enviar al servidor que está listo.
+					console.log("Junté todos mis banderines.");
+					Client.listo();
+					Client.final();//solo pregunto cuando termine de juntar mis banderines
 				}
 			}
 			//Acá ver colisión entre ladron y poli
@@ -479,7 +478,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 		Client.colision({key:body.sprite.id});
 				 		//el servidor tiene que ver la relacion entre ladrones y presos
 				 		//y determinar si polis ganan juego o no
-
+				 		Client.final();
 				 		
 				 	}
 			}
@@ -527,11 +526,6 @@ Game.onRemovePlayer=function(data) {
 	}
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
-};
-Game.toggle=function(data){
-	console.log("TOGGLE, habilito? "+(data.valor));
-	var valor=!(data.valor);
-	document.getElementById("poli").disabled=valor;
 };
 
 Game.saltar=function(data){
@@ -584,8 +578,8 @@ function createLeaderBoard() {
 Game.lbupdate=function(data) {
 	//this is the final board string.
 	var board_string = ""; 
-	var maxlen = 10;
-	var maxPlayerDisplay = 10;
+	var maxlen = 11;
+	var maxPlayerDisplay = 11;
 	var mainPlayerShown = false;
 	if(leader_text!=null){
 		for (var i = 0;  i < data.length; i++) {
@@ -616,6 +610,19 @@ Game.lbupdate=function(data) {
 			}
 		}
 		//console.log(board_string);
+		ranking=board_string;
 		leader_text.setText(board_string); 
 	}
+}
+
+
+function mostrarCartel(ganadores){
+	//cartelGanar
+	var ventana=document.getElementById("cartelGanar");
+	var text=ventana.innerHTML;
+	ventana.innerHTML=text+" "+ganadores+"\n \n \n"+ranking;
+	document.getElementById("game").style.display="none";
+	document.getElementById("datos").style.display="none";
+	document.getElementById("base").style.display="block";
+	ventana.style.display='block';
 }

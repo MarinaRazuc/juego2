@@ -23,6 +23,19 @@ coloresP[0]='black_player'
 coloresP[1]='grey_player'
 coloresP[2]='brown_player'
 
+var dispL=[];
+dispL[0]=true; //na
+dispL[1]=true; //vi
+dispL[2]=true; //am
+dispL[3]=true; //roj
+dispL[4]=true; //ve
+dispL[5]=true; //az
+dispL[6]=true; //ros
+
+var dispP=[];
+dispP[0]=true; //ne
+dispP[1]=true; //gr
+dispP[2]=true; //ma
 
 
 //needed for physics update 
@@ -57,7 +70,9 @@ const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
-var pagina;
+var listos;
+
+
 
 app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
@@ -71,9 +86,6 @@ var physicsPlayer = require('./public/physics/playerMovement.js');
 app.get('/', function(req, res){
   //Let’s refactor our route handler to use sendFile instead
   res.sendFile(__dirname + '/index.html');
-  pagina=res;
- // console.log(pagina);
- 
 });
 
 http.listen(4000, function(){
@@ -108,16 +120,9 @@ io.on('connection', function(socket){
       usrname=data.username;
     }
     if(data.tipo_jugador=="lad"){
-      //console.log("soy ladron");
       ladrones=ladrones+1;
-      // if(ladrones>=3){
-      //   socket.broadcast.emit("toggle", {valor:true});
-      // }
-      console.log("ladrones "+ladrones);
     }else{
-      console.log("soy policia");
       policias=policias+1;
-      console.log("policias "+policias);
     }
     socket.emit('join_game', {username: usrname, tipo:data.tipo_jugador, id: this.id});
     //login
@@ -128,7 +133,7 @@ io.on('connection', function(socket){
   console.log('a user connected, ID: ', http.lastPlayerID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
   socket.on('new_player', function(data) {
-      console.log("index.js new_player. Player name= "+data.username);
+      // console.log("index.js new_player. Player name= "+data.username);
       //new player instance
       var newPlayer = new Player(data.x, data.y, data.angle);
       var c;
@@ -139,11 +144,34 @@ io.on('connection', function(socket){
 
       if(data.tipo=="lad"){ //es ladron
         c = http.lastPlayerID%7;
+        var i=0;
+        var bandera=false;
+        while(!bandera && i<7){
+          if(dispL[i]){
+            bandera=true;
+            c=i;
+            dispL[i]=false;
+          }
+          i=i+1;
+        }
+        newPlayer.listo=false;
         newPlayer.color=colores[c];
+        // console.log("newPlayer.color "+newPlayer.color);
         http.lastPlayerID++;
       }else{ //es policia
+        var i=0;
+        var bandera=false;
         c=http.lastPolID%3;
+        while(!bandera && i<3){
+          if(dispP[i]){
+            bandera=true;
+            c=i;
+            dispP[i]=false;
+          }
+          i=i+1;
+        }
         newPlayer.color=coloresP[c];
+        // console.log("newPlayer.color "+newPlayer.color);
         http.lastPolID++;
       }
      //debo controlar si se paso de 7-- ver q hacer cuando esto pasa
@@ -178,7 +206,6 @@ io.on('connection', function(socket){
      
       //send to the new player about everyone who is already connected.   
       for (i = 0; i < player_lst.length; i++) {
-        console.log("Entro al for");
         existingPlayer = player_lst[i];
         var player_info = {
             id: existingPlayer.id,
@@ -222,8 +249,6 @@ io.on('connection', function(socket){
             socket.emit("item_update", foodentity); 
             socket.broadcast.emit("item_update", foodentity);
         }
-        //ladrones+=1;
-        //gameProperties.cantL=ladrones;
       }
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
@@ -239,10 +264,6 @@ io.on('connection', function(socket){
             //console.log("en verdad entro aca");
             return;
           }
-
-          //if(data.preso){
-           //   movePlayer.reset(data.x, data.y);
-          //}else{
               setTimeout(function() {movePlayer.sendData = true}, 50);
               //we set sendData to false when we send the data. 
               movePlayer.sendData = false;
@@ -339,6 +360,7 @@ io.on('connection', function(socket){
         }
       }
     }
+    apresados=0;
     console.log("presos "+presos);
     movePlayer.puntos=movePlayer.puntos+presos*puntos_liberar;
     socket.emit("leader_board",sortPlayerListByScore());
@@ -356,7 +378,7 @@ io.on('connection', function(socket){
 
   socket.on("pregunta", function(){
     if(ladrones>=3 && policias<3){
-       console.log("emito habilitar"); //habilito policias
+       // console.log("emito habilitar"); //habilito policias
       socket.emit("habilitar");
       if(policias==0){
         socket.emit("des_ladrones");
@@ -366,7 +388,7 @@ io.on('connection', function(socket){
         }
       }
     }else{//si los ladrones son pocos y los policias muchos, deshabilito polis
-       console.log("emito deshabilitar");
+       // console.log("emito deshabilitar");
       socket.emit("deshabilitar");
     }
     if(ladrones==5 && policias==1){
@@ -380,35 +402,71 @@ io.on('connection', function(socket){
     if(policias==3){
       socket.emit("deshabilitar");
     }
+    if(ladrones==7){
+      socket.emit("des_ladrones");
+    }
 
   });
 
+  socket.on("listo", function(){
+    //solo los ladrones pueden emitir esto
+    var movePlayer=find_playerid(this.id);
+    movePlayer.listo=true;
+    listos=listos+1;
+  });
 
-    //call when a client disconnects and tell the clients except sender to 
-    //remove the disconnected player
-     socket.on("disconnect", function(){
-      console.log('disconnect'); 
-      var removePlayer = find_playerid(this.id);
-      var clave=removePlayer.color;
-      var str=clave+"_food";
-      if (removePlayer) {
-        if(removePlayer.tipo=="lad"){
-          ladrones=ladrones-1;
-          // if(ladrones<3){
-          //   socket.broadcast.emit("toggle", {valor:false});
-          // }
-          console.log("ladrones: "+ladrones);
-        }else{
-          console.log("remuevo policia");
-          policias=policias-1;
-          console.log("policias: "+policias);
+  socket.on("final", function(){
+    var tl=true;
+    var i=0;
+    var largo=player_lst.length;
+    while(i<largo && tl){
+        if(!(player_lst[i].listo)){
+            tl=false;
         }
-        player_lst.splice(player_lst.indexOf(removePlayer), 1);
+      
+        i=i+1;
+    }
+
+    if(tl){
+      socket.emit("ganan_L");
+      socket.broadcast.emit("ganan_L");
+    }else{
+      //ver si ganan polis
+      if(apresados==ladrones){
+        socket.emit("ganan_P");
+        socket.broadcast.emit("ganan_P");
       }
-      //send message to every connected client except the sender
-      var comiditas=game_instance.food_pickup;
-      let largo = comiditas.length-1;
-      //console.log ("largo comiditas :) "+comiditas.length );
+    }
+    
+  });
+
+  //call when a client disconnects and tell the clients except sender to 
+  //remove the disconnected player
+  socket.on("disconnect", function(){
+    console.log('disconnect'); 
+    var removePlayer = find_playerid(this.id);
+    var clave=removePlayer.color;
+    var str=clave+"_food";
+    if (removePlayer) {
+      if(removePlayer.tipo=="lad"){
+        ladrones=ladrones-1;
+        if(removePlayer.preso){
+          apresados=apresados-1;
+        }
+        // console.log("ladrones: "+ladrones);
+      }else{
+        // console.log("remuevo policia");
+        policias=policias-1;
+        // console.log("policias: "+policias);
+      }
+      player_lst.splice(player_lst.indexOf(removePlayer), 1);
+    }
+    //send message to every connected client except the sender
+    var comiditas=game_instance.food_pickup;
+    let largo = comiditas.length-1;
+    //console.log ("largo comiditas :) "+comiditas.length );
+   
+    if(removePlayer.tipo=="lad"){
       for(i=largo; i>=0; i--){
         var banderin=comiditas[i];
         if(banderin.type==str){
@@ -416,12 +474,31 @@ io.on('connection', function(socket){
           comiditas.splice(i, 1);
         }
       }
-      
-      socket.broadcast.emit('remove_player', {id: this.id});
-      console.log("removing player " + this.id);
-      socket.emit("leader_board",sortPlayerListByScore());
-      socket.broadcast.emit("leader_board",sortPlayerListByScore());
-    }); //fin disconnect
+      var encontre=false;
+      var j=0;
+      while(!encontre && j<7){
+        if(clave==colores[j]){
+          encontre=true;
+          dispL[j]=true;
+        }
+        j=j+1;
+      }
+    }else{
+      var encontre=false;
+      var j=0;
+      while(!encontre && j<3){
+        if(clave==coloresP[j]){
+          encontre=true;
+          dispP[j]=true;
+        }
+        j=j+1;
+      }
+    }
+    socket.broadcast.emit('remove_player', {id: this.id});
+    console.log("removing player " + this.id);
+    socket.emit("leader_board",sortPlayerListByScore());
+    socket.broadcast.emit("leader_board",sortPlayerListByScore());
+  }); //fin disconnect
 });//FIN DE CONNECTION  
 
 //find player by the the unique socket id 

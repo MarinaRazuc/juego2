@@ -91,3 +91,36 @@ div{
 	color: red;
 }
 
+#cartelGanar{
+	fill: white;
+	color: white;
+	font-size: 30px;
+	border-style: solid;
+	border-color: white;
+	background-color: #566573;
+	height: 400px;
+	width: 800px;
+	opacity: 0.9;
+}
+
+#col1{
+	height: 50px;
+	width: 50px;
+}
+
+#col2{
+	height: 50px;
+	width: 50px;
+}
+
+/*#base{
+	fill: white;
+	color: white;
+	font-size: 40px;
+	border-style: solid;
+	border-color: white;
+	background-color: #566573;
+	height: 500px;
+	width: 500px;
+	opacity: 0.9;
+}*/
