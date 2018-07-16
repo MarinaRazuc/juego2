@@ -1,8 +1,7 @@
 document.getElementById("prison").style.display='none';
 document.getElementById("datos").style.display='none';
-document.getElementById("cartelGanar").style.display='none';
 document.getElementById("sala_llena").style.display='none';
-document.getElementById("base").style.display="none";
+document.getElementById("prueba").style.display="none";
 document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {
 		gameProperties.in_game = true; 

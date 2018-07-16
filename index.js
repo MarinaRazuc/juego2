@@ -530,11 +530,14 @@ var Player = function (startX, startY, angle) {
 var foodpickup = function (max_x, max_y, type, id) {
   var bandera=false
   var ex, guay;
+  var delta=10;
   while(!bandera){
     ex=getRandomArbitrary(1, max_x);
     guay =getRandomArbitrary(1, max_y);
-    if(ex<(minPX-5) || ex>(maxPX+5) || guay<(minPY-5)|| guay>(maxPY+5)){
-      bandera=true
+    if(ex<(minPX-delta) || ex>(maxPX+delta) || guay<(minPY-delta)|| guay>(maxPY+delta)){
+      if(ex>(16+delta) && ex<(2544-delta) && guay>(16+delta) && guay<(2544-delta)){
+        bandera=true
+      }
     }
   }
   this.x =ex;

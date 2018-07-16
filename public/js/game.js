@@ -59,7 +59,7 @@ var carga = 0;
 Game.init=function(username, tipo){
 	USERNAME=username;
 	TIPO_J=tipo;
-	game.stage.disableVisibilityChange=true;//estaba en true
+	game.stage.disableVisibilityChange=false;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
 	// carga++;console.log("carga "+carga);
 	//document.getElementById("poli").disabled=true;
@@ -457,7 +457,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
 				bandlev=bandlev+1;
-				if(bandlev==max_banderas){
+				if(bandlev==max_banderas){//max_banderas
 					listo=true;
 					//enviar al servidor que está listo.
 					console.log("Junté todos mis banderines.");
@@ -473,7 +473,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 	{
 				 		banderin=true;
 				 		this.puntos=this.puntos+puntos_prision;
-				 		console.log("player_coll en game.js");
+				 		// console.log("player_coll en game.js");
 				 		document.getElementById('prison').style.display='block';
 				 		Client.colision({key:body.sprite.id});
 				 		//el servidor tiene que ver la relacion entre ladrones y presos
@@ -618,11 +618,18 @@ Game.lbupdate=function(data) {
 
 function mostrarCartel(ganadores){
 	//cartelGanar
-	var ventana=document.getElementById("cartelGanar");
+	var ventana=document.getElementById("cartel");
 	var text=ventana.innerHTML;
-	ventana.innerHTML=text+" "+ganadores+"\n \n \n"+ranking;
+	var nuevo_rank=ranking.replace(/\n/g, "</br>");
+	// console.log(ranking);
+	// console.log("----");
+	// console.log(nuevo_rank);
+	var texto="  ¡Fin del Juego!"+"</br>"+"Ganaron los "+" "+ganadores+"."+"</br> </br>"+"Ranking final: "+"</br>"+nuevo_rank;
+	ventana.innerHTML=texto;
 	document.getElementById("game").style.display="none";
 	document.getElementById("datos").style.display="none";
-	document.getElementById("base").style.display="block";
+	document.getElementById("prueba").style.display="block";
+	ventana.style.textAlign = "center";
 	ventana.style.display='block';
+
 }
