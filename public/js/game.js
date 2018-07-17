@@ -233,13 +233,18 @@ Game.create=function() {
 	socket.on("ganan_L", function(){
 		console.log("Ganan ladrones");
 		mostrarCartel("Ladrones");
+		// socket.emit("disconnect");
 	});
 
 	socket.on("ganan_P", function(){
 		console.log("Ganan policias");
 		mostrarCartel("Policías");
+		// socket.emit("disconnect");
 	});
 
+	socket.on("final", function(){
+		socket.emit("final");
+	});
 //------------------------------------------------------------
 
 
@@ -617,13 +622,9 @@ Game.lbupdate=function(data) {
 
 
 function mostrarCartel(ganadores){
-	//cartelGanar
 	var ventana=document.getElementById("cartel");
 	var text=ventana.innerHTML;
 	var nuevo_rank=ranking.replace(/\n/g, "</br>");
-	// console.log(ranking);
-	// console.log("----");
-	// console.log(nuevo_rank);
 	var texto="  ¡Fin del Juego!"+"</br>"+"Ganaron los "+" "+ganadores+"."+"</br> </br>"+"Ranking final: "+"</br>"+nuevo_rank;
 	ventana.innerHTML=texto;
 	document.getElementById("game").style.display="none";
@@ -632,4 +633,5 @@ function mostrarCartel(ganadores){
 	ventana.style.textAlign = "center";
 	ventana.style.display='block';
 
+	Client.desconectar();
 }

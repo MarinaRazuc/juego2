@@ -460,6 +460,7 @@ io.on('connection', function(socket){
         // console.log("policias: "+policias);
       }
       player_lst.splice(player_lst.indexOf(removePlayer), 1);
+
     }
     //send message to every connected client except the sender
     var comiditas=game_instance.food_pickup;
@@ -498,6 +499,7 @@ io.on('connection', function(socket){
     console.log("removing player " + this.id);
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
+    socket.broadcast.emit("final"); //para ver si finalizó el juego gracias al que se fue
   }); //fin disconnect
 });//FIN DE CONNECTION  
 

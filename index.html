@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="todo">
       <div class="row container3">
         <div class="row container3"> </div>
         <div class="col div2" id="datos">
@@ -52,6 +52,7 @@
       <div class="container container4" id="boton">
         <div class="row div1">
             <button id="entername" class="hidden"><span class="text"> ¡Jugar! </span></button>
+            <button id="modalButton" class="hidden"><span class="text"> Cómo Jugar </span></button>
         </div>
         <div>
             <p id="sala_llena">Sala Llena. Volvé a intentar más tarde.</p>
@@ -61,15 +62,34 @@
     
     <div id="game"></div>
     
-    <!-- <div class="container">
-      <div class="row" id="base">
-        <div id="col1" class="col-xs-12 col-sm-6 col-md-6" padding="horizontal">+++++++++</div>
-        <div id="cartelGanar" class="col-xs-12 col-sm-6 col-md-6" padding="horizontal">¡Fin del juego! Ganaron los </div>
-        <div id="col2" class="col-xs-12 col-sm-6 col-md-6" padding="horizontal">++++++++++</div>
-      </div>
-    </div> -->
-
-
+    <div class="modal" id="myModal">
+        <!-- <div class="row row2"></div>
+        <div class="row">
+          <h6>    .    </h6> -->
+          <div id="como_cartel" class="modal-content">
+          <span class="close">&times;</span>
+             <p> <b>Ladrones</b> </br>
+                  Juntá todos los banderines y evitá que los policías te atrapen.</br>
+                  Ayudá a tus compañeros a salir de prisión pisando la llave.</br>
+                  Si todos logran juntar sus banderines ¡Ganan el juego!</br>
+                  </br>
+                  Puntos:</br>
+                  -Recolectar Banderín . . . . +15</br>
+                  -Liberar Ladrón . . . . +5</br>
+                  -Caer Preso . . . . -5</br>
+                  </br>
+                  <b>Policías</b></br>
+                  Atrapá la mayor cantidad de ladrones posible, antes de que junten todos sus banderines.
+                  </br>
+                  Si logran que todos los ladrones terminen en prisión, ¡Ganan el juego! </br>
+                  </br>
+                  Puntos:</br>
+                  -Atrapar Ladrón . . . . +20</br>
+              </p>
+           </div>
+        </div>
+    </div>
+    
     <script src="/js/game.js" type="text/javascript"></script>
     <script src="/js/player.js" type="text/javascript"></script>
     <script src="/js/login.js" type="text/javascript"></script>

@@ -66,9 +66,17 @@ Client.final=function(){
   socket.emit("final");
 }
 
+Client.desconectar=function(){
+  socket.emit("disconnect");
+}
+
 function randomInt(low, high){
   return Math.floor(Math.random() *(high-low) +low);
 };
 function listar(data){
   Game.lbupdate(data);
 };
+
+// socket.on("final", function(){
+//     socket.emit("final");
+// });
