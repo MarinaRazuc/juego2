@@ -26,6 +26,9 @@ document.getElementById("entername").onclick = function () {
 		var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
 		document.getElementById("game").style.display="block";
+	}else{
+		//aca entraria cuando reinicia
+		
 	}
 }
 //boton de reiniciar
