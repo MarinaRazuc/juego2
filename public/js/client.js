@@ -66,8 +66,9 @@ Client.final=function(){
   socket.emit("final");
 }
 
-Client.desconectar=function(){
-  socket.emit("disconnect");
+Client.terminarJuego=function(){
+  socket.emit("terminar");
+  //socket.emit("disconnect");
 }
 
 function randomInt(low, high){

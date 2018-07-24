@@ -183,3 +183,12 @@ h1{
 .container{
 	padding-top: 20px;
 }
+
+#reiniciar{
+	background-color: transparent;
+	background:  url(../assets/reiniciar.png);
+	width: 70px;
+	height: 70px;
+	background-size:cover;
+	border-color:transparent;
+}

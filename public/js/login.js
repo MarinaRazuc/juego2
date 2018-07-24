@@ -23,10 +23,30 @@ document.getElementById("entername").onclick = function () {
 		elegir.style.display='none';
 		datos.style.display='block';
 		boton.style.display='none';
-		
 		var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
+		document.getElementById("game").style.display="block";
 	}
+}
+//boton de reiniciar
+document.getElementById("reiniciar").onclick=function(){
+	//deberia ver como llamar  a main de nuevo. 
+
+	console.log("REINICIAR");
+	
+	//gameProperties.in_game = false; 
+	preguntar();
+		
+	document.getElementById("cartel").style.display="none";
+	document.getElementById("reiniciar").style.display="none";
+	document.getElementById("prueba").style.display="none";
+	document.getElementById("signDiv").style.display="block";
+	document.getElementById("elegir").style.display="block";
+	document.getElementById("boton").style.display="block";
+	
+	
+
+	//borrar todo lo relacionado al juego del jugador correspondiente.
 }
 
 
@@ -37,11 +57,7 @@ function getRadioButtonSelectedValue(ctrl){
     }
 }
 
-function join_game (data) {
-	game.state.start(
-        'Game', true, false, data.username, data.tipo
-    );
-}
+
 
 var login = function(game){
 	//console.log("login function");
@@ -54,7 +70,13 @@ login.prototype = {
 		console.log("hoal");
 		socket = io({transports: ['websocket'], upgrade: false});
 		preguntar();
-		socket.on('join_game', join_game);
+		socket.on('join_game', function(data){
+			console.log("si");
+			game.state.start(
+        		'Game', true, false, data.username, data.tipo
+    		);
+		});
+	
 		socket.on("habilitar", function(){
 			console.log("HABILITO POLIS");
 			document.getElementById("poli").disabled=false;

@@ -70,7 +70,7 @@ const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
-var listos;
+var listos = false;
 
 
 
@@ -117,15 +117,24 @@ io.on('connection', function(socket){
       temp=temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
       usrname="plyr_"+temp;
     }else{
-      usrname=data.username;
+      if(data.username.length>6){
+        var temp=data.username;
+        usrname=temp[0]+temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
+      }else{
+        usrname=data.username;
+      }
     }
     if(data.tipo_jugador=="lad"){
       ladrones=ladrones+1;
     }else{
       policias=policias+1;
     }
+    console.log("LLEGUEEEE");
     socket.emit('join_game', {username: usrname, tipo:data.tipo_jugador, id: this.id});
     //login
+
+    socket.emit("leader_board",sortPlayerListByScore());
+    socket.broadcast.emit("leader_board",sortPlayerListByScore());
   }); 
 
 
@@ -428,16 +437,55 @@ io.on('connection', function(socket){
     }
 
     if(tl){
+      socket.emit("leader_board",sortPlayerListByScore());
+      socket.broadcast.emit("leader_board",sortPlayerListByScore());
       socket.emit("ganan_L");
       socket.broadcast.emit("ganan_L");
     }else{
       //ver si ganan polis
       if(apresados==ladrones){
+        socket.emit("leader_board",sortPlayerListByScore());
+        socket.broadcast.emit("leader_board",sortPlayerListByScore());
         socket.emit("ganan_P");
         socket.broadcast.emit("ganan_P");
       }
     }
     
+  });
+
+  socket.on("terminar", function(){
+    var removePlayer = find_playerid(this.id);
+    var clave=removePlayer.color;
+    var str=clave+"_food"; 
+    var comiditas=game_instance.food_pickup;
+    let largo = comiditas.length-1;
+    if(removePlayer.tipo=="lad"){
+      for(i=largo; i>=0; i--){
+        var banderin=comiditas[i];
+        if(banderin.type==str){
+          socket.broadcast.emit("itemremove", banderin);
+          comiditas.splice(i, 1);
+        }
+      }
+    }
+    player_lst.splice(player_lst.indexOf(removePlayer), 1);
+    socket.emit('remove_player', {id: this.id});
+    socket.broadcast.emit('remove_player', {id: this.id});
+
+    player_lst=[];
+    food_pickup=[];
+    largo_L=dispL.length;
+    largo_P=dispP.length;
+    for(i=0; i<largo_L; i++){
+      dispL[i]=true;
+    }
+    for(i=0; i<largo_P; i++){
+      dispP[i]=true;
+    }
+
+    listos=false;
+    ladrones=policias=apresados=0;
+
   });
 
   //call when a client disconnects and tell the clients except sender to 

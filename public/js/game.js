@@ -42,6 +42,7 @@ var enemies = [];
 var food_pickup=[];
 var customBounds;
 var USERNAME;
+var TIPO_J;
 var test;
 var paredes;
 
@@ -114,21 +115,8 @@ Game.create=function() {
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
-	//bounds = new Phaser.Rectangle(200, 200, 400, 400);
-	//Capa_3 = map.createLayer('Capa_3');
 	Capa_1 = map.createLayer('Capa_1');
-	//Capa_2 = map.createLayer('Capa_2');
-
 	Capa_1.resizeWorld();
-
-	//game.physics.p2.setImpactEvents(true);
- //   // Make things a bit more bouncey
-	// game.physics.p2.restitution = 0.3;	
- // //   game.physics.p2.updateBoundsCollisionGroup();
-
-	// game.physics.p2.gravity.y = 0;
-	// game.physics.p2.applyGravity = false; 
-	// game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
 	var width = this.game.width;
     var height = this.game.height;
 
@@ -462,7 +450,8 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
 				bandlev=bandlev+1;
-				if(bandlev==max_banderas){//max_banderas
+				console.log("TENGO "+bandlev+" BANDERINES.");
+				if(bandlev==25){//max_banderas
 					listo=true;
 					//enviar al servidor que está listo.
 					console.log("Junté todos mis banderines.");
@@ -622,6 +611,7 @@ Game.lbupdate=function(data) {
 
 
 function mostrarCartel(ganadores){
+
 	var ventana=document.getElementById("cartel");
 	var text=ventana.innerHTML;
 	var nuevo_rank=ranking.replace(/\n/g, "</br>");
@@ -632,6 +622,23 @@ function mostrarCartel(ganadores){
 	document.getElementById("prueba").style.display="block";
 	ventana.style.textAlign = "center";
 	ventana.style.display='block';
+	Client.terminarJuego();
+	document.getElementById("score").innerHTML="Banderines: "+0;
+	//ranking="";
+	//enemies=[];
+	//food_pickup=[];
+	listo=false;
+	bandlev=0;
+	score=0;
 
-	Client.desconectar();
+	// var removePlayer=findplayerbyid(id);
+	// // Player not found
+	// if (!removePlayer) {
+	// 	//console.log('Player not found: ', data.id)
+	// 	return;
+	// }
+	// Inicio.preguntar();
+ // 	removePlayer.player.destroy();
+ //   	enemies.splice(enemies.indexOf(removeplayer), 1);
+
 }
