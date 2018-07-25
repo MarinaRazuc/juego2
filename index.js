@@ -125,8 +125,16 @@ io.on('connection', function(socket){
       }
     }
     if(data.tipo_jugador=="lad"){
+      if((ladrones>=3 && policias==0) || (ladrones==5 && policias==1) || (ladrones==7)){
+       throw new Error("Error, no se puede acceder como Ladrón.");
+        return;
+      }
       ladrones=ladrones+1;
     }else{
+      if( ladrones<3 || policias==3 ){
+        throw new Error("Error, no se puede acceder como Policía.");
+        return;
+      }
       policias=policias+1;
     }
     console.log("LLEGUEEEE");
@@ -400,6 +408,7 @@ io.on('connection', function(socket){
        // console.log("emito deshabilitar");
       socket.emit("deshabilitar");
     }
+
     if(ladrones==5 && policias==1){
       socket.emit("des_ladrones");
     }
@@ -472,8 +481,8 @@ io.on('connection', function(socket){
     socket.emit('remove_player', {id: this.id});
     socket.broadcast.emit('remove_player', {id: this.id});
 
-    player_lst=[];
-    food_pickup=[];
+  //  player_lst=[];
+  //  food_pickup=[];
     largo_L=dispL.length;
     largo_P=dispP.length;
     for(i=0; i<largo_L; i++){
@@ -501,14 +510,10 @@ io.on('connection', function(socket){
         if(removePlayer.preso){
           apresados=apresados-1;
         }
-        // console.log("ladrones: "+ladrones);
       }else{
-        // console.log("remuevo policia");
         policias=policias-1;
-        // console.log("policias: "+policias);
       }
       player_lst.splice(player_lst.indexOf(removePlayer), 1);
-
     }
     //send message to every connected client except the sender
     var comiditas=game_instance.food_pickup;

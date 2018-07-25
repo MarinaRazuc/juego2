@@ -28,7 +28,7 @@ document.getElementById("entername").onclick = function () {
 		document.getElementById("game").style.display="block";
 	}else{
 		//aca entraria cuando reinicia
-		
+		console.log("el ELSE del game properties");
 	}
 }
 //boton de reiniciar
@@ -37,7 +37,7 @@ document.getElementById("reiniciar").onclick=function(){
 
 	console.log("REINICIAR");
 	
-	//gameProperties.in_game = false; 
+	gameProperties.in_game = false; 
 	preguntar();
 		
 	document.getElementById("cartel").style.display="none";

@@ -451,7 +451,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				banderin=true;
 				bandlev=bandlev+1;
 				console.log("TENGO "+bandlev+" BANDERINES.");
-				if(bandlev==25){//max_banderas
+				if(bandlev==3){//max_banderas
 					listo=true;
 					//enviar al servidor que está listo.
 					console.log("Junté todos mis banderines.");
@@ -515,9 +515,10 @@ Game.onRemovePlayer=function(data) {
 	var removePlayer = findplayerbyid(data.id);
 	// Player not found
 	if (!removePlayer) {
-		//console.log('Player not found: ', data.id)
+		console.log('Player not found: ', data.id)
 		return;
 	}
+	console.log("todo ok");
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 };
@@ -611,7 +612,6 @@ Game.lbupdate=function(data) {
 
 
 function mostrarCartel(ganadores){
-
 	var ventana=document.getElementById("cartel");
 	var text=ventana.innerHTML;
 	var nuevo_rank=ranking.replace(/\n/g, "</br>");
@@ -624,21 +624,8 @@ function mostrarCartel(ganadores){
 	ventana.style.display='block';
 	Client.terminarJuego();
 	document.getElementById("score").innerHTML="Banderines: "+0;
-	//ranking="";
-	//enemies=[];
-	//food_pickup=[];
 	listo=false;
 	bandlev=0;
 	score=0;
-
-	// var removePlayer=findplayerbyid(id);
-	// // Player not found
-	// if (!removePlayer) {
-	// 	//console.log('Player not found: ', data.id)
-	// 	return;
-	// }
-	// Inicio.preguntar();
- // 	removePlayer.player.destroy();
- //   	enemies.splice(enemies.indexOf(removeplayer), 1);
-
+//	player.destroy();
 }
