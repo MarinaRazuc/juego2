@@ -7,6 +7,7 @@ game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, document.getEl
 //game.state.add('Main',main);
 game.state.add('Game',Game);
 game.state.add('login', login);
+game.state.add('fin', fin);
 game.state.start('login'); 
 	
 

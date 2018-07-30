@@ -1,11 +1,13 @@
 var modal=document.getElementById("myModal");
 var btn=document.getElementById("modalButton");
-var span=document.getElementsByClassName("close")[0];
+var signDiv=document.getElementById("signDiv");
+var elegir=document.getElementById("elegir");
+var datos=document.getElementById("datos");
+var boton=document.getElementById("boton");
+
+document.getElementById("danger").style.display="none";
 btn.onclick=function(){
 	modal.style.display='block';
-}
-span.onclick=function(){
-	modal.style.display="none";
 }
 window.onclick = function(event) {
     if (event.target == modal) {
@@ -18,14 +20,8 @@ document.getElementById("sala_llena").style.display='none';
 document.getElementById("prueba").style.display="none";
 document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {
-		gameProperties.in_game = true; 
-		signDiv.style.display = 'none'; 
-		elegir.style.display='none';
-		datos.style.display='block';
-		boton.style.display='none';
 		var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
-		document.getElementById("game").style.display="block";
 	}else{
 		//aca entraria cuando reinicia
 		console.log("el ELSE del game properties");
@@ -33,13 +29,9 @@ document.getElementById("entername").onclick = function () {
 }
 //boton de reiniciar
 document.getElementById("reiniciar").onclick=function(){
-	//deberia ver como llamar  a main de nuevo. 
-
 	console.log("REINICIAR");
-	
 	gameProperties.in_game = false; 
-	preguntar();
-		
+	preguntar();	
 	document.getElementById("cartel").style.display="none";
 	document.getElementById("reiniciar").style.display="none";
 	document.getElementById("prueba").style.display="none";
@@ -70,13 +62,27 @@ login.prototype = {
 	create: function () {
 		//console.log("login prototype");
 		//game.stage.backgroundColor = "#AFF7F0";
-		console.log("hoal");
+		
 		socket = io({transports: ['websocket'], upgrade: false});
 		preguntar();
 		socket.on('join_game', function(data){
 			console.log("si");
+			gameProperties.in_game = true; 
+			signDiv.style.display = 'none'; 
+			elegir.style.display='none';
+			datos.style.display='block';
+			boton.style.display='none';
+			document.getElementById("danger").style.display="none";
+			document.getElementById("game").style.display="block";
 			game.state.start(
         		'Game', true, false, data.username, data.tipo
+    		);
+		});
+		socket.on('not_join_game', function(data){
+			console.log(data.msg);
+			document.getElementById("danger").style.display="block";
+			game.state.start(
+        		'login'
     		);
 		});
 	

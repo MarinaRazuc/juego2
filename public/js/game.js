@@ -55,13 +55,14 @@ const puntos_atrapar=20;
 const puntos_liberar=5;
 
 var carga = 0;
-//No obligatorio, pero útil, ya que mantendrá al juego reactivo a los mensajes del servidor 
-//incluso cuando la ventana del juego no esté en foco 
+
 Game.init=function(username, tipo){
+	
 	USERNAME=username;
 	TIPO_J=tipo;
 	game.stage.disableVisibilityChange=false;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
+	console.log("GAME INIT");
 	// carga++;console.log("carga "+carga);
 	//document.getElementById("poli").disabled=true;
 	//Inicio.preguntar();
@@ -156,9 +157,9 @@ Game.create=function() {
     	Game.movePlayer(data.id, data.x, data.y);
 	});
 
-	socket.on('remove',function(id){
-	    Game.removePlayer(id);
-	});
+	// socket.on('remove',function(id){
+	//     Game.removePlayer(id);
+	// });
 
 	socket.on("enemy_move", function(data){
 	    Game.onEnemyMove(data); 
@@ -174,7 +175,7 @@ Game.create=function() {
 	});
 
 	socket.on("create_player", function(data){
-	  Game.create_player(data);
+		Game.create_player(data);
 	});
 
 	socket.on("item_update", function(data){
@@ -233,6 +234,10 @@ Game.create=function() {
 	socket.on("final", function(){
 		socket.emit("final");
 	});
+    socket.on('eliminar_jugador_local', function(data){
+    	eliminarLocal(data);
+    });
+
 //------------------------------------------------------------
 
 
@@ -252,17 +257,17 @@ Game.update=function(){
 };
 
  
-Game.removePlayer=function(id){
-  	var removePlayer=findplayerbyid(id);
-	// Player not found
-	if (!removePlayer) {
-		//console.log('Player not found: ', data.id)
-		return;
-	}
-	Inicio.preguntar();
- 	removePlayer.player.destroy();
-   	enemies.splice(enemies.indexOf(removeplayer), 1);
-};
+// Game.removePlayer=function(id){
+//   	var removePlayer=findplayerbyid(id);
+// 	// Player not found
+// 	if (!removePlayer) {
+// 		//console.log('Player not found: ', data.id)
+// 		return;
+// 	}
+// 	Inicio.preguntar();
+//  	removePlayer.player.destroy();
+//    	enemies.splice(enemies.indexOf(removeplayer), 1);
+// };
 
 
 //Server tells us there is a new enemy movement. We find the moved enemy and sync the enemy movement with the server
@@ -359,6 +364,8 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 
 
 Game.create_player=function(data){ //esto es lo q llama el cliente
+	console.log("EN Game.create_player");
+	player=null;
 	id_jugador=data.id;
 	color_jugador=data.color;
 	player = game.add.sprite(1200, 300, color_jugador); 
@@ -385,6 +392,7 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	player.playertext = game.add.text(0, 0, data.username , style);
 	// add the text to player object to follw as child
 	player.addChild(player.playertext);
+
 };
 
 Game.onItemUpdate=function(datos){
@@ -451,13 +459,13 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				banderin=true;
 				bandlev=bandlev+1;
 				console.log("TENGO "+bandlev+" BANDERINES.");
-				if(bandlev==3){//max_banderas
+				if(bandlev==max_banderas){//max_banderas
 					listo=true;
 					//enviar al servidor que está listo.
-					console.log("Junté todos mis banderines.");
+					//console.log("Junté todos mis banderines.");
+				}
 					Client.listo();
 					Client.final();//solo pregunto cuando termine de juntar mis banderines
-				}
 			}
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
@@ -518,7 +526,7 @@ Game.onRemovePlayer=function(data) {
 		console.log('Player not found: ', data.id)
 		return;
 	}
-	console.log("todo ok");
+	console.log("todo ok, player eliminado");
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 };
@@ -612,20 +620,29 @@ Game.lbupdate=function(data) {
 
 
 function mostrarCartel(ganadores){
-	var ventana=document.getElementById("cartel");
-	var text=ventana.innerHTML;
-	var nuevo_rank=ranking.replace(/\n/g, "</br>");
-	var texto="  ¡Fin del Juego!"+"</br>"+"Ganaron los "+" "+ganadores+"."+"</br> </br>"+"Ranking final: "+"</br>"+nuevo_rank;
-	ventana.innerHTML=texto;
-	document.getElementById("game").style.display="none";
-	document.getElementById("datos").style.display="none";
-	document.getElementById("prueba").style.display="block";
-	ventana.style.textAlign = "center";
-	ventana.style.display='block';
 	Client.terminarJuego();
-	document.getElementById("score").innerHTML="Banderines: "+0;
 	listo=false;
 	bandlev=0;
 	score=0;
-//	player.destroy();
+	game.state.start('fin',true,false, ganadores );
+}
+
+function eliminarLocal(data){
+	player.body=null;
+	player.destroy();
+	this.player.body=null;
+	this.player.destroy();
+	// player.destroy(); 
+	// this.player.destroy();
+	// player.visible=false;
+	// player.kinematic=false;
+	// this.player.visible=false;
+	// this.player.kinematic=false;
+	// // player.kill();
+	// // this.player.kill();
+	// game.world.removeAll();
+	// player._destroyCachedSprite();
+	// this.player._destroyCachedSprite();
+	console.log("EN eliminarLocal");
+	console.log(player);
 }

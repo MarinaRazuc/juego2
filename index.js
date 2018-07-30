@@ -37,6 +37,7 @@ dispP[0]=true; //ne
 dispP[1]=true; //gr
 dispP[2]=true; //ma
 
+var recolectados=[];
 
 //needed for physics update 
 var startTime = (new Date).getTime();
@@ -117,27 +118,30 @@ io.on('connection', function(socket){
       temp=temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
       usrname="plyr_"+temp;
     }else{
-      if(data.username.length>6){
+      if(data.username.length>14){
         var temp=data.username;
-        usrname=temp[0]+temp[1]+temp[2]+temp[3]+temp[4]+temp[5]+"#";
+        usrname="";
+        for(var i=0; i<14; i++){
+          usrname=usrname+temp[i];
+        }
+        usrname=usrname+"#";
       }else{
         usrname=data.username;
       }
     }
     if(data.tipo_jugador=="lad"){
       if((ladrones>=3 && policias==0) || (ladrones==5 && policias==1) || (ladrones==7)){
-       throw new Error("Error, no se puede acceder como Ladrón.");
+        socket.emit('not_join_game', {msg:"error"});
         return;
       }
       ladrones=ladrones+1;
     }else{
       if( ladrones<3 || policias==3 ){
-        throw new Error("Error, no se puede acceder como Policía.");
+        socket.emit('not_join_game', {msg:"error"});
         return;
       }
       policias=policias+1;
     }
-    console.log("LLEGUEEEE");
     socket.emit('join_game', {username: usrname, tipo:data.tipo_jugador, id: this.id});
     //login
 
@@ -151,6 +155,7 @@ io.on('connection', function(socket){
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
   socket.on('new_player', function(data) {
       // console.log("index.js new_player. Player name= "+data.username);
+      console.log("index.js new_player. ID DEL SOCKET "+this.id);
       //new player instance
       var newPlayer = new Player(data.x, data.y, data.angle);
       var c;
@@ -158,7 +163,6 @@ io.on('connection', function(socket){
       newPlayer.username = data.username;
       newPlayer.tipo=data.tipo;
       newPlayer.puntos=0;
-
       if(data.tipo=="lad"){ //es ladron
         c = http.lastPlayerID%7;
         var i=0;
@@ -173,6 +177,7 @@ io.on('connection', function(socket){
         }
         newPlayer.listo=false;
         newPlayer.color=colores[c];
+        recolectados[newPlayer.color]=0;
         // console.log("newPlayer.color "+newPlayer.color);
         http.lastPlayerID++;
       }else{ //es policia
@@ -336,6 +341,7 @@ io.on('connection', function(socket){
         console.log("could not find object");
         return;
       }
+      recolectados[movePlayer.color]++;
       game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
       movePlayer.puntos=movePlayer.puntos+puntos_banderin; //por ahora +1, despues se vera
       socket.emit("leader_board",sortPlayerListByScore());
@@ -429,8 +435,10 @@ io.on('connection', function(socket){
   socket.on("listo", function(){
     //solo los ladrones pueden emitir esto
     var movePlayer=find_playerid(this.id);
-    movePlayer.listo=true;
-    listos=listos+1;
+    if(recolectados[movePlayer.color]==max_banderas){
+      movePlayer.listo=true;
+      listos=listos+1;
+    }
   });
 
   socket.on("final", function(){
@@ -463,6 +471,7 @@ io.on('connection', function(socket){
   });
 
   socket.on("terminar", function(){
+    console.log("SE TERMINO EL JUEEEGOOOO");
     var removePlayer = find_playerid(this.id);
     var clave=removePlayer.color;
     var str=clave+"_food"; 
@@ -478,7 +487,8 @@ io.on('connection', function(socket){
       }
     }
     player_lst.splice(player_lst.indexOf(removePlayer), 1);
-    socket.emit('remove_player', {id: this.id});
+    console.log("player_lst "+player_lst);
+    socket.emit('eliminar_jugador_local', {id: this.id});
     socket.broadcast.emit('remove_player', {id: this.id});
 
   //  player_lst=[];
