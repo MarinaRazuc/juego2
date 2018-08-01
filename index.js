@@ -429,9 +429,12 @@ io.on('connection', function(socket){
   socket.on("final", function(){
     var tl=true;
     var i=0;
+    var hayladrones=false;
     var largo=player_lst.length;
+
     while(i<largo && tl){
       if(player_lst[i].tipo=="lad"){
+        hayladrones=true;
         if(!(player_lst[i].listo)){
             tl=false;
         }
@@ -439,20 +442,26 @@ io.on('connection', function(socket){
       
         i=i+1;
     }
-
-    if(tl){
-      console.log("todos listos");
+    if(!hayladrones){
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
-      socket.emit("ganan_L");
-      socket.broadcast.emit("ganan_L");
+      socket.emit("ganan_P");
+      socket.broadcast.emit("ganan_P");
     }else{
-      //ver si ganan polis
-      if(apresados==ladrones){
+      if(tl){
+        console.log("todos listos");
         socket.emit("leader_board",sortPlayerListByScore());
         socket.broadcast.emit("leader_board",sortPlayerListByScore());
-        socket.emit("ganan_P");
-        socket.broadcast.emit("ganan_P");
+        socket.emit("ganan_L");
+        socket.broadcast.emit("ganan_L");
+      }else{
+        //ver si ganan polis
+        if(apresados==ladrones){
+          socket.emit("leader_board",sortPlayerListByScore());
+          socket.broadcast.emit("leader_board",sortPlayerListByScore());
+          socket.emit("ganan_P");
+          socket.broadcast.emit("ganan_P");
+        }
       }
     }
     

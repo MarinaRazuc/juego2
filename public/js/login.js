@@ -18,14 +18,21 @@ document.getElementById("prison").style.display='none';
 document.getElementById("datos").style.display='none';
 document.getElementById("sala_llena").style.display='none';
 document.getElementById("prueba").style.display="none";
+
 document.getElementById("entername").onclick = function () {
 	if (!gameProperties.in_game) {
 		var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
+		if(valor=="pol"){
+			document.getElementById("score").innerHTML="";
+		}
 	}else{
 		//aca entraria cuando reinicia
 	}
 }
+
+
+
 //boton de reiniciar
 document.getElementById("reiniciar").onclick=function(){
 	location.reload(true);

@@ -539,7 +539,6 @@ Game.saltar=function(data){
 Game.resetear=function(data) {
 	var movePlayer=findplayerbyid(data.id);
 	movePlayer.player.reset(data.x, data.y);
-	//movePlayer.player.reset(22,17);
 	//console.log("Reseteando jugador: "+movePlayer.player);
 };
 
