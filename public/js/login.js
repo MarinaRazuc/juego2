@@ -26,20 +26,20 @@ document.getElementById("entername").onclick = function () {
 		//aca entraria cuando reinicia
 	}
 }
-// //boton de reiniciar
-// document.getElementById("reiniciar").onclick=function(){
-// 	console.log("REINICIAR");
-// 	gameProperties.in_game = false; 
-// 	preguntar();	
-// 	document.getElementById("cartel").style.display="none";
-// 	document.getElementById("reiniciar").style.display="none";
-// 	document.getElementById("prueba").style.display="none";
-// 	document.getElementById("signDiv").style.display="block";
-// 	document.getElementById("elegir").style.display="block";
-// 	document.getElementById("boton").style.display="block";
+//boton de reiniciar
+document.getElementById("reiniciar").onclick=function(){
+	location.reload(true);
+	// gameProperties.in_game = false; 
+	// preguntar();	
+	// document.getElementById("cartel").style.display="none";
+	// document.getElementById("reiniciar").style.display="none";
+	// document.getElementById("prueba").style.display="none";
+	// document.getElementById("signDiv").style.display="block";
+	// document.getElementById("elegir").style.display="block";
+	// document.getElementById("boton").style.display="block";
 
-// 	//borrar todo lo relacionado al juego del jugador correspondiente.
-// }
+	//borrar todo lo relacionado al juego del jugador correspondiente.
+}
 
 
 function getRadioButtonSelectedValue(ctrl){

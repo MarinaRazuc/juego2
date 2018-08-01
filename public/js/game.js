@@ -48,7 +48,7 @@ var paredes;
 
 var listo=false;
 var bandlev=0;
-const max_banderas=30;
+const max_banderas=20;
 const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
@@ -217,13 +217,13 @@ Game.create=function() {
 	});
 
 	socket.on("ganan_L", function(){
-	//	console.log("Ganan ladrones");
+		console.log("Ganan ladrones");
 		mostrarCartel("Ladrones");
 		// socket.emit("disconnect");
 	});
 
 	socket.on("ganan_P", function(){
-		//console.log("Ganan policias");
+		console.log("Ganan policias");
 		mostrarCartel("Policías");
 		// socket.emit("disconnect");
 	});
@@ -616,11 +616,11 @@ Game.lbupdate=function(data) {
 
 
 function mostrarCartel(ganadores){
+	game.state.start('fin',true,false, ganadores );
 	Client.terminarJuego();
 	listo=false;
 	bandlev=0;
 	score=0;
-	game.state.start('fin',true,false, ganadores );
 }
 
 function eliminarLocal(data){

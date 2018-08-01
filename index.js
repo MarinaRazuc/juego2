@@ -66,7 +66,7 @@ const maxPX=633;
 const minPX=267;
 const maxPY=502;
 const minPY=237;
-const max_banderas=30;
+const max_banderas=20;
 const puntos_banderin=15;
 const puntos_prision=-5
 const puntos_atrapar=20;
@@ -431,14 +431,17 @@ io.on('connection', function(socket){
     var i=0;
     var largo=player_lst.length;
     while(i<largo && tl){
+      if(player_lst[i].tipo=="lad"){
         if(!(player_lst[i].listo)){
             tl=false;
         }
+      }
       
         i=i+1;
     }
 
     if(tl){
+      console.log("todos listos");
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
       socket.emit("ganan_L");
