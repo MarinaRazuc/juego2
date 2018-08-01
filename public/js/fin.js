@@ -10,7 +10,7 @@ fin.prototype = {
 		var ventana=document.getElementById("cartel");
 		var text=ventana.innerHTML;
 		var nuevo_rank=ranking.replace(/\n/g, "</br>");
-		console.log(variable);
+		
 		var texto="  ¡Fin del Juego!"+"</br>"+"Ganaron los "+" "+variable+"."+"</br> </br>"+"Ranking final: "+"</br>"+nuevo_rank;
 		ventana.innerHTML=texto;
 		document.getElementById("game").style.display="none";

@@ -154,12 +154,10 @@ io.on('connection', function(socket){
   console.log('a user connected, ID: ', http.lastPlayerID);
   //socket.on: permite especificar callbacks para manejar diferentes mensajes
   socket.on('new_player', function(data) {
-      // console.log("index.js new_player. Player name= "+data.username);
-      console.log("index.js new_player. ID DEL SOCKET "+this.id);
       //new player instance
       var newPlayer = new Player(data.x, data.y, data.angle);
       var c;
-      newPlayer.id = this.id;  /*console.log(newPlayer.id);*/
+      newPlayer.id = this.id;  
       newPlayer.username = data.username;
       newPlayer.tipo=data.tipo;
       newPlayer.puntos=0;
@@ -178,7 +176,6 @@ io.on('connection', function(socket){
         newPlayer.listo=false;
         newPlayer.color=colores[c];
         recolectados[newPlayer.color]=0;
-        // console.log("newPlayer.color "+newPlayer.color);
         http.lastPlayerID++;
       }else{ //es policia
         var i=0;
@@ -193,25 +190,19 @@ io.on('connection', function(socket){
           i=i+1;
         }
         newPlayer.color=coloresP[c];
-        // console.log("newPlayer.color "+newPlayer.color);
         http.lastPolID++;
       }
-     //debo controlar si se paso de 7-- ver q hacer cuando esto pasa
+     
       playerBody = new p2.Body ({
         mass: 0,
         position: [0,0],
-        //position: [data.x,data.y], //ver, estaba en 0,0
         fixedRotation: true
       });
 
-      //add the playerbody into the player object 
       newPlayer.playerBody = playerBody;
-      //Don’t forget to add the playerbody to the world with world.addBody(playerbody) !! or else your player's physics will not be calculated
       world.addBody(newPlayer.playerBody); 
-
       socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo, preso:false, puntos:newPlayer.puntos});
      
-      //information to be sent to all clients except sender
       var current_info = {
         id: newPlayer.id, 
         x: newPlayer.x,
@@ -226,7 +217,7 @@ io.on('connection', function(socket){
       };
 
      
-      //send to the new player about everyone who is already connected.   
+      //el nuevo se entera de los demas
       for (i = 0; i < player_lst.length; i++) {
         existingPlayer = player_lst[i];
         var player_info = {
@@ -241,12 +232,11 @@ io.on('connection', function(socket){
             preso: existingPlayer.preso,
             puntos: existingPlayer.puntos
         };
-        // send message to the sender-client only
          //me llega la info de cada jugador existente antes que "yo"
         socket.emit("new_enemyPlayer", player_info);
       }//END DEL FOR
       
-      player_lst.push(newPlayer); //console.log(player_lst.length);
+      player_lst.push(newPlayer); 
       
       //banderas del resto
       for (j = 0; j < game_instance.food_pickup.length; j++) {
@@ -267,7 +257,7 @@ io.on('connection', function(socket){
                      
             var foodentity = new foodpickup(2500, 2500, str_clr/*'food'*/, unique_id);
             game_instance.food_pickup.push(foodentity); 
-            //set the food data back to client
+        
             socket.emit("item_update", foodentity); 
             socket.broadcast.emit("item_update", foodentity);
         }
@@ -277,13 +267,12 @@ io.on('connection', function(socket){
   }); //FIN 'new_player'------------------------------------------------------------
  
 
-      //listen for new player inputs. 
+      
       socket.on("input_fired", function(data) {
-          var movePlayer = find_playerid(this.id/*, this.room*/); 
-          if (!movePlayer|| movePlayer.dead){/*console.log("entra aca");*/ return;}
+          var movePlayer = find_playerid(this.id); 
+          if (!movePlayer|| movePlayer.dead){ return;}
           //when sendData is true, we send the data back to client. 
           if (!movePlayer.sendData) {
-            //console.log("en verdad entro aca");
             return;
           }
               setTimeout(function() {movePlayer.sendData = true}, 50);
@@ -349,23 +338,19 @@ io.on('connection', function(socket){
       //comunicar a todos los jugadores, incluyéndome
       socket.emit('itemremove', object);
       socket.broadcast.emit('itemremove', object); 
-
-      /* preguntar por todos los jugadores, si están todos listos, ganaron*/
-
   }); //fin item picked
 
 //------------------------------------------------------------COLISION
   //Esto en el caso de chocar con un policia
   socket.on("player_collision", function(data){
-    var movePlayer = find_playerid(this.id);  //ladronciño
-    var enemyPlayer = find_playerid(data.id); //policiña
+    var movePlayer = find_playerid(this.id);  //ladron
+    var enemyPlayer = find_playerid(data.id); //policia
     var equis=Math.random() * (maxPX - minPX) + minPX;
     var ygriega=Math.random() * (maxPY - minPY) + minPY;
     movePlayer.puntos+=puntos_prision;
     enemyPlayer.puntos+=puntos_atrapar;
     movePlayer.preso=true;
     apresados=apresados+1;
-    //if apresados==ladrones --> fin del juego, ganan los policias
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.emit("salto", {x:equis, y:ygriega});//al ladron
@@ -384,7 +369,7 @@ io.on('connection', function(socket){
       }
     }
     apresados=0;
-    console.log("presos "+presos);
+   // console.log("presos "+presos);
     movePlayer.puntos=movePlayer.puntos+presos*puntos_liberar;
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
@@ -471,7 +456,6 @@ io.on('connection', function(socket){
   });
 
   socket.on("terminar", function(){
-    console.log("SE TERMINO EL JUEEEGOOOO");
     var removePlayer = find_playerid(this.id);
     var clave=removePlayer.color;
     var str=clave+"_food"; 
@@ -487,12 +471,9 @@ io.on('connection', function(socket){
       }
     }
     player_lst.splice(player_lst.indexOf(removePlayer), 1);
-    console.log("player_lst "+player_lst);
     socket.emit('eliminar_jugador_local', {id: this.id});
     socket.broadcast.emit('remove_player', {id: this.id});
 
-  //  player_lst=[];
-  //  food_pickup=[];
     largo_L=dispL.length;
     largo_P=dispP.length;
     for(i=0; i<largo_L; i++){
@@ -528,7 +509,6 @@ io.on('connection', function(socket){
     //send message to every connected client except the sender
     var comiditas=game_instance.food_pickup;
     let largo = comiditas.length-1;
-    //console.log ("largo comiditas :) "+comiditas.length );
    
     if(removePlayer.tipo=="lad"){
       for(i=largo; i>=0; i--){
@@ -569,7 +549,6 @@ io.on('connection', function(socket){
 //find player by the the unique socket id 
 function find_playerid(id) {
   if (player_lst.length>0){
-    //console.log("id del primero en la lista" + player_lst[0].id);
     for (var i = 0; i < player_lst.length; i++) {
       if (player_lst[i].id == id) {
         return player_lst[i]; 
@@ -584,7 +563,6 @@ var Player = function (startX, startY, angle) {
   this.x = startX;
   this.y = startY;
   this.speed = 500;
-  //We need to intilaize with true.
   this.sendData = true;
   this.size = 30; 
   this.angle=angle;
@@ -595,7 +573,7 @@ var Player = function (startX, startY, angle) {
 var foodpickup = function (max_x, max_y, type, id) {
   var bandera=false
   var ex, guay;
-  var delta=10;
+  var delta=15;
   while(!bandera){
     ex=getRandomArbitrary(1, max_x);
     guay =getRandomArbitrary(1, max_y);
@@ -637,11 +615,9 @@ function sortPlayerListByScore() {
   
   var playerListSorted = [];
   for (var i = 0; i < player_lst.length; i++) {
-    // send the player username to the client so that clients can update the leaderboard.
     playerListSorted.push({id: player_lst[i].id, username: player_lst[i].username, puntos: player_lst[i].puntos});
   }
   return playerListSorted;
-  //this.emit("leader_board", playerListSorted);
 }
 
 function hola(){

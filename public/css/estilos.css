@@ -7,6 +7,9 @@ body{
 	
 }	
 
+#datos{
+	height:70px;
+}
 
 .container1{
 	background-color: white;
@@ -120,7 +123,8 @@ div{
 	height: 650px;
 	width: 450px;
 	opacity: 0.9;
-
+position: fixed; /* Stay in place */
+	overflow: auto; 
 }
 
 h3{
@@ -153,6 +157,12 @@ h1{
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.primero{
+	position: fixed; /* Stay in place */
+	overflow: auto; 
+    
 }
 
 /* Modal Content/Box */

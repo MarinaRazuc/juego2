@@ -3,18 +3,12 @@ var player;
 //objeto cliente que actuara como la interface entre el servidor y el cliente en sí
 var Client = {};
 
-//iniciar una conexion con el servidor (localhost si no se especifica otro link entre parentesis)
-//socket = io.connect();
-
 /*Usa nuestro objeto socket y envía a través del mismo un mensaje al servidor
   Este msj tendrá la etiqueta 'new_player'*/
 Client.askNewPlayer=function(data){
   socket.emit('new_player', data); //  {x: randomInt(20, 30), y: randomInt(20, 30), angle:0}
 };
 
-// Client.askNewPlayer=function(){
-//    socket.emit('new_player', {x:0, y:0, angle:0}); //  {x: randomInt(20, 30), y: randomInt(20, 30), angle:0}
-// };
 
 Client.moverJugador = function(pointer){  
   socket.emit('input_fired', {
@@ -24,7 +18,6 @@ Client.moverJugador = function(pointer){
     pointer_worldy: pointer.worldY, 
     preso: pointer.preso
   });
- // socket.emit('moverJugador',{x:pointer.x, y:pointer.y});
 };
 
 Client.crearComida=function(color){
@@ -68,7 +61,6 @@ Client.final=function(){
 
 Client.terminarJuego=function(){
   socket.emit("terminar");
-  //socket.emit("disconnect");
 }
 
 function randomInt(low, high){
@@ -77,7 +69,3 @@ function randomInt(low, high){
 function listar(data){
   Game.lbupdate(data);
 };
-
-// socket.on("final", function(){
-//     socket.emit("final");
-// });

@@ -24,25 +24,22 @@ document.getElementById("entername").onclick = function () {
 		socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
 	}else{
 		//aca entraria cuando reinicia
-		console.log("el ELSE del game properties");
 	}
 }
-//boton de reiniciar
-document.getElementById("reiniciar").onclick=function(){
-	console.log("REINICIAR");
-	gameProperties.in_game = false; 
-	preguntar();	
-	document.getElementById("cartel").style.display="none";
-	document.getElementById("reiniciar").style.display="none";
-	document.getElementById("prueba").style.display="none";
-	document.getElementById("signDiv").style.display="block";
-	document.getElementById("elegir").style.display="block";
-	document.getElementById("boton").style.display="block";
-	
-	
+// //boton de reiniciar
+// document.getElementById("reiniciar").onclick=function(){
+// 	console.log("REINICIAR");
+// 	gameProperties.in_game = false; 
+// 	preguntar();	
+// 	document.getElementById("cartel").style.display="none";
+// 	document.getElementById("reiniciar").style.display="none";
+// 	document.getElementById("prueba").style.display="none";
+// 	document.getElementById("signDiv").style.display="block";
+// 	document.getElementById("elegir").style.display="block";
+// 	document.getElementById("boton").style.display="block";
 
-	//borrar todo lo relacionado al juego del jugador correspondiente.
-}
+// 	//borrar todo lo relacionado al juego del jugador correspondiente.
+// }
 
 
 function getRadioButtonSelectedValue(ctrl){
@@ -66,7 +63,7 @@ login.prototype = {
 		socket = io({transports: ['websocket'], upgrade: false});
 		preguntar();
 		socket.on('join_game', function(data){
-			console.log("si");
+			
 			gameProperties.in_game = true; 
 			signDiv.style.display = 'none'; 
 			elegir.style.display='none';
@@ -79,7 +76,7 @@ login.prototype = {
     		);
 		});
 		socket.on('not_join_game', function(data){
-			console.log(data.msg);
+			
 			document.getElementById("danger").style.display="block";
 			game.state.start(
         		'login'
@@ -87,21 +84,21 @@ login.prototype = {
 		});
 	
 		socket.on("habilitar", function(){
-			console.log("HABILITO POLIS");
+			
 			document.getElementById("poli").disabled=false;
 		});
 
 		socket.on("deshabilitar", function(){
-			console.log("DESHABILITO POLIS");
+			
 			document.getElementById("poli").disabled=true;
 		});
 		socket.on("hab_ladrones", function(){
-			console.log("HABILITO LADRIS");
+			
 		  document.getElementById("ladr").disabled=false;
 		});
 
 		socket.on("des_ladrones", function(){
-			console.log("DESHABILITO LADRIS");
+			
 		  document.getElementById("ladr").disabled=true;
 		});
 		socket.on("habilitar", function(){
@@ -138,6 +135,6 @@ login.prototype = {
 }
 
 function preguntar(){
-	console.log("emito preguntas...");
+	
 	socket.emit('pregunta');
 };

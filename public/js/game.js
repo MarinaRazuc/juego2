@@ -62,10 +62,7 @@ Game.init=function(username, tipo){
 	TIPO_J=tipo;
 	game.stage.disableVisibilityChange=false;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
-	console.log("GAME INIT");
-	// carga++;console.log("carga "+carga);
-	//document.getElementById("poli").disabled=true;
-	//Inicio.preguntar();
+	
 };
 
 
@@ -191,7 +188,7 @@ Game.create=function() {
 	});
 
 	socket.on("enter_game", function(data){
-	  console.log("client.js en enter_game");
+	//  console.log("client.js en enter_game");
 	  Game.logueado({username: data.username});
 	});
 
@@ -220,13 +217,13 @@ Game.create=function() {
 	});
 
 	socket.on("ganan_L", function(){
-		console.log("Ganan ladrones");
+	//	console.log("Ganan ladrones");
 		mostrarCartel("Ladrones");
 		// socket.emit("disconnect");
 	});
 
 	socket.on("ganan_P", function(){
-		console.log("Ganan policias");
+		//console.log("Ganan policias");
 		mostrarCartel("Policías");
 		// socket.emit("disconnect");
 	});
@@ -244,7 +241,7 @@ Game.create=function() {
 
 	createLeaderBoard();
 	Client.askNewPlayer({username: USERNAME, tipo:TIPO_J, x:0, y:0, angle:0}); 
-	carga++;console.log("carga "+carga);
+	
 };
 
 Game.update=function(){
@@ -307,7 +304,7 @@ Game.onInputRecieved=function(data) {
 		var ygriega=Math.round(player.y);
 		document.getElementById("MiPos").innerHTML="Mi posición: "+equis+" "+ygriega;
 	}else{
-		console.log("preso onInputRecieved");
+		//console.log("preso onInputRecieved");
 	}
 
 };
@@ -328,7 +325,7 @@ function findplayerbyid (id) {
 Game.onNewPlayer= function(data) {
 	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, /*data.size,*/ data.angle, data.tipo, data.preso, data.puntos, data.username); 
 	enemies.push(new_enemy);
-	console.log(data.id);
+	//console.log(data.id);
 };
 
 
@@ -364,7 +361,7 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 
 
 Game.create_player=function(data){ //esto es lo q llama el cliente
-	console.log("EN Game.create_player");
+	
 	player=null;
 	id_jugador=data.id;
 	color_jugador=data.color;
@@ -458,7 +455,6 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
 				bandlev=bandlev+1;
-				console.log("TENGO "+bandlev+" BANDERINES.");
 				if(bandlev==max_banderas){//max_banderas
 					listo=true;
 					//enviar al servidor que está listo.
@@ -485,7 +481,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 	}
 			}
 			if(tipobody=="prison"){
-				console.log("choque prision");
+				
 			}
 		
 			if(tipobody=="pared" && 
@@ -526,25 +522,25 @@ Game.onRemovePlayer=function(data) {
 		console.log('Player not found: ', data.id)
 		return;
 	}
-	console.log("todo ok, player eliminado");
+//	console.log("todo ok, player eliminado");
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 };
 
 Game.saltar=function(data){
-	console.log("GAME.SALTAR");
+	
 	player.preso=true;
 	this.preso=true;
 	this.puntos=this.puntos+puntos_prision;
 	player.reset(data.x, data.y);
-	console.log("Actualizo jugador en prision!");
+	//console.log("Actualizo jugador en prision!");
 	//demo(data);
 };
 Game.resetear=function(data) {
 	var movePlayer=findplayerbyid(data.id);
 	movePlayer.player.reset(data.x, data.y);
 	//movePlayer.player.reset(22,17);
-	console.log("Reseteando jugador: "+movePlayer.player);
+	//console.log("Reseteando jugador: "+movePlayer.player);
 };
 
 
@@ -643,6 +639,6 @@ function eliminarLocal(data){
 	// game.world.removeAll();
 	// player._destroyCachedSprite();
 	// this.player._destroyCachedSprite();
-	console.log("EN eliminarLocal");
-	console.log(player);
+//	console.log("EN eliminarLocal");
+	//console.log(player);
 }
