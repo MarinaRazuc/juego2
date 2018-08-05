@@ -20,14 +20,9 @@ function  movetoPointer(displayObject, speed, pointer, maxTime) {
 function distanceToPointer(displayObject, pointer, world) {  
 	
 	if(displayObject==null){
-		//console.log(displayObject);
     }else{
-		//console.log("distanceToPointer: ", displayObject);
         if (world === undefined) { world = false; }
-        // var dx = (world) ? displayObject.world.x - pointer.worldX : displayObject.position[0] - pointer.worldX; //cannot read property 0 of undefined
-        // var dy = (world) ? displayObject.world.y - pointer.worldY : displayObject.position[1] - pointer.worldY;
-        var dx = (world) ? displayObject.world.x - pointer.worldX : displayObject.playerBody.position[0] - pointer.worldX; //cannot read property 0 of undefined
-        //cannot read property position of undefined
+       	var dx = (world) ? displayObject.world.x - pointer.worldX : displayObject.playerBody.position[0] - pointer.worldX; 
         var dy = (world) ? displayObject.world.y - pointer.worldY : displayObject.playerBody.position[1] - pointer.worldY;
         return Math.sqrt(dx * dx + dy * dy);
 	}

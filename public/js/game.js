@@ -106,6 +106,7 @@ Game.preload=function(){
 }
 
 Game.create=function() {
+	game.time.advancedTiming = true;
 
 	// game.load.reset(true);
 	game.world.setBounds(0, 0, window.innerHeight * window.devicePixelRatio+10, window.innerWidth * window.devicePixelRatio+10);
@@ -126,7 +127,7 @@ Game.create=function() {
     prison2=game.add.sprite(450, 532, "prison2");
     prison3=game.add.sprite(660, 368, "prison3");
     prison4=game.add.sprite(235, 365, "prison4");
-    
+
     game.physics.p2.enable(prison1);
     game.physics.p2.enable(prison2);
     game.physics.p2.enable(prison3);
@@ -298,6 +299,8 @@ Game.onInputRecieved=function(data) {
 		//between the current position and the new position so that player
 		//does jerk. 
 		speed = distance/0.05;
+		console.log("vel "+speed);
+		speed = constrainVelocity(1000,speed);
 		//move to the new position. 
 		player.rotation = movetoPointer(player, speed, newPointer);
 		var equis=Math.round(player.x);
@@ -307,6 +310,12 @@ Game.onInputRecieved=function(data) {
 		//console.log("preso onInputRecieved");
 	}
 
+};
+function constrainVelocity( maxVelocity,speed) {       
+	if (speed > maxVelocity) {        
+		return maxVelocity;
+	}	
+	return speed;
 };
 
 //This is where we use the socket id. 
@@ -371,11 +380,6 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	//  Enable if for physics. This creates a default rectangular body.
 	game.physics.p2.enable(player);
     player.body.setCircle(16);
-//--------------------------------------------------
-	//player.body.fixedRotation = true;
-	//player.body.collideWorldBounds = true;
-	//player.body.data.shapes[0].sensor = true;
-//--------------------------------------------------	
 	player.type = "player_body"; //necesario para las colisiones
 	player.preso=data.preso;
 	player.puntos=data.puntos;
@@ -553,7 +557,9 @@ function finditembyid (id) {
 	return false; 
 };
 
-function render(){};
+Game.render=function(){
+		game.debug.text(game.time.fps, 2, 14, "#00ff00");
+};
 
 //create leader board in here.
 function createLeaderBoard() {

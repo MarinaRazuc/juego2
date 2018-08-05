@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Proyecto IAW",
   "dependencies": {
-    "arcade": "0.0.2",
+    //"arcade": "0.0.2",
     "express": "^4.15.2",
     "node-uuid": "^1.4.8",
     "p2": "^0.7.1",

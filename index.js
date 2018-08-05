@@ -107,6 +107,7 @@ function physics_handler() {
     var dt = lastTime ? (timeElapsed - lastTime) / 1000 : 0;
     dt = Math.min(1 / 10, dt);
     world.step(timeStep);
+   // console.log("timestep "+timeStep);
 }
 
 io.on('connection', function(socket){
@@ -201,6 +202,7 @@ io.on('connection', function(socket){
 
       newPlayer.playerBody = playerBody;
       world.addBody(newPlayer.playerBody); 
+      console.log("MUNDOOOO "+world );
       socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo, preso:false, puntos:newPlayer.puntos});
      
       var current_info = {
@@ -281,17 +283,16 @@ io.on('connection', function(socket){
               //Make a new pointer with the new inputs from the client. 
               //contains player positions in server
               var serverPointer = {
-                x: data.pointer_x,
-                y: data.pointer_y,
+                
                 worldX: data.pointer_worldx,    
                 worldY: data.pointer_worldy
               }
               //moving the player to the new inputs from the player
               // console.log(movePlayer.playerBody);
               if(physicsPlayer.distanceToPointer(movePlayer, serverPointer) <=30) {
-                movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, 0, serverPointer, 1000);
+                /*movePlayer.playerBody.angle = */physicsPlayer.movetoPointer(movePlayer, 0, serverPointer, 1000);
               }else{
-                movePlayer.playerBody.angle = physicsPlayer.movetoPointer(movePlayer, movePlayer.speed, serverPointer); 
+                /*movePlayer.playerBody.angle =*/ physicsPlayer.movetoPointer(movePlayer, movePlayer.speed, serverPointer); 
               }
 
               movePlayer.x = movePlayer.playerBody.position[0]; 
@@ -302,7 +303,7 @@ io.on('connection', function(socket){
                 id:movePlayer.id,
                 x: movePlayer.playerBody.position[0], 
                 y: movePlayer.playerBody.position[1],
-                angle: movePlayer.playerBody.angle
+              /*  angle: movePlayer.playerBody.angle*/
               } 
 
               //send to sender (not to every clients). 
@@ -505,6 +506,9 @@ io.on('connection', function(socket){
   socket.on("disconnect", function(){
     console.log('disconnect'); 
     var removePlayer = find_playerid(this.id);
+      
+    //world.removeBody(removePlayer.playerBody);
+
     var clave=removePlayer.color;
     var str=clave+"_food";
     if (removePlayer) {
@@ -555,7 +559,8 @@ io.on('connection', function(socket){
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("final"); //para ver si finalizó el juego gracias al que se fue
-  }); //fin disconnect
+  console.log("MUNDOOOO "+world ); 
+   }); //fin disconnect
 });//FIN DE CONNECTION  
 
 //find player by the the unique socket id 
