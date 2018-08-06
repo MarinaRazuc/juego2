@@ -30,22 +30,22 @@ document.getElementById("entername").onclick = function () {
 		//aca entraria cuando reinicia
 	}
 }
-document.onkeypressed=function(){
-	console.log("enter");
-	tecla = (document.all) ? e.keyCode : e.which;
-	if(tecla==13){
-		console.log("enter");
-	  	if (!gameProperties.in_game) {
-			var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
-			socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
-			if(valor=="pol"){
-				document.getElementById("score").innerHTML="";
-			}
-		}else{
-			//aca entraria cuando reinicia
-		}
-  	}
-}
+// document.onkeypressed=function(){
+// 	console.log("enter");
+// 	tecla = (document.all) ? e.keyCode : e.which;
+// 	if(tecla==13){
+// 		console.log("enter");
+// 	  	if (!gameProperties.in_game) {
+// 			var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
+// 			socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
+// 			if(valor=="pol"){
+// 				document.getElementById("score").innerHTML="";
+// 			}
+// 		}else{
+// 			//aca entraria cuando reinicia
+// 		}
+//   	}
+// }
 
 
 //boton de reiniciar
