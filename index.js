@@ -202,7 +202,7 @@ io.on('connection', function(socket){
 
       newPlayer.playerBody = playerBody;
       world.addBody(newPlayer.playerBody); 
-      console.log("MUNDOOOO "+world );
+      
       socket.emit('create_player', {x: newPlayer.x, y: newPlayer.y, id: newPlayer.id, color:newPlayer.color, size:newPlayer.size, username:newPlayer.username, tipo:newPlayer.tipo, preso:false, puntos:newPlayer.puntos});
      
       var current_info = {
@@ -506,9 +506,6 @@ io.on('connection', function(socket){
   socket.on("disconnect", function(){
     console.log('disconnect'); 
     var removePlayer = find_playerid(this.id);
-      
-    //world.removeBody(removePlayer.playerBody);
-
     var clave=removePlayer.color;
     var str=clave+"_food";
     if (removePlayer) {
@@ -559,7 +556,6 @@ io.on('connection', function(socket){
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("final"); //para ver si finalizó el juego gracias al que se fue
-  console.log("MUNDOOOO "+world ); 
    }); //fin disconnect
 });//FIN DE CONNECTION  
 
@@ -590,7 +586,7 @@ var Player = function (startX, startY, angle) {
 var foodpickup = function (max_x, max_y, type, id) {
   var bandera=false
   var ex, guay;
-  var delta=15;
+  var delta=25;
   while(!bandera){
     ex=getRandomArbitrary(1, max_x);
     guay =getRandomArbitrary(1, max_y);

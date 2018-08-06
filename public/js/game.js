@@ -54,13 +54,11 @@ const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
 
-var carga = 0;
-
 Game.init=function(username, tipo){
 	
 	USERNAME=username;
 	TIPO_J=tipo;
-	game.stage.disableVisibilityChange=false;//estaba en true
+	game.stage.disableVisibilityChange=true;//estaba en true
 	game.physics.startSystem(Phaser.Physics.P2JS);
 	
 };
@@ -299,8 +297,8 @@ Game.onInputRecieved=function(data) {
 		//between the current position and the new position so that player
 		//does jerk. 
 		speed = distance/0.05;
-		console.log("vel "+speed);
-		speed = constrainVelocity(1000,speed);
+		// console.log("vel "+speed);
+		// speed = constrainVelocity(1000,speed);
 		//move to the new position. 
 		player.rotation = movetoPointer(player, speed, newPointer);
 		var equis=Math.round(player.x);
@@ -510,6 +508,7 @@ Game.Liberar=function(data){
 		Client.salir_de_prision();
 		
 	}
+
 };
 
 Game.aumentar=function(data){
@@ -582,8 +581,8 @@ function createLeaderBoard() {
 Game.lbupdate=function(data) {
 	//this is the final board string.
 	var board_string = ""; 
-	var maxlen = 11;
-	var maxPlayerDisplay = 11;
+	var maxlen = 10;
+	var maxPlayerDisplay = 10;
 	var mainPlayerShown = false;
 	if(leader_text!=null){
 		for (var i = 0;  i < data.length; i++) {

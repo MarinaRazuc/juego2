@@ -33,7 +33,6 @@ Client.nombre_usr=function(data){
 }
 
 Client.colision=function(data){
-  console.log("colision en client.js");
   socket.emit('player_collision', {id:data.key});
 }
 
