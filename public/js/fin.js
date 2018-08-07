@@ -11,7 +11,7 @@ fin.prototype = {
 		var text=ventana.innerHTML;
 		var nuevo_rank=ranking.replace(/\n/g, "</br>");
 		
-		var texto="  ¡Fin del Juego!"+"</br>"+"Ganaron los "+" "+variable+"."+"</br> </br>"+"Ranking final: "+"</br>"+nuevo_rank;
+		var texto="  ¡Fin del Juego!"+"</br>"+"¡Ganaron los "+" "+variable+"!"+"</br> </br>"+"Ranking final: "+"</br>"+nuevo_rank;
 		ventana.innerHTML=texto;
 		document.getElementById("game").style.display="none";
 		document.getElementById("datos").style.display="none";

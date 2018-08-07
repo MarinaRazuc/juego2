@@ -49,7 +49,7 @@ var paredes;
 var listo=false;
 var bandlev=0;
 const max_banderas=20;
-const puntos_banderin=15;
+const puntos_banderin=5;
 const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
@@ -584,38 +584,41 @@ Game.lbupdate=function(data) {
 	var maxlen = 10;
 	var maxPlayerDisplay = 10;
 	var mainPlayerShown = false;
-	if(leader_text!=null){
-		for (var i = 0;  i < data.length; i++) {
-			//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
-			// and then add three dots at the end, and show player's rank.
-			if (!mainPlayerShown && i >= maxPlayerDisplay - 1 && socket.id == data[i].id) {
-				board_string = board_string.concat(".\n");
-				board_string = board_string.concat(".\n");
-				board_string = board_string.concat(".\n");
-				mainPlayerShown = true;
-			}
-			//here we are checking if user id is greater than 10 characters, if it is 
-			//it is too long, so we're going to trim it.
-			if (data[i].username.length >= 10) {
-				var username = data[i].username;
-				var temp = ""; 
-				for (var j = 0; j < maxlen; j++) {
-					temp += username[j];
+
+
+		if(leader_text!=null){
+			for (var i = 0;  i < data.length; i++) {
+				//if the player's rank is very low, we display maxPlayerDisplay - 1 names in the leaderboard
+				// and then add three dots at the end, and show player's rank.
+				if (!mainPlayerShown && i >= maxPlayerDisplay - 1 && socket.id == data[i].id) {
+					board_string = board_string.concat(".\n");
+					board_string = board_string.concat(".\n");
+					board_string = board_string.concat(".\n");
+					mainPlayerShown = true;
 				}
-				temp += "...";
-				username = temp;
-				//change to player username instead of id.
-				board_string = board_string.concat(i + 1,": ");
-				board_string = board_string.concat(username," ",(data[i].puntos).toString() + "\n");
-			}else{
-				board_string = board_string.concat(i + 1,": ");
-				board_string = board_string.concat(data[i].username," ",(data[i].puntos).toString() + "\n");
+				//here we are checking if user id is greater than 10 characters, if it is 
+				//it is too long, so we're going to trim it.
+				if (data[i].username.length >= 10) {
+					var username = data[i].username;
+					var temp = ""; 
+					for (var j = 0; j < maxlen; j++) {
+						temp += username[j];
+					}
+					temp += "...";
+					username = temp;
+					//change to player username instead of id.
+					board_string = board_string.concat(i + 1,": ");
+					board_string = board_string.concat(username," ",(data[i].puntos).toString() + "\n");
+				}else{
+					board_string = board_string.concat(i + 1,": ");
+					board_string = board_string.concat(data[i].username," ",(data[i].puntos).toString() + "\n");
+				}
 			}
+			//console.log(board_string);
+			ranking=board_string;
+			leader_text.setText(board_string); 
 		}
-		//console.log(board_string);
-		ranking=board_string;
-		leader_text.setText(board_string); 
-	}
+
 }
 
 

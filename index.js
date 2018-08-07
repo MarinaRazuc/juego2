@@ -67,7 +67,7 @@ const minPX=267;
 const maxPY=502;
 const minPY=237;
 const max_banderas=20;
-const puntos_banderin=15;
+const puntos_banderin=5;
 const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
@@ -449,23 +449,22 @@ io.on('connection', function(socket){
       socket.emit("ganan_P");
       socket.broadcast.emit("ganan_P");
     }else{
-      if(tl){
-        console.log("todos listos");
-        socket.emit("leader_board",sortPlayerListByScore());
-        socket.broadcast.emit("leader_board",sortPlayerListByScore());
-        socket.emit("ganan_L");
-        socket.broadcast.emit("ganan_L");
-      }else{
         //ver si ganan polis
         if(apresados==ladrones){
           socket.emit("leader_board",sortPlayerListByScore());
           socket.broadcast.emit("leader_board",sortPlayerListByScore());
           socket.emit("ganan_P");
           socket.broadcast.emit("ganan_P");
+        }else{
+          if(tl){
+            console.log("todos listos");
+            socket.emit("leader_board",sortPlayerListByScore());
+            socket.broadcast.emit("leader_board",sortPlayerListByScore());
+            socket.emit("ganan_L");
+            socket.broadcast.emit("ganan_L");
         }
       }
     }
-    
   });
 
   socket.on("terminar", function(){
@@ -553,7 +552,7 @@ io.on('connection', function(socket){
     }
     socket.broadcast.emit('remove_player', {id: this.id});
     console.log("removing player " + this.id);
-    socket.emit("leader_board",sortPlayerListByScore());
+    //socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("final"); //para ver si finalizó el juego gracias al que se fue
    }); //fin disconnect
@@ -631,8 +630,4 @@ function sortPlayerListByScore() {
     playerListSorted.push({id: player_lst[i].id, username: player_lst[i].username, puntos: player_lst[i].puntos});
   }
   return playerListSorted;
-}
-
-function hola(){
-  return 5;
 }
