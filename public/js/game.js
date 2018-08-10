@@ -472,7 +472,7 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
 				 	{
 				 		banderin=true;
-				 		this.puntos=this.puntos+puntos_prision;
+				 		
 				 		// console.log("player_coll en game.js");
 				 		document.getElementById('prison').style.display='block';
 				 		Client.colision({key:body.sprite.id});
