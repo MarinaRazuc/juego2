@@ -83,18 +83,6 @@ div{
 	color: white;
 }
 
-/*#cartelGanar{
-	fill: white;
-	color: white;
-	font-size: 30px;
-	border-style: solid;
-	border-color: white;
-	background-color: #566573;
-	height: 400px;
-	width: 800px;
-	opacity: 0.9;
-}*/
-
 #col1{
 	height: 50px;
 	width: 50px;
@@ -180,8 +168,6 @@ h1{
 }
 
 #todo{
-	/*position: fixed;*/
-	/*padding-top: 100px;*/
 	padding-left: 90px;
 }
 

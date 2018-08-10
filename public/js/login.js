@@ -81,24 +81,6 @@ login.prototype = {
     		);
 		});
 	
-		// socket.on("habilitar", function(){
-			
-		// 	document.getElementById("poli").disabled=false;
-		// });
-
-		// socket.on("deshabilitar", function(){
-			
-		// 	document.getElementById("poli").disabled=true;
-		// });
-		// socket.on("hab_ladrones", function(){
-			
-		//   document.getElementById("ladr").disabled=false;
-		// });
-
-		// socket.on("des_ladrones", function(){
-			
-		//   document.getElementById("ladr").disabled=true;
-		// });
 		socket.on("habilitar", function(){
 		  document.getElementById("poli").disabled=false;
 		});

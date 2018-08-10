@@ -2,9 +2,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);//server
 var io = require('socket.io')(http);
-//var io=require('socket.io').listen(http)
 var player_lst = [];
-//require p2 physics library in the server.
 var p2 = require('p2'); 
 var world = new p2.World({
   gravity : [0,0]
@@ -50,12 +48,12 @@ var game_setup = function() {
   //food object list
   this.food_pickup = [];
   //game size height
-  this.canvas_height =4000;//2000;
+  this.canvas_height =4000;
   //game size width
-  this.canvas_width =4000;//2000; 
+  this.canvas_width =4000;
 }
 
-// createa a new game instance
+// create a new game instance
 var game_instance = new game_setup();
 var posx=451;
 var posy=377;
@@ -68,7 +66,6 @@ const maxPY=502;
 const minPY=237;
 const max_banderas=20;
 const puntos_banderin=5;
-//const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
 var listos = false;
@@ -107,7 +104,6 @@ function physics_handler() {
     var dt = lastTime ? (timeElapsed - lastTime) / 1000 : 0;
     dt = Math.min(1 / 10, dt);
     world.step(timeStep);
-   // console.log("timestep "+timeStep);
 }
 
 io.on('connection', function(socket){
@@ -333,7 +329,7 @@ io.on('connection', function(socket){
       }
       recolectados[movePlayer.color]++;
       game_instance.food_pickup.splice(game_instance.food_pickup.indexOf(object), 1);
-      movePlayer.puntos=movePlayer.puntos+puntos_banderin; //por ahora +1, despues se vera
+      movePlayer.puntos=movePlayer.puntos+puntos_banderin;
       socket.emit("leader_board",sortPlayerListByScore());
       socket.broadcast.emit("leader_board",sortPlayerListByScore());
       //comunicar a todos los jugadores, incluyéndome
@@ -348,7 +344,6 @@ io.on('connection', function(socket){
     var enemyPlayer = find_playerid(data.id); //policia
     var equis=Math.random() * (maxPX - minPX) + minPX;
     var ygriega=Math.random() * (maxPY - minPY) + minPY;
-   // movePlayer.puntos+=puntos_prision;
     enemyPlayer.puntos+=puntos_atrapar;
     movePlayer.preso=true;
     apresados=apresados+1;
@@ -370,7 +365,6 @@ io.on('connection', function(socket){
       }
     }
     apresados=0;
-   // console.log("presos "+presos);
     movePlayer.puntos=movePlayer.puntos+presos*puntos_liberar;
     socket.emit("leader_board",sortPlayerListByScore());
     socket.broadcast.emit("leader_board",sortPlayerListByScore());
@@ -387,7 +381,6 @@ io.on('connection', function(socket){
 
   socket.on("pregunta", function(){
     if(ladrones>=3 && policias<3){
-       // console.log("emito habilitar"); //habilito policias
       socket.emit("habilitar");
       if(policias==0){
         socket.emit("des_ladrones");
@@ -397,7 +390,6 @@ io.on('connection', function(socket){
         }
       }
     }else{//si los ladrones son pocos y los policias muchos, deshabilito polis
-       // console.log("emito deshabilitar");
       socket.emit("deshabilitar");
     }
 

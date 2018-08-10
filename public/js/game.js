@@ -50,7 +50,6 @@ var listo=false;
 var bandlev=0;
 const max_banderas=20;
 const puntos_banderin=5;
-//const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
 
@@ -58,7 +57,7 @@ Game.init=function(username, tipo){
 	
 	USERNAME=username;
 	TIPO_J=tipo;
-	game.stage.disableVisibilityChange=true;//estaba en true
+	game.stage.disableVisibilityChange=true;
 	game.physics.startSystem(Phaser.Physics.P2JS);
 	
 };
@@ -96,19 +95,15 @@ Game.preload=function(){
 		game.load.image("prison4", "/assets/p_izquierdo.png");
 		game.load.image("llave", "/assets/llave2.png");
 
-		game.physics.startSystem(Phaser.Physics.P2JS);
 		game.physics.p2.restitution = 0.3;	
 		game.physics.p2.gravity.y = 0;
 		game.physics.p2.applyGravity = false; 
-		game.physics.p2.enableBody(game.physics.p2.walls, true);//estaba en false
+		game.physics.p2.enableBody(game.physics.p2.walls, true);
 }
 
 Game.create=function() {
 	game.time.advancedTiming = true;
-
-	// game.load.reset(true);
 	game.world.setBounds(0, 0, window.innerHeight * window.devicePixelRatio+10, window.innerWidth * window.devicePixelRatio+10);
-	// game.physics.startSystem(Phaser.Physics.P2JS);
 	map = game.add.tilemap('mapa');
 	map.addTilesetImage('castle_tileset_part3', 'tiles');
 	map.addTilesetImage('PathAndObjects', 'tiles');
@@ -119,7 +114,6 @@ Game.create=function() {
 
 	// para trackear a los jugadores
     Game.playerMap={};
-   // var prison=game.add.sprite(450,368,"prison");
     var prison1, prison2, prison3, prison4;
     prison1=game.add.sprite(450, 205, "prison1");
     prison2=game.add.sprite(450, 532, "prison2");
@@ -131,15 +125,11 @@ Game.create=function() {
     game.physics.p2.enable(prison3);
     game.physics.p2.enable(prison4);
 
-   //	prison.body.data.shapes[0].sensor=true;
     prison1.body.kinematic = true;
     prison2.body.kinematic = true;
     prison3.body.kinematic = true;
     prison4.body.kinematic = true;
-   // prison.body.velocity.x = 10;
-    //prison.type="pared";
-    //prison.body.type="pared";
-
+  
 	var sitio=game.add.sprite(200,300,"pared");
 	game.add.sprite(162,264,"llave");
     game.physics.p2.enable(sitio, Phaser.Physics.p2);
@@ -162,10 +152,8 @@ Game.create=function() {
 	});
 	socket.on("input_rec", function(data){ 
 	  Game.onInputRecieved(data);
-	//Game.movePlayer(data.id, data.x, data.y);
 	});
 
-	//listen to new enemy connections
 	socket.on("new_enemyPlayer", function(data){
 	    Game.onNewPlayer(data);
 	});
@@ -187,7 +175,6 @@ Game.create=function() {
 	});
 
 	socket.on("enter_game", function(data){
-	//  console.log("client.js en enter_game");
 	  Game.logueado({username: data.username});
 	});
 
@@ -218,13 +205,11 @@ Game.create=function() {
 	socket.on("ganan_L", function(){
 		console.log("Ganan ladrones");
 		mostrarCartel("Ladrones");
-		// socket.emit("disconnect");
 	});
 
 	socket.on("ganan_P", function(){
 		console.log("Ganan policias");
 		mostrarCartel("Policías");
-		// socket.emit("disconnect");
 	});
 
 	socket.on("final", function(){
@@ -253,17 +238,6 @@ Game.update=function(){
 };
 
  
-// Game.removePlayer=function(id){
-//   	var removePlayer=findplayerbyid(id);
-// 	// Player not found
-// 	if (!removePlayer) {
-// 		//console.log('Player not found: ', data.id)
-// 		return;
-// 	}
-// 	Inicio.preguntar();
-//  	removePlayer.player.destroy();
-//    	enemies.splice(enemies.indexOf(removeplayer), 1);
-// };
 
 
 //Server tells us there is a new enemy movement. We find the moved enemy and sync the enemy movement with the server
@@ -297,15 +271,10 @@ Game.onInputRecieved=function(data) {
 		//between the current position and the new position so that player
 		//does jerk. 
 		speed = distance/0.05;
-		// console.log("vel "+speed);
-		// speed = constrainVelocity(1000,speed);
-		//move to the new position. 
 		player.rotation = movetoPointer(player, speed, newPointer);
 		var equis=Math.round(player.x);
 		var ygriega=Math.round(player.y);
 		document.getElementById("MiPos").innerHTML="Mi posición: "+equis+" "+ygriega;
-	}else{
-		//console.log("preso onInputRecieved");
 	}
 
 };
@@ -332,7 +301,6 @@ function findplayerbyid (id) {
 Game.onNewPlayer= function(data) {
 	var new_enemy = new remote_player(data.id, data.x, data.y, data.color, /*data.size,*/ data.angle, data.tipo, data.preso, data.puntos, data.username); 
 	enemies.push(new_enemy);
-	//console.log(data.id);
 };
 
 
@@ -345,11 +313,9 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 	this.angle = startAngle;
 	this.player=game.add.sprite(this.x, this.y, color);
 	this.player.type = "player_body"; //para colisiones
-	// console.log("game.physics.p2 ", game.physics.p2);
 	if(game.physics.p2==null){
 		Game.preload();
 	}
-	//game.physics.p2.enable(this.player);//, Phaser.Physics.p2);
 	game.physics.p2.enable(this.player, Phaser.Physics.p2);
 	this.player.body.collideWorldBounds = true;
 	this.player.body.clearShapes();
@@ -357,25 +323,21 @@ var remote_player = function(id, startx, starty, color, /*startSize,*/ startAngl
 	this.player.kinematic=true;
 	//this.player.body.data.shapes[0].sensor = true;
 	this.player.id=id;
-	// this.player.type=type;
-	// this.player.body.type="player_body";
 	this.preso=preso;
-	this.puntos=puntos; //????
+	this.puntos=puntos; 
 	var style = {fill: "black", align: "center", fontSize:'18px'};
 	this.player.playertext = game.add.text(0, 0, username , style);
 	this.player.addChild(this.player.playertext);
 };	
 
 
-Game.create_player=function(data){ //esto es lo q llama el cliente
-	
+Game.create_player=function(data){ 
 	player=null;
 	id_jugador=data.id;
 	color_jugador=data.color;
 	player = game.add.sprite(1200, 300, color_jugador); 
 	//player.scale.set(2);
 	player.smoothed=false;
-	//  Enable if for physics. This creates a default rectangular body.
 	game.physics.p2.enable(player);
     player.body.setCircle(16);
 	player.type = "player_body"; //necesario para las colisiones
@@ -385,11 +347,8 @@ Game.create_player=function(data){ //esto es lo q llama el cliente
 	//camera follow
 	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);	
 	player.body.onBeginContact.add(player_coll, this); 
-	//player.body.type="player_body";
-	// player follow text (set text to username)
 	var style = {fill: "white", align: "right", fontSize:'20px'};
 	player.playertext = game.add.text(0, 0, data.username , style);
-	// add the text to player object to follw as child
 	player.addChild(player.playertext);
 
 };
@@ -409,7 +368,7 @@ var food_object = function (id, type, startx, starty) {
 	this.posy = starty; 
 	this.type=type;
 	this.item = game.add.sprite(startx, starty, type); 
-	game.physics.p2.enable(this.item, Phaser.Physics.p2);//problemas
+	game.physics.p2.enable(this.item, Phaser.Physics.p2);
 	this.item.body.collideWorldBounds = true;
 	this.item.body.data.shapes[0].sensor = true;
 	this.item.id=id;
@@ -457,13 +416,13 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				document.getElementById("score").innerHTML="Banderines: "+score;
 				banderin=true;
 				bandlev=bandlev+1;
-				if(bandlev==max_banderas){//max_banderas
+				if(bandlev==max_banderas){
 					listo=true;
 					//enviar al servidor que está listo.
 					//console.log("Junté todos mis banderines.");
 				}
 					Client.listo();
-					Client.final();//solo pregunto cuando termine de juntar mis banderines
+					Client.final();
 			}
 			//Acá ver colisión entre ladron y poli
 			if(!banderin){
@@ -472,8 +431,6 @@ function player_coll (body, bodyB, shapeA, shapeB, equation){//siempre para los 
 				 	key_player=="red_player"||key_player=="blue_player"||key_player=="pink_player"||key_player=="green_player"))
 				 	{
 				 		banderin=true;
-				 		
-				 		// console.log("player_coll en game.js");
 				 		document.getElementById('prison').style.display='block';
 				 		Client.colision({key:body.sprite.id});
 				 		//el servidor tiene que ver la relacion entre ladrones y presos
@@ -525,7 +482,6 @@ Game.onRemovePlayer=function(data) {
 		console.log('Player not found: ', data.id)
 		return;
 	}
-//	console.log("todo ok, player eliminado");
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 };
@@ -534,15 +490,11 @@ Game.saltar=function(data){
 	
 	player.preso=true;
 	this.preso=true;
-	//this.puntos=this.puntos+puntos_prision;
 	player.reset(data.x, data.y);
-	//console.log("Actualizo jugador en prision!");
-	//demo(data);
 };
 Game.resetear=function(data) {
 	var movePlayer=findplayerbyid(data.id);
 	movePlayer.player.reset(data.x, data.y);
-	//console.log("Reseteando jugador: "+movePlayer.player);
 };
 
 
