@@ -50,7 +50,7 @@ var listo=false;
 var bandlev=0;
 const max_banderas=20;
 const puntos_banderin=5;
-const puntos_prision=-5
+//const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
 
@@ -534,7 +534,7 @@ Game.saltar=function(data){
 	
 	player.preso=true;
 	this.preso=true;
-	this.puntos=this.puntos+puntos_prision;
+	//this.puntos=this.puntos+puntos_prision;
 	player.reset(data.x, data.y);
 	//console.log("Actualizo jugador en prision!");
 	//demo(data);

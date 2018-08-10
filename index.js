@@ -68,7 +68,7 @@ const maxPY=502;
 const minPY=237;
 const max_banderas=20;
 const puntos_banderin=5;
-const puntos_prision=-5
+//const puntos_prision=-5
 const puntos_atrapar=20;
 const puntos_liberar=5;
 var listos = false;
@@ -348,7 +348,7 @@ io.on('connection', function(socket){
     var enemyPlayer = find_playerid(data.id); //policia
     var equis=Math.random() * (maxPX - minPX) + minPX;
     var ygriega=Math.random() * (maxPY - minPY) + minPY;
-    movePlayer.puntos+=puntos_prision;
+   // movePlayer.puntos+=puntos_prision;
     enemyPlayer.puntos+=puntos_atrapar;
     movePlayer.preso=true;
     apresados=apresados+1;
