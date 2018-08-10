@@ -26,39 +26,15 @@ document.getElementById("entername").onclick = function () {
 		if(valor=="pol"){
 			document.getElementById("score").innerHTML="";
 		}
-	}else{
-		//aca entraria cuando reinicia
 	}
 }
-// document.onkeypressed=function(){
-// 	console.log("enter");
-// 	tecla = (document.all) ? e.keyCode : e.which;
-// 	if(tecla==13){
-// 		console.log("enter");
-// 	  	if (!gameProperties.in_game) {
-// 			var valor=getRadioButtonSelectedValue(document.form_jugador.tipo_jugador);
-// 			socket.emit('enter_name', {username: signdivusername.value, tipo_jugador:valor}); 
-// 			if(valor=="pol"){
-// 				document.getElementById("score").innerHTML="";
-// 			}
-// 		}else{
-// 			//aca entraria cuando reinicia
-// 		}
-//   	}
-// }
+
 
 
 //boton de reiniciar
 document.getElementById("reiniciar").onclick=function(){
 	location.reload(true);
-	// gameProperties.in_game = false; 
-	// preguntar();	
-	// document.getElementById("cartel").style.display="none";
-	// document.getElementById("reiniciar").style.display="none";
-	// document.getElementById("prueba").style.display="none";
-	// document.getElementById("signDiv").style.display="block";
-	// document.getElementById("elegir").style.display="block";
-	// document.getElementById("boton").style.display="block";
+	
 
 	//borrar todo lo relacionado al juego del jugador correspondiente.
 }
@@ -105,24 +81,24 @@ login.prototype = {
     		);
 		});
 	
-		socket.on("habilitar", function(){
+		// socket.on("habilitar", function(){
 			
-			document.getElementById("poli").disabled=false;
-		});
+		// 	document.getElementById("poli").disabled=false;
+		// });
 
-		socket.on("deshabilitar", function(){
+		// socket.on("deshabilitar", function(){
 			
-			document.getElementById("poli").disabled=true;
-		});
-		socket.on("hab_ladrones", function(){
+		// 	document.getElementById("poli").disabled=true;
+		// });
+		// socket.on("hab_ladrones", function(){
 			
-		  document.getElementById("ladr").disabled=false;
-		});
+		//   document.getElementById("ladr").disabled=false;
+		// });
 
-		socket.on("des_ladrones", function(){
+		// socket.on("des_ladrones", function(){
 			
-		  document.getElementById("ladr").disabled=true;
-		});
+		//   document.getElementById("ladr").disabled=true;
+		// });
 		socket.on("habilitar", function(){
 		  document.getElementById("poli").disabled=false;
 		});

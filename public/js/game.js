@@ -635,17 +635,5 @@ function eliminarLocal(data){
 	player.destroy();
 	this.player.body=null;
 	this.player.destroy();
-	// player.destroy(); 
-	// this.player.destroy();
-	// player.visible=false;
-	// player.kinematic=false;
-	// this.player.visible=false;
-	// this.player.kinematic=false;
-	// // player.kill();
-	// // this.player.kill();
-	// game.world.removeAll();
-	// player._destroyCachedSprite();
-	// this.player._destroyCachedSprite();
-//	console.log("EN eliminarLocal");
-	//console.log(player);
+
 }
