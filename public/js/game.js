@@ -575,11 +575,11 @@ Game.lbupdate=function(data) {
 
 
 function mostrarCartel(ganadores){
-	game.state.start('fin',true,false, ganadores );
 	Client.terminarJuego();
 	listo=false;
 	bandlev=0;
 	score=0;
+	game.state.start('fin',true,false, ganadores );
 }
 
 function eliminarLocal(data){
